@@ -7,9 +7,9 @@ licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
 
-## Graphs Plugin ##
+## GraphEdit Plugin ##
 py_library(
-    name = "graphs_plugin",
+    name = "graphedit_plugin",
     srcs = ["graphs_plugin.py"],
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
@@ -46,7 +46,7 @@ py_library(
     srcs = ["graphs_plugin_test.py"],
     srcs_version = "PY2AND3",
     deps = [
-        ":graphs_plugin",
+        ":graphedit_plugin",
         "//tensorboard:expect_tensorflow_installed",
         "//tensorboard/backend:application",
         "//tensorboard/backend/event_processing:event_multiplexer",
@@ -66,7 +66,7 @@ py_test(
     main = "graphs_plugin_v2_test.py",
     srcs_version = "PY2AND3",
     deps = [
-        ":graphs_plugin",
+        ":graphedit_plugin",
         ":graphs_plugin_test_lib",
         "//tensorboard:expect_numpy_installed",
         "//tensorboard:expect_tensorflow_installed",
@@ -83,7 +83,7 @@ py_test(
     main = "graphs_plugin_test.py",
     srcs_version = "PY2AND3",
     deps = [
-        ":graphs_plugin",
+        ":graphedit_plugin",
         "//tensorboard:expect_tensorflow_installed",
         "//tensorboard/backend:application",
         "//tensorboard/backend/event_processing:event_multiplexer",

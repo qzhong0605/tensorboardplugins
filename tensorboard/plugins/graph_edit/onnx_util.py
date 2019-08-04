@@ -20,7 +20,7 @@ from tensorboard.compat.proto import tensor_pb2
 from tensorboard.compat.proto import types_pb2
 from tensorboard.compat.proto.onnx import onnx_pb2
 
-from tensorboard.plugins.graph import tbgraph_base
+from tensorboard.plugins.graph_edit import tbgraph_base
 from tensorboard.util import tb_logging
 
 logger = tb_logging.get_logger()

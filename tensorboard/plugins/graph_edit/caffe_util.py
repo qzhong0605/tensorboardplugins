@@ -15,7 +15,7 @@ from tensorboard.compat.proto import attr_value_pb2
 from tensorboard.compat.proto import tensor_shape_pb2
 from tensorboard.compat.proto.caffe import caffe_pb2
 
-from tensorboard.plugins.graph import tbgraph_base
+from tensorboard.plugins.graph_edit import tbgraph_base
 
 from google.protobuf import text_format
 

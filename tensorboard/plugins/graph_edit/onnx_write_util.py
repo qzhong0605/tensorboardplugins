@@ -6,7 +6,7 @@ from tensorboard.compat.proto import tensor_pb2
 from tensorboard.compat.proto import types_pb2
 from tensorboard.compat.proto.onnx import onnx_pb2
 
-from tensorboard.plugins.graph import tbgraph_base
+from tensorboard.plugins.graph_edit import tbgraph_base
 from tensorboard.util import tb_logging
 
 logger = tb_logging.get_logger()
@@ -57,7 +57,7 @@ def _tb_dtype_to_onnx(tb_dtype):
         return onnx_pb2.DT_INVALID
 
 def _tb_shape_to_onnx_dims(tb_shape, onnx_tensor):
-    """ Build onnx dims from tensor shape 
+    """ Build onnx dims from tensor shape
     Args:
         onnx_tensor: an onnx tensor message proto
         tb_tensor: a tb tensor message proto
@@ -154,7 +154,7 @@ def _make_tbattr_to_onnxattr(tb_attr, tb_attr_name, onnx_attr):
         raise NotImplementedError("onnx undefined type attribute doesn't support yet")
     else:
         raise NotImplementedError("onnx undefined type attribute doesn't support yet")
-    
+
 def convert_to_nodes(tb_node, onnx_nodes, outputs):
     new_node = onnx_pb2.NodeProto()
     new_node.op_type = tb_node.op
@@ -171,7 +171,7 @@ def convert_to_nodes(tb_node, onnx_nodes, outputs):
         attr_value = onnx_pb2.AttributeProto()
         _make_tbattr_to_onnxattr(tb_node.attr[tb_attr], tb_attr, attr_value)
         new_node.attribute.extend([attr_value])
-        
+
     new_node.name = tb_node.name
     onnx_nodes[new_node.name] = new_node
 

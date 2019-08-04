@@ -13,7 +13,7 @@ from tensorboard.compat.proto import tensor_pb2
 from tensorboard.compat.proto import types_pb2
 from tensorboard.compat.proto.caffe2 import caffe2_pb2
 
-from tensorboard.plugins.graph import tbgraph_base
+from tensorboard.plugins.graph_edit import tbgraph_base
 
 from google.protobuf import text_format
 

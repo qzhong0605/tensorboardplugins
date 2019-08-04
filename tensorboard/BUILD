@@ -181,7 +181,7 @@ py_library(
         "//tensorboard/plugins/custom_scalar:custom_scalars_plugin",
         "//tensorboard/plugins/debugger:debugger_plugin_loader",
         "//tensorboard/plugins/distribution:distributions_plugin",
-        "//tensorboard/plugins/graph:graphs_plugin",
+        "//tensorboard/plugins/graph_edit:graphedit_plugin",
         "//tensorboard/plugins/histogram:histograms_plugin",
         "//tensorboard/plugins/hparams:hparams_plugin_loader",
         "//tensorboard/plugins/image:images_plugin",

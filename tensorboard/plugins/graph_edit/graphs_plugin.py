@@ -32,12 +32,12 @@ from tensorboard.compat.proto import node_def_pb2
 from tensorboard.compat.proto import attr_value_pb2
 
 from tensorboard.plugins import base_plugin
-from tensorboard.plugins.graph import graph_util
-from tensorboard.plugins.graph import keras_util
-from tensorboard.plugins.graph import c2graph_util
-from tensorboard.plugins.graph import caffe_util
-from tensorboard.plugins.graph import onnx_util
-from tensorboard.plugins.graph import onnx_write_util
+from tensorboard.plugins.graph_edit import graph_util
+from tensorboard.plugins.graph_edit import keras_util
+from tensorboard.plugins.graph_edit import c2graph_util
+from tensorboard.plugins.graph_edit import caffe_util
+from tensorboard.plugins.graph_edit import onnx_util
+from tensorboard.plugins.graph_edit import onnx_write_util
 
 from tensorboard.util import tb_logging
 
@@ -235,7 +235,7 @@ class GraphEditPlugin(base_plugin.TBPlugin):
     else:
       graph = self._multiplexer.Graph(run)
       self.graph = graph
-    
+
     # This next line might raise a ValueError if the limit parameters
     # are invalid (size is negative, size present but key absent, etc.).
     process_graph.prepare_graph_for_ui(graph, limit_attr_size, large_attrs_key)
@@ -333,9 +333,9 @@ class GraphEditPlugin(base_plugin.TBPlugin):
     # logger.warn(eidt_type)
     data = json.loads(request.args.get('data'))
     message = ''
-    
+
     graph = self.graph
-      
+
     if eidt_type == 'add_node':
       # logger.warn(data['attr'])
       newNode = node_def_pb2.NodeDef()
@@ -343,7 +343,7 @@ class GraphEditPlugin(base_plugin.TBPlugin):
       newNode.op = data['op']
       # 根据返回的属性类型，设置相应值
       # for attr_item in data['attr']:
-      #   logger.warn(attr_item) 
+      #   logger.warn(attr_item)
       #   newAttr = attr_value_pb2.AttrValue()
       #   newNode.attr.get_or_create()
       # logger.warn(newNode)
@@ -370,8 +370,8 @@ class GraphEditPlugin(base_plugin.TBPlugin):
           tmp_node.input.remove(data['op'])
         if tmp_node.name == data['op']:
           delete_pos = i
-      del graph.node[delete_pos] 
-      message = 'ok'   
+      del graph.node[delete_pos]
+      message = 'ok'
 
     if eidt_type == 'add_edge':
       for i in range(0, len(graph.node)):

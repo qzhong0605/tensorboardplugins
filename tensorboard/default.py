@@ -41,7 +41,7 @@ from tensorboard.plugins.core import core_plugin
 from tensorboard.plugins.custom_scalar import custom_scalars_plugin
 from tensorboard.plugins.debugger import debugger_plugin_loader
 from tensorboard.plugins.distribution import distributions_plugin
-from tensorboard.plugins.graph import graphs_plugin
+from tensorboard.plugins.graph_edit import graphs_plugin
 from tensorboard.plugins.histogram import histograms_plugin
 from tensorboard.plugins.hparams import hparams_plugin_loader
 from tensorboard.plugins.image import images_plugin
