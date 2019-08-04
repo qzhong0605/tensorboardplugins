@@ -1,0 +1,140 @@
+<!--
+@license
+Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+
+<dom-module id="tf-graph-controls">
+<template>
+<style>
+.allcontrols {
+  padding: 0 20px 20px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+.allcontrols .control-holder {
+  clear: both;
+  display: flex;
+  justify-content: space-between;
+}
+
+/** Otherwise, polymer UI controls appear atop node search. */
+paper-input {
+  --paper-input-container-focus-color: #f57c00;
+  width: 100%
+}
+
+paper-button.full-width-bt{
+    width: 100%;
+    background-color: #f57c00 !important;
+    font: 900 !important;
+    color: white !important;
+  }
+
+paper-dropdown-menu {
+  flex-grow: 1;
+}
+
+.button-icon-left {
+  float: left;
+}
+
+.button-icon-left:hover {
+  cursor:col-resize;  
+}
+
+.button-icon-right {
+  float: right;
+}
+
+.button-icon-right:hover {
+  cursor:col-resize;  
+}
+
+</style>
+<svg width="0" height="0">
+  <defs>
+    <g id="legend-rect">
+      <rect x="1" y="1" stroke-width="2px" height="14" width="35" rx="5" ry="5"></rect>
+    </g>
+    <g id="grey-rect">
+       <use xmlns:xlink="http://www.w3.org/1999/xlink"
+            xlink:href="#legend-rect"/>
+     </g>
+     <g id="faded-rect">
+       <use xmlns:xlink="http://www.w3.org/1999/xlink"
+            xlink:href="#legend-rect"/>
+     </g>
+     <g id="unfilled-rect">
+       <use xmlns:xlink="http://www.w3.org/1999/xlink"
+            xlink:href="#legend-rect"/>
+     </g>
+  </defs>
+</svg>
+<template is="dom-if" if="{{!selectedNode}}">
+  <div class="allcontrols">
+    <div style="margin-bottom: 10px">
+      <iron-icon icon="chevron-left" class="button-icon-left" on-click="dragLeft" id="drag-left"></iron-icon>
+
+      <iron-icon icon="chevron-right" class="button-icon-right" on-click="dragRight" id="drag-right"></iron-icon>
+    </div>
+    <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input> 
+
+    <paper-input class="" label="Storage Path " value="{{desPath}}"></paper-input>
+
+    <paper-input class="" label="Source Model Type" value="{{srcType}}"></paper-input> 
+
+    <paper-input class="" label="Destination Model Type" value="{{desType}}"></paper-input> 
+
+    <paper-button raised noink class="full-width-bt" on-click="transformModel">TRANSFORM</paper-button>
+
+    <iron-ajax 
+          id="transform" 
+          url="" 
+          method="POST" 
+          verbose 
+          handle-as="json" 
+          params="[[param]]"
+          on-response="showSuccess" 
+          contentType="application/json">  
+      </iron-ajax> 
+  </div>
+</template>
+
+<template is="dom-if" if="{{selectedNode}}">
+  <div class="nodeInfo">
+    <tf-node-info 
+        graph-type="[[selectedGraph]]"    
+        graph-hierarchy="[[graphHierarchy]]"
+        render-hierarchy="[[renderHierarchy]]"
+        flat-graph="[[graph]]"
+        node-name="[[selectedNode]]"
+        node-include="[[selectedNodeInclude]]"
+        highlighted-node="{{highlightedNode}}"
+        color-by="[[colorBy]]">
+    </tf-node-info>
+  </div>
+</template>
+
+
+</template>
+</dom-module>
+
+<script src="tf-graph-controls.js"></script>
