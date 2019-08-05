@@ -20,6 +20,7 @@ limitations under the License.
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../tf-convert-info/tf-convert-node-info.html">
 
 <dom-module id="tf-convert-controls">
 <template>
@@ -120,7 +121,7 @@ paper-dropdown-menu {
 
 <template is="dom-if" if="{{selectedNode}}">
   <div class="nodeInfo">
-    <tf-node-info 
+    <tf-convert-node-info
         graph-type="[[selectedGraph]]"    
         graph-hierarchy="[[graphHierarchy]]"
         render-hierarchy="[[renderHierarchy]]"
@@ -129,7 +130,7 @@ paper-dropdown-menu {
         node-include="[[selectedNodeInclude]]"
         highlighted-node="{{highlightedNode}}"
         color-by="[[colorBy]]">
-    </tf-node-info>
+    </tf-convert-node-info>
   </div>
 </template>
 

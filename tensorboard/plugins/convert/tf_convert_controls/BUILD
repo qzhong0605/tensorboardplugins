@@ -16,6 +16,7 @@ tf_web_library(
         "//tensorboard/components/tf_dashboard_common",
         "//tensorboard/components/tf_imports:polymer",
         "//tensorboard/plugins/convert/tf_convert_common",
+        "//tensorboard/plugins/convert/tf_convert_info",
         "@org_polymer_iron_icon",
         "@org_polymer_iron_ajax",
         "@org_polymer_paper_button",
@@ -37,6 +38,7 @@ tensorboard_webcomponent_library(
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
         "//tensorboard/plugins/convert/tf_convert_common:legacy",
+        "//tensorboard/plugins/convert/tf_convert_info:legacy",
         "//third_party/javascript/polymer/v1/paper-button:lib",
         "//third_party/javascript/polymer/v1/paper-dropdown-menu:lib",
         "//third_party/javascript/polymer/v1/paper-icon-button:lib",
