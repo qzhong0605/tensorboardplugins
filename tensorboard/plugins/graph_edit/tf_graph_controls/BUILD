@@ -16,7 +16,6 @@ tf_web_library(
         "//tensorboard/components/tf_dashboard_common",
         "//tensorboard/components/tf_imports:polymer",
         "//tensorboard/plugins/graph_edit/tf_graph_common",
-        "//tensorboard/plugins/graph_edit/tf_graph_node_search",
         "//tensorboard/plugins/graph_edit/tf_graph_add_op",
         "//tensorboard/plugins/graph_edit/tf_graph_add_edge",
         "//tensorboard/plugins/graph_edit/tf_graph_edit_op",
@@ -42,7 +41,6 @@ tensorboard_webcomponent_library(
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
         "//tensorboard/plugins/graph_edit/tf_graph_common:legacy",
-        "//tensorboard/plugins/graph_edit/tf_graph_node_search:legacy",
         "//tensorboard/plugins/graph_edit/tf_graph_add_op:legacy",
         "//tensorboard/plugins/graph_edit/tf_graph_add_edge:legacy",
         "//tensorboard/plugins/graph_edit/tf_graph_edit_op:legacy",

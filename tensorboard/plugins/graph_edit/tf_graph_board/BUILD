@@ -12,7 +12,6 @@ tf_web_library(
     deps = [
         "//tensorboard/plugins/graph_edit/tf_graph",
         "//tensorboard/plugins/graph_edit/tf_graph_common",
-        "//tensorboard/plugins/graph_edit/tf_graph_info",
         "//tensorboard/components/tf_imports:polymer",
         "@org_polymer_paper_progress",
     ],
@@ -25,7 +24,6 @@ tensorboard_webcomponent_library(
     deps = [
         "//tensorboard/plugins/graph_edit/tf_graph:legacy",
         "//tensorboard/plugins/graph_edit/tf_graph_common:legacy",
-        "//tensorboard/plugins/graph_edit/tf_graph_info:legacy",
         "//third_party/javascript/polymer/v1/paper-progress:lib",
         "//third_party/javascript/polymer/v1/polymer:lib",
     ],
