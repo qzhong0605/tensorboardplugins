@@ -1,0 +1,481 @@
+<!--
+@license
+Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<link rel="import" href="../tf-backend/tf-backend.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-slider/paper-slider.html">
+<link rel="import" href="../paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../tf-backend/tf-backend.html">
+<link rel="import" href="../tf-card-heading/tf-card-heading.html">
+<link rel="import" href="../tf-card-heading/tf-card-heading-style.html">
+<link rel="import" href="../tf-card-heading/util.html">
+<link rel="import" href="../tf-color-scale/tf-color-scale.html">
+<link rel="import" href="../tf-dashboard-common/tensorboard-color.html">
+<link rel="import" href="../tf-imports/d3.html">
+<link rel="import" href="../tf-imports/lodash.html">
+
+<!--
+tf-image-loader loads an individual image from the TensorBoard backend.
+
+Right now it always loads the most recent image. We should add support in the
+future for loading older images.
+-->
+<dom-module id="tf-inference-loader">
+  <template>
+    <tf-card-heading
+      isActive="[[isActive]]"
+      tag="[[tag]]"
+      run="[[run]]"
+      categoryname="[[categoryname]]"
+      display-name="[[tagMetadata.displayName]]"
+      description="[[tagMetadata.description]]"
+      color="[[_runColor]]"
+    >
+      <template is="dom-if" if="[[_hasMultipleSamples]]">
+        <div>sample: [[_sampleText]] of [[ofSamples]]</div>
+      </template>
+      <template is="dom-if" if="[[_hasAtLeastOneStep]]">
+        <div class="heading-row">
+          <div class="heading-label">
+            [[_sliderName]] <span style="font-weight: bold">[[_toLocaleString(_stepValue)]]</span>
+          </div>
+          <div class="heading-label heading-right datetime">
+            <template is="dom-if" if="[[_currentWallTime]]">
+              [[_currentWallTime]]
+            </template>
+          </div>
+          <div class="label right">
+            <paper-spinner-lite active hidden$=[[!_isImageLoading]]>
+            </paper-spinner-lite>
+          </div>
+        </div>
+      </template>
+      <template is="dom-if" if="[[_hasMultipleSteps]]">
+        <div>
+          <paper-slider
+            id="steps"
+            immediate-value="{{_stepIndex}}"
+            max="[[_maxStepIndex]]"
+            max-markers="[[_maxStepIndex]]"
+            snaps
+            step="1"
+            value="{{_stepIndex}}"
+          ></paper-slider>
+        </div>
+      </template>
+    </tf-card-heading>
+
+    <!-- Semantically a button but <img> inside a <button> disallows user to do
+    an interesting operation like "Copy Image" in non-Chromium browsers. -->
+    <a  id="main-image-container"
+        role="button"
+        aria-label="Toggle actual size"
+        aria-expanded$="[[_getAriaExpanded(actualSize)]]"
+        on-tap="_handleTap"></a>
+    <style include="tf-card-heading-style">
+      /** Make button a div. */
+      button {
+        width: 100%;
+        display: block;
+        background: none;
+        border: 0;
+        padding: 0;
+      }
+
+      /** Firefox: Get rid of dotted line inside button. */
+      button::-moz-focus-inner {
+        border: 0;
+        padding: 0;
+      }
+
+      /** Firefox: Simulate Chrome's outer glow on button when focused. */
+      button:-moz-focusring {
+        outline: none;
+        box-shadow: 0px 0px 1px 2px Highlight;
+      }
+
+      :host {
+        display: block;
+        width: 350px;
+        height: auto;
+        position: relative;
+        margin: 0 15px 40px 0;
+        overflow-x: auto;
+      }
+
+      /** When actual size shown is on, use the actual image width. */
+      :host[actual-size] {
+        max-width: 100%;
+        width: auto;
+      }
+
+      :host[actual-size] #main-image-container {
+        max-height: none;
+        width: auto;
+      }
+
+      :host[actual-size] #main-image-container img {
+        width: auto;
+      }
+
+      paper-spinner-lite {
+        width: 14px;
+        height: 14px;
+        vertical-align: text-bottom;
+        --paper-spinner-color: var(--tb-orange-strong);
+      }
+
+      #steps {
+        height: 15px;
+        margin: 0 0 0 -15px;
+        /*
+         * 31 comes from adding a padding of 15px from both sides of the
+         * paper-slider, subtracting 1px so that the slider width aligns
+         * with the image (the last slider marker takes up 1px), and
+         * adding 2px to account for a border of 1px on both sides of
+         * the image. 30 - 1 + 2.
+         */
+        width: calc(100% + 31px);
+        --paper-slider-active-color: var(--tb-orange-strong);
+        --paper-slider-knob-color: var(--tb-orange-strong);
+        --paper-slider-knob-start-border-color: var(--tb-orange-strong);
+        --paper-slider-knob-start-color: var(--tb-orange-strong);
+        --paper-slider-markers-color: var(--tb-orange-strong);
+        --paper-slider-pin-color: var(--tb-orange-strong);
+        --paper-slider-pin-start-color: var(--tb-orange-strong);
+      }
+
+      #main-image-container {
+        max-height: 1024px;
+        overflow: auto;
+      }
+
+      #main-image-container img {
+        cursor: pointer;
+        display: block;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: pixelated;
+        width: 100%;
+        height: auto;
+      }
+      #main-image-container div{
+        position: absolute;
+        border-bottom:2px dashed #999;
+        z-index:0;
+      }
+
+      paper-icon-button {
+        color: #2196F3;
+        border-radius: 100%;
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+      }
+      paper-icon-button[selected] {
+        background: var(--tb-ui-light-accent);
+      }
+    </style>
+  </template>
+  <script>
+    "use strict";
+
+    Polymer({
+      is: "tf-inference-loader",
+      properties: {
+        isActive: Boolean,
+        run: String,
+        tag: String,
+        sample: Number,
+        ofSamples: Number,
+        categoryname: String,
+        selectedImg: Number,
+        /** @type {{description: string, displayName: string}} */
+        tagMetadata: Object,
+        imgsrc: String,
+        channel: {
+         type: Number,
+        },
+        _runColor: {
+          type: String,
+          computed: '_computeRunColor(run)',
+        },
+        actualSize: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true,  // for CSS
+        },
+        brightnessAdjustment: {
+          type: Number,
+          value: 0.5,
+        },
+        contrastPercentage: {
+          type: Number,
+          value: 0,
+        },
+        requestManager: Object,
+        _metadataCanceller: {
+          type: Object,
+          value: () => new tf_backend.Canceller(),
+        },
+        _imageCanceller: {
+          type: Object,
+          value: () => new tf_backend.Canceller(),
+        },
+
+        // steps: {
+        //   width: number,
+        //   height: number,
+        //   wall_time: Date,
+        //   step: number,
+        //   url: string,
+        // }[]
+        _steps: {
+          type: Array,
+          value: [],
+          notify: true,
+        },
+        _stepIndex: {
+          type: Number,
+          notify: true,
+        },
+        _currentStep: {
+          type: Object,
+          computed: "_computeCurrentStep(_steps, _stepIndex)",
+        },
+        _hasAtLeastOneStep: {
+          type: Boolean,
+          computed: "_computeHasAtLeastOneStep(_steps)",
+        },
+        _hasMultipleSteps: {
+          type: Boolean,
+          computed: "_computeHasMultipleSteps(_steps)",
+        },
+        _stepValue: {
+          type: Number,
+          computed: "_computeStepValue(_currentStep)",
+        },
+        _currentWallTime: {
+          type: String,
+          computed: "_computeCurrentWallTime(_currentStep)",
+        },
+        _maxStepIndex: {
+          type: Number,
+          computed: "_computeMaxStepIndex(_steps)",
+        },
+        _sampleText: {
+          type: String,
+          computed: "_computeSampleText(sample)",
+        },
+        _sliderName: {
+          type: String,
+          computed: "_computeSliderName(run)",
+        },
+        _hasMultipleSamples: {
+          type: Boolean,
+          computed: "_computeHasMultipleSamples(ofSamples)",
+        },
+        _isImageLoading: {
+          type: Boolean,
+          value: false,
+        },
+        _mousePosition: {
+          type: Object,
+        },
+      },
+      observers: [
+        "reload(run, tag)",
+        "_updateImageUrl(_currentStep, brightnessAdjustment, contrastPercentage)",
+      ],
+      _computeChannel(categoryname){
+        if(categoryname == "conv1_16"){
+          return 16
+        }
+      },
+      _computeRunColor(run) {
+        return tf_color_scale.runsColorScale(run);
+      },
+      _computeHasAtLeastOneStep(steps) {
+        return !!steps && steps.length > 0;
+      },
+      _computeHasMultipleSteps(steps) {
+        return !!steps && steps.length > 1;
+      },
+      _computeCurrentStep(steps, stepIndex) {
+        return steps[stepIndex] || null;
+      },
+      _computeStepValue(currentStep) {
+        if (!currentStep) return 0;
+        return currentStep.step;
+      },
+      _computeCurrentWallTime(currentStep) {
+        if (!currentStep) return '';
+        return tf_card_heading.formatDate(currentStep.wall_time);
+      },
+      _computeMaxStepIndex(steps) {
+        return steps.length - 1;
+      },
+      _computeSampleText(sample) {
+        return `${sample + 1}`;
+      },
+      _computeSliderName(run) {
+        if (run == 'feature') {
+          return "channel"
+        }
+        if (run == 'prediction') {
+          return "each_label_accuracy"
+        }
+        else
+          return "step"
+      },
+      _computeHasMultipleSamples(ofSamples) {
+        return ofSamples > 1;
+      },
+      _getAriaExpanded() {
+        return this.actualSize ? 'true' : 'false';
+      },
+      attached() {
+        this._attached = true;
+        this.reload();
+      },
+      reload() {
+        if (!this._attached) {
+          return;
+        }
+        this._metadataCanceller.cancelAll();
+        const router = tf_backend.getRouter();
+        const url = tf_backend.addParams(router.pluginRoute('images', '/images'), {
+            tag: this.tag,
+            run: this.run,
+            sample: this.sample,
+        });
+        const updateSteps = this._metadataCanceller.cancellable(result => {
+          if (result.cancelled) {
+            return;
+          }
+          const data = result.value;
+          //console.log(data)
+          const steps = data.map(this._createStepDatum.bind(this));
+          this.set("_steps", steps);
+          //console.log(result)
+          this.set("_stepIndex", steps.length - 1);
+        });
+        this.requestManager.request(url).then(updateSteps);
+      },
+      _createStepDatum(imageMetadata) {
+        let url = tf_backend.getRouter().pluginRoute('images', '/individualImage');
+        // Include wall_time just to disambiguate the URL and force
+        // the browser to reload the image when the URL changes. The
+        // backend doesn't care about the value.
+        url = tf_backend.addParams(url, {ts: imageMetadata.wall_time});
+        url += '&' + imageMetadata.query;
+
+        return {
+          width: imageMetadata.width,
+          height: imageMetadata.height,
+          // The wall time within the metadata is in seconds. The Date
+          // constructor accepts a time in milliseconds, so we multiply by 1000.
+          wall_time: new Date(imageMetadata.wall_time * 1000),
+          step: imageMetadata.step,
+          url,
+        };
+      },
+      _updateImageUrl(currentStep, brightnessAdjustment, contrastPercentage) {
+        // We manually change the image URL (instead of binding to the
+        // image's src attribute) because we would like to manage what
+        // happens when the image starts and stops loading.
+        if (!currentStep) return;
+
+        const img = new Image();
+        this._imageCanceller.cancelAll();
+        img.onload = img.onerror = this._imageCanceller.cancellable(result => {
+          if (result.cancelled) {
+            return;
+          }
+          const mainImageContainer = this.$$("#main-image-container");
+          mainImageContainer.innerHTML = "";
+          Polymer.dom(mainImageContainer).appendChild(img);
+          this.set("_isImageLoading", false);
+        }).bind(this);
+        img.style.filter = `contrast(${contrastPercentage}%) `;
+        img.style.filter += `brightness(${brightnessAdjustment})`;
+        // Load the new image.
+        this.set("_isImageLoading", true);
+        img.src = currentStep.url;
+        this.set('imgsrc',img.src);
+      },
+      _updateImageBoarder(Bottom,Left,Lenth){
+        const imgboarder=document.createElement("div");
+        const mainImageContainer = this.$$("#main-image-container");
+        console.log(mainImageContainer.length);
+        Polymer.dom(mainImageContainer).appendChild(imgboarder);
+        imgboarder.style.bottom = Bottom + 'px';
+        imgboarder.style.left = Left+'px';
+        imgboarder.style.width = Lenth+'px';
+        imgboarder.style.height = Lenth+'px';
+      },
+      _handleTap(e) {
+        this.set('isActive',false);
+        this.set('channel',this._computeChannel(this.categoryname));
+        //this.set('actualSize', !this.actualSize);
+        var div = this.$$("#main-image-container");
+        var reactObj = div.getBoundingClientRect();
+        var mp = this._mousePosition;
+        var block_num = Math.sqrt(this.channel);
+        var block_l = (reactObj.bottom - reactObj.top)/block_num
+        //console.log(reactObj.top);
+        //console.log(this.channel);
+        for(var i=0;i<block_num;i++){
+          for(var j=0;j<block_num;j++){
+            if(mp['y']>reactObj.top+i*block_l && mp['y']<reactObj.bottom-(block_num-i-1)*block_l && mp['x']>reactObj.left+j*block_l && mp['x']<reactObj.right-(block_num-j-1)*block_l){
+              this.set("selectImg",4*i+j)
+              //console.log(this.selectImg);
+              var Bottom = (block_num-i-1)*block_l;
+              var Left = j*block_l;
+              const url = tf_backend.getRouter().pluginRoute('inference', '/splitimg');
+              var channel = this.requestManager.request(url,{selectImg: this.selectImg, channel: this.channel, imgsrc: this.imgsrc});
+              if(this.isActive==false){
+                //this._updateImageBoarder(Bottom,Left,block_l);
+              }
+            }
+          }
+        }
+      },
+    listeners: {
+      'mousedown': '_handleMouseDown',
+      'mousemove': '_handleMouseMove',
+    },
+    _handleMouseMove(e){
+      e.preventDefault();
+      this.set('_mousePosition', this._getPositionRelativeToViewport(e));
+    },
+    _handleMouseDown(e) {
+      e.preventDefault();
+      this.set('_mousePosition', this._getPositionRelativeToViewport(e));
+      //window.addEventListener('mouseup', this._mousePosition);
+      
+    },
+    _getPositionRelativeToViewport(mouseEvent) {
+      //console.log(mouseEvent.clientY)
+      return {x :mouseEvent.clientX,y :mouseEvent.clientY};
+    },
+      _toLocaleString(number) {
+        // Shows commas (or locale-appropriate punctuation) for large numbers.
+        return number.toLocaleString();
+      },
+    });
+  </script>
+</dom-module>

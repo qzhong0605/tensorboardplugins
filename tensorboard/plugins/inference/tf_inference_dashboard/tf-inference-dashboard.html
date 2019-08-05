@@ -1,0 +1,676 @@
+<!--
+@license
+Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-slider/paper-slider.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../tf-backend/tf-backend.html">
+<link rel="import" href="../tf-categorization-utils/tf-categorization-utils.html">
+<link rel="import" href="../tf-categorization-utils/tf-tag-filterer.html">
+<link rel="import" href="../tf-dashboard-common/dashboard-style.html">
+<link rel="import" href="../tf-dashboard-common/tf-dashboard-layout.html">
+<link rel="import" href="../tf-paginated-view/tf-paginated-view.html">
+<link rel="import" href="../tf-runs-selector/tf-runs-selector.html">
+<link rel="import" href="../tf-tensorboard/registry.html">
+<link rel="import" href="../google-chart/google-chart-dist.html">
+<link rel="import" href="../google-chart/google-chart.html">
+<link rel="import" href="tf-inference-loader.html">
+<link rel="import" href="tf-inference-info.html">
+<link rel="import" href="animation.html">
+
+<!--
+tf-image-dashboard displays a dashboard that loads images from a
+TensorFlow run.
+-->
+<dom-module id="tf-inference-dashboard">
+  <template>
+    <tf-dashboard-layout>
+      <div class="sidebar" id = "side">
+        <div class="sidebar-section">
+          <div class="line-item">
+            <paper-checkbox
+              checked="{{_actualSize}}"
+            >Show actual image size</paper-checkbox>
+          </div>
+        </div>
+	<div class="sidebar-section">
+        <form is="iron-form" id="form" method="post">
+	<div class="flex-holder">
+          <paper-input
+            label="Model Path"
+            id = "modelpath"
+            name = "modelpath"
+          ></papper-input>
+	</div>
+        <div class="flex-holder">
+	  <paper-input
+            label="Data Path"
+            id = "datapath"
+            name = "datapath"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+	  <paper-input
+            label="Batch Size"
+            id = "batchsize"
+            name = "batchsize"
+            required type = "number"
+            value = "1024"
+          ></papper-input>
+        </div>
+        <div class="allcontrols">
+        <div class="control-holder">
+          <div class="title">Model Type</div>
+            <paper-radio-group selected="{{modelType}}">
+              <paper-radio-button name="ckpt" value="ckpt">ckpt</paper-radio-button>
+              <paper-radio-button name="onnx" value="onnx">onnx</paper-radio-button>
+              <paper-radio-button name="pb" value="pb" disabled>pb</paper-radio-button>
+              <paper-radio-button name="h5" value="h5" disabled>h5</paper-radio-button>
+            </paper-radio-group>
+        </div>
+        </div>
+	<div class="accept-button-holder">
+        <paper-button raised on-click="submitForm">
+          Accept
+        </paper-button>
+        <paper-button dialog-dismiss class="control-button">Cancel</paper-button>
+        </div>
+        </form>
+	</div>
+	<div class="sidebar-section">
+          <tf-runs-selector
+            id="runs-selector"
+            selected-runs="{{_selectedRuns}}"
+          ></tf-runs-selector>
+        </div>
+      <!--<div class="resizer" id="resizer">
+        <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
+      </div>-->
+      </div>
+      <div class="center" id="center">
+        <!--<div class="resizer" id="resizer">
+        <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
+        </div>-->
+        <div class="center-content" id="channelimage">
+        <template is="dom-if" if="[[_dataNotFound]]">
+          <div class="no-data-warning">
+            <h3>No image data was found.</h3>
+            <p>Probable causes:</p>
+            <ul>
+              <li>You haven’t written any image data to your event files.
+              <li>TensorBoard can’t find your event files.
+            </ul>
+            <p>
+            If you’re new to using TensorBoard, and want to find out how
+            to add data and set up your event files, check out the
+            <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md">README</a>
+            and perhaps the <a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard tutorial</a>.
+            <p>
+            If you think TensorBoard is configured properly, please see
+            <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md#my-tensorboard-isnt-showing-any-data-whats-wrong">the section of the README devoted to missing data problems</a>
+            and consider filing an issue on GitHub.
+          </div>
+        </template>
+        <template is="dom-if" if="[[!_dataNotFound]]">
+          <tf-tag-filterer tag-filter="{{_tagFilter}}"></tf-tag-filterer>
+          <template is="dom-repeat" items="[[_categories]]" as="category">
+            <tf-category-pane category="[[category]]" opened="[[_shouldOpen(index)]]">
+              <tf-paginated-view
+                items="[[category.items]]"
+                pages="{{category._pages}}"
+              >
+                <template is="dom-repeat" items="[[category._pages]]" as="page">
+                  <template is="dom-if" if="[[page.active]]">
+                    <div class="layout horizontal wrap" id="_channelimgs">
+                      <template is="dom-repeat" items="[[page.items]]">
+                        <tf-inference-loader
+                          id="channelloader"
+                          isActive="[[_isRevealed]]"
+                          run="[[item.run]]"
+                          tag="[[item.tag]]"
+                          sample="[[item.sample]]"
+                          categoryname="[[category.name]]"
+                          of-samples="[[item.ofSamples]]"
+                          tag-metadata="[[_tagMetadata(_runToTagInfo, item.run, item.tag)]]"
+                          request-manager="[[_requestManager]]"
+                          actual-size="[[_actualSize]]"
+                          brightness-adjustment="[[_brightnessAdjustment]]"
+                          contrast-percentage="[[_contrastPercentage]]"
+                          on-tap="_revealInfo"
+                        ></tf-inference-loader>
+                      </template>
+                    </div>
+                  </template>
+                </template>
+              </tf-paginated-view>
+            </tf-category-pane>
+          </template>
+        </template>
+      </div>
+      <div class="resizer" id="resizer">
+        <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
+      </div>
+      <div class="center-content" id = "channelinfo">
+        <template is="dom-if" if="[[_dataNotFound]]">
+          <div class="no-data-warning">
+            <h3>No image data was found.</h3>
+            <p>Probable causes:</p>
+            <ul>
+              <li>You haven’t written any image data to your event files.
+              <li>TensorBoard can’t find your event files.
+            </ul>
+            <p>
+            If you’re new to using TensorBoard, and want to find out how
+            to add data and set up your event files, check out the
+            <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md">README</a>
+            and perhaps the <a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard tutorial</a>.
+            <p>
+            If you think TensorBoard is configured properly, please see
+            <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md#my-tensorboard-isnt-showing-any-data-whats-wrong">the section of the README devoted to missing data problems</a>
+            and consider filing an issue on GitHub.
+          </div>
+        </template>
+        <template is="dom-if" if="[[!_dataNotFound]]">
+        <div class="info" id="info">
+          <div class="info-content" id="infoImg">
+            <tf-inference-info
+              on-tap="_hideInfo"
+              categoryname="[[_categoryname]]"
+            ></tf-inference-info> 
+          </div>
+          <div class="resizerinfo" id="resizerinfo" style="display: table;">
+            <iron-icon icon="av:pause" class="resizeinfo-icon"></iron-icon>
+          </div>        
+          <div class="info-content" id="infoDistribution">
+            <google-chart-dist
+              data="[[_data]]">
+            </google-chart-dist>
+          </div>      
+        </div>   
+        </template>
+      </div>
+      </div>
+    </tf-dashboard-layout>
+    <style include="dashboard-style"></style>
+    <style>
+
+      .resize-icon {
+        display: table-cell;
+        vertical-align: middle;
+        color: grey;
+        width: 10px;
+        height: 10px;
+        min-width: 10px;
+        min-height: 10px;
+      }
+      .resizeinfo-icon {
+        display: table-cell;
+        justify-content: center;
+        color: grey;
+        width: 10px;
+        height: 10px;
+        min-width: 10px;
+        min-height: 10px;
+      }
+      .side-holder {
+        position: relative;
+        width: 40%;
+        display: flex;
+      }
+      #sidebar{
+        width:100%;
+      }
+      #center {
+        position: relative;
+        display: flex;
+        float:right;
+      }
+      #info {
+        position: relative;
+        display: flex;
+        float:center;
+        height: 100%;
+        flex-direction:column;
+      }
+      #channelinfo{
+        display:none;
+        margin-left: 3px;
+      }
+      #infoImg{
+        height: 40%;
+        display: block;
+        margin-bottom: 3px;
+        border:1px solid #999;
+      }
+      #infoDistribution{
+        display: block;
+        margin-top: 3px;
+        border:1px solid #999;
+      }
+      #channelimage{
+        margin-right:3px;
+      }
+      google-chart-dist{
+        width: 100%;
+      }
+      .info-content {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        overflow: scroll;
+      }
+      .center-content {
+        width: calc(100% );
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: scroll;
+      }
+      .resizer {
+        display: none;
+        height: 100%;
+        width: 8px;
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        cursor: pointer;
+      }
+      .resizerinfo {
+        height: 8px;
+        width: 100%;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        cursor: pointer;
+      }
+      .allcontrols {
+        padding: 0 2px 2px;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+      .control-holder .icon-button {
+        font-size: 6px;
+        margin: 0 -0.5px;
+        padding: 0.5px;
+      }
+      .allcontrols .control-holder {
+        clear: both;
+        display: flex;
+        justify-content: space-between;
+      }
+      .allcontrols .control-holder paper-radio-group {
+        margin-right: 80px;
+      }
+      .title {
+        font-size: 14px;
+        margin: 0.8px 0.5px 0.8px 0;
+        color: black;
+      }
+      table.control-holder {
+        border: 0;
+        border-collapse: collapse;
+      }
+      .resettable-slider-container {
+        display: flex;
+      }
+      .resettable-slider-container paper-slider {
+        flex-grow: 1;
+      }
+      .resettable-slider-container paper-button {
+        flex-grow: 0;
+      }
+      .resettable-slider-container paper-button[disabled] {
+        background-color: unset;
+      }
+      .x-button {
+        font-size: 13px;
+        background-color: var(--tb-ui-light-accent);
+        color: var(--tb-ui-dark-accent);
+      }
+      h3 {
+        color: var(--paper-grey-800);
+        margin: 0;
+        font-weight: normal;
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: block;
+        pointer-events: none;
+      }
+      .no-data-warning {
+        max-width: 540px;
+        margin: 80px auto 0 auto;
+      }
+      paper-dropdown-menu {
+        flex-grow: 1;
+      }
+      paper-radio-button {
+        font-size: 9px;
+        display: block;
+        padding: 5px;
+      }
+      paper-slider {
+        --paper-slider-active-color: var(--tb-orange-strong);
+        --paper-slider-knob-color: var(--tb-orange-strong);
+        --paper-slider-knob-start-border-color: var(--tb-orange-strong);
+        --paper-slider-knob-start-color: var(--tb-orange-strong);
+        --paper-slider-markers-color: var(--tb-orange-strong);
+        --paper-slider-pin-color: var(--tb-orange-strong);
+        --paper-slider-pin-start-color: var(--tb-orange-strong);
+      }
+    </style>
+  </template>
+  <script>
+    "use strict";
+    Polymer({
+      is: 'tf-inference-dashboard',
+      properties: {
+        _selectedRuns: Array,
+        _runToTagInfo: Object,
+        _actualSize: Boolean,
+        _dataNotFound: {
+          type: Boolean, 
+          value:true,
+        },
+        dataLocation: {
+          type: String,
+          notify: true,
+        },
+        _isRevealed: {
+          type: Boolean, 
+          value: false,
+        },
+        _defaultBrightnessAdjustment: {
+          type: Number,
+          value: 1,
+          readOnly: true,
+        },
+        _defaultContrastPercentage: {
+          type: Number,
+          value: 100,
+          readOnly: true,
+        },
+        _data: {
+          type: Object,
+        },
+        _brightnessAdjustment: {
+          type: Number,
+          value: 1,
+        },
+        _contrastPercentage: {
+          type: Number,
+          value: 100,
+        },
+        _tagFilter: String,
+        _brightnessIsDefault: {
+          type: Boolean,
+          //computed: '_computeBrightnessIsDefault(_brightnessAdjustment)',
+          value: true,
+        },
+        _contrastIsDefault: {
+          type: Boolean,
+          //computed: '_computeContrastIsDefault(_contrastPercentage)',
+          value: true,
+        },
+
+        // Categories must only be computed after _dataNotFound is found to be
+        // true and then polymer DOM templating responds to that finding. We
+        // thus use this property to guard when categories are computed.
+        _categoriesDomReady: Boolean,
+        _categories: {
+          type: Array,
+          computed:
+            '_makeCategories(_runToTagInfo, _selectedRuns, _tagFilter, _categoriesDomReady)',
+        },
+        _categoryname: {
+          type: String,
+        },
+        _isActive: {
+          type: String,
+        },
+        _requestManager: {
+          type: Object,
+          value: () => new tf_backend.RequestManager(),
+        },
+        modelType: {
+          type: String,
+          value: tf_storage.getStringInitializer(
+            'modelType', {defaultValue: 'ckpt'}),
+          observer: 'modelTypeChanged_',
+          notify: true,
+        },
+      },
+      attached() {
+        this._envStoreListener = tf_backend.environmentStore.addListener(() => {
+          this.set('dataLocation', tf_backend.environmentStore.getDataLocation());
+        });
+        this.set('dataLocation', tf_backend.environmentStore.getDataLocation());
+        console.log(this.dataLocation+"  77777");
+      },
+      detached() {
+        tf_backend.environmentStore.removeListenerByKey(this._envStoreListener);
+      },
+      /*ready() {
+        this.reload();
+      },*/
+      ready: function() {
+        this.reload();
+        if(this._dataNotFound){
+          this._clearTags();
+          this.loadAnimation();
+          this.$.form.submit();
+        }
+        const img = d3.select(this.$.channelimage);
+        const infoImg = d3.select(this.$.infoImg);
+        const infoDistribution = d3.select(this.$.infoDistribution);
+        const info = d3.select(this.$.channelinfo);
+        const resizer = d3.select(this.$.resizer).classed("dragging", true);
+        const resizerinfo = d3.select(this.$.resizerinfo);
+        console.log(resizerinfo);
+        const self = this;
+        const dragResize = d3.drag().on('drag', () => {
+          // Determine resizer position relative to width of the tool.
+          const x = d3.mouse(this.parentNode.parentNode)[0]-270;
+          const width = this.parentNode.parentNode.offsetWidth;
+          let perc = x / width * 100;
+          console.log(perc)
+          // Side panel will be a minimum of 40% width.
+          perc = Math.max(Math.min(perc,70), 30);
+
+          img.style('width', (perc) + '%');
+          info.style('width', (100-perc) + '%');
+          infoImg.style('height', (perc) + '%');
+        }).on("end", () => {resizer.classed("dragging", false);});
+        const dragResizeInfo = d3.drag().on('drag', () => {
+          console.log("^^^^^^^^^^^^^^^^^")
+          // Determine resizer position relative to width of the tool.
+          const y = d3.mouse(this.parentNode.parentNode)[1];
+          const height = this.parentNode.parentNode.offsetHeight;
+          let perc = y / height * 100;
+          console.log(perc)
+          // Side panel will be a minimum of 40% width.
+          perc = Math.max(Math.min(perc,70), 30);
+
+          infoImg.style('height', (perc) + '%');
+          infoDistribution.style('height', (100-perc) + '%');
+        }).on("end", () => {resizer.classed("dragging", true);});
+        resizer.call(dragResize);
+        resizerinfo.call(dragResizeInfo);
+      },
+      reload() {
+        this._fetchTags().then(() => {
+          this._reloadImages();
+        });
+      },
+      loadAnimation() {
+        const loading = d3.select(this.$.loading);
+        const center = d3.select(this.$.center);
+        loading.style('display', 'block');
+        center.style('display', 'none');
+        setTimeout(function(){
+                     loading.style('display','block');
+                     center.style('display', 'flex');
+                   },1000);
+      },
+      _revealInfo(e){
+        const img = d3.select(this.$.channelimage);
+        const info = d3.select(this.$.channelinfo);
+        const infoImg = d3.select(this.$.infoImg);
+        const infoDistribution = d3.select(this.$.infoDistribution);
+        const resizer = d3.select(this.$.resizer);
+        const resizerinfo = d3.select(this.$.resizerinfo);
+        const loader = this.$.channelloader
+        if(!this._isRevealed){
+          this._isRevealed = true;
+          img.style('width', 30 + '%');
+          info.style('width', 70 + '%');
+          infoImg.style('height', 30 + '%');
+          infoDistribution.style('height', 70 + '%');
+          info.style('display', "block");
+          resizer.style('display',"table");
+          resizerinfo.style('display',"table");
+        }
+        const url = tf_backend.getRouter().pluginRoute('inference', '/channelinfo');
+        const datainfo = Promise.resolve(this._requestManager.request(url));
+        const that = this;
+        datainfo.then(function(result) {
+          var data = result['data'];
+          that.set('_data',data);
+          console.log(that._data);
+        });
+        
+        this.reload();
+        console.log(this._isRevealed);
+      },
+      _hideInfo(e){
+        const img = d3.select(this.$.channelimage);
+        const info = d3.select(this.$.channelinfo);
+        const resizer = d3.select(this.$.resizer);
+        const resizerinfo = d3.select(this.$.resizerinfo);
+        const loader = this.$.channelloader
+        if(this._isRevealed){
+          this._isRevealed = false;
+          img.style('width', 100 + '%');
+          info.style('display', "none");
+          resizer.style('display',"none");
+          resizerinfo.style('display',"none");
+        }
+        this.reload();
+        console.log(this._isRevealed);
+      },
+      _clearTags() {
+        const url = tf_backend.getRouter().pluginRoute('inference', '/cleartags');
+        const a = Promise.resolve(this._requestManager.request(url,{'path':'/tmp/mnist'}));
+        console.log(this.dataLocation);
+        a.then(function(result) {
+          var ifDone = result['ifDone'];
+          console.log(ifDone);
+        });
+      },
+      _fetchTags() {
+        console.log(this._isRevealed);
+        const url = tf_backend.getRouter().pluginRoute('images', '/tags');
+        //console.log(this._requestManager.request(url));
+        return this._requestManager.request(url).then(runToTagInfo => {
+          if (_.isEqual(runToTagInfo, this._runToTagInfo)) {
+            // No need to update anything if there are no changes.
+            return;
+          }
+          const runToTag = _.mapValues(runToTagInfo, x => Object.keys(x));
+          const tags = tf_backend.getTags(runToTag);
+          this.set('_dataNotFound', tags.length === 0);
+          this.set('_runToTagInfo', runToTagInfo);
+          this.async(() => {
+            // See the comment above `_categoriesDomReady`.
+            this.set('_categoriesDomReady', true);
+          });
+        });
+      },
+      _reloadImages() {
+        this.querySelectorAll('tf-inference-loader').forEach(image => {
+          image.reload();
+        });
+        this.querySelectorAll('tf-inference-info').forEach(image => {
+          image.reload();
+        });
+      },
+
+      _shouldOpen(index) {
+        return index <= 2;
+      },
+
+      _resetBrightness() {
+        this._brightnessAdjustment = this._defaultBrightnessAdjustment;
+      },
+      _resetContrast() {
+        this._contrastPercentage = this._defaultContrastPercentage;
+      },
+      _computeBrightnessIsDefault(brightnessAdjustment) {
+        return brightnessAdjustment === this._defaultBrightnessAdjustment;
+      },
+      _computeContrastIsDefault(contrastPercentage) {
+        return contrastPercentage === this._defaultContrastPercentage;
+      },
+
+      _makeCategories(
+          runToTagInfo, selectedRuns, tagFilter, categoriesDomReady) {
+        const runToTag = _.mapValues(runToTagInfo, x => Object.keys(x));
+        const baseCategories =
+          tf_categorization_utils.categorizeRunTagCombinations(runToTag, selectedRuns, tagFilter);
+        function explodeItem(item) {
+          const samples = runToTagInfo[item.run][item.tag].samples;
+          return _.range(samples).map(i => Object.assign({}, item, {
+            sample: i,
+            ofSamples: samples,
+          }));
+        }
+        const withSamples = baseCategories.map(category =>
+          Object.assign({}, category, {
+            items: [].concat.apply([], category.items.map(explodeItem)),
+            name: category.name,
+          }));
+        this.set('_categoryname',withSamples[1]['name']);
+        console.log(this._categoryname,withSamples[1]['name']);
+        return withSamples;
+      },
+      _tagMetadata(runToTagInfo, run, tag) {
+        return runToTagInfo[run][tag];
+      },
+      modelTypeChanged_: tf_storage.getStringObserver(
+        'modelType', {defaultValue: 'ckpt'}),
+      submitForm: function() {
+                var modelpath = this.$.modelpath.value;
+                var data = this.$.datapath.value;
+                var batch = this.$.batchsize.value;
+                var modeltype = this.modelType;
+                console.log(this.modelType);
+                if(modelpath != "" && data != ""){ // whatever input check                   
+                    const url = tf_backend.getRouter().pluginRoute('inference', '/distribution');
+                    const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'batchsize':batch,'modeltype':modeltype}));
+                    a.then(function(result) {
+                      var ifDone = result['ifDone'];
+                      console.log(ifDone);
+                    });
+                    this.set('_dataNotFound',false);
+                    alert("start!")
+                    this.loadAnimation();
+                }
+       }
+});
+</script>
+</dom-module>
