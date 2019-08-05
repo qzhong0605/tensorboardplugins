@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""The TensorBoard debugDB plugin."""
+"""The TensorBoard debugdb plugin."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -34,7 +34,7 @@ from tensorboard.util import tb_logging
 
 logger = tb_logging.get_logger()
 
-_PLUGIN_PREFIX_ROUTE = 'graphdebug'
+_PLUGIN_PREFIX_ROUTE = 'debugdb'
 
 # The Summary API is implemented in TensorFlow because it uses TensorFlow internal APIs.
 # As a result, this SummaryMetadata is a bit unconventional and uses non-public
@@ -48,17 +48,17 @@ _PLUGIN_NAME_KERAS_MODEL = 'graph_keras_model'
 
 
 class DebugDBPlugin(base_plugin.TBPlugin):
-  """debugDB Plugin for TensorBoard."""
+  """debugdb Plugin for TensorBoard."""
 
   plugin_name = _PLUGIN_PREFIX_ROUTE
 
   def __init__(self, context):
-    """Instantiates debugDBPlugin via TensorBoard core.
+    """Instantiates debugdbPlugin via TensorBoard core.
 
     Args:
       context: A base_plugin.TBContext instance.
     """
-    logger.warn('debugDB')
+    logger.warn('debugdb')
     self._multiplexer = context.multiplexer
 
   def get_plugin_apps(self):
@@ -76,12 +76,12 @@ class DebugDBPlugin(base_plugin.TBPlugin):
     }
 
   def is_active(self):
-    """The debugDB plugin is active iff any run has a graph."""
+    """The debugdb plugin is active iff any run has a graph."""
     return bool(self._multiplexer and self.info_impl())
 
   def frontend_metadata(self):
     return super(DebugDBPlugin, self).frontend_metadata()._replace(
-        element_name='tf-debugDB-dashboard',
+        element_name='tf-debugdb-dashboard',
         # TODO(@chihuahua): Reconcile this setting with Health Pills.
         disable_reload=True,
     )

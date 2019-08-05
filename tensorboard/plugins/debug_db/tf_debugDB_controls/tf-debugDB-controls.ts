@@ -51,7 +51,7 @@ namespace tf.graph.controls {
     [key: string]: boolean;
   }
   
-  // TODO(stephanwlee): Move this to tf-debugDB-dashboard
+  // TODO(stephanwlee): Move this to tf-debugdb-dashboard
   export interface TagItem {
     tag: string | null,
     displayName: string,
@@ -60,13 +60,13 @@ namespace tf.graph.controls {
     profile: boolean,
   }
   
-  // TODO(stephanwlee): Move this to tf-debugDB-dashboard
+  // TODO(stephanwlee): Move this to tf-debugdb-dashboard
   export interface RunItem {
     name: string,
     tags: TagItem[],
   }
   
-  // TODO(stephanwlee): Move this to tf-debugDB-dashboard
+  // TODO(stephanwlee): Move this to tf-debugdb-dashboard
   export type Dataset = Array<RunItem>;
   
   interface CurrentDevice {
@@ -103,7 +103,7 @@ namespace tf.graph.controls {
     color: string;
   }
   
-  // TODO(stephanwlee) Move this to tf-debugDB.html when it becomes TypeScript.
+  // TODO(stephanwlee) Move this to tf-debugdb.html when it becomes TypeScript.
   interface ColorByParams {
     compute_time: ColorParams,
     memory: ColorParams,
@@ -116,7 +116,7 @@ namespace tf.graph.controls {
   
   
   Polymer({
-    is: 'tf-debugDB-controls',
+    is: 'tf-debugdb-controls',
     properties: {
       machineidList:{
         type: Array,
@@ -304,7 +304,7 @@ namespace tf.graph.controls {
       params.set('machine_list', JSON.stringify(this.machineList));
       
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/newstart', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/newstart', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
@@ -328,7 +328,7 @@ namespace tf.graph.controls {
       this.newIsStop = true
       const params = new URLSearchParams();
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/newstop', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/newstop', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
@@ -345,7 +345,7 @@ namespace tf.graph.controls {
       var iteration_number = (<HTMLInputElement>document.getElementById('iteration_number')).value;
       params.set('iteration_number', iteration_number);
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/newcontinue', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/newcontinue', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
@@ -365,7 +365,7 @@ namespace tf.graph.controls {
       const params = new URLSearchParams();
       params.set('network_identification',network_identification);
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/attach', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attach', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.json().then(function(respond){
@@ -389,7 +389,7 @@ namespace tf.graph.controls {
       const params = new URLSearchParams();
       params.set('identification',this.attachList[this.selectedIdentification]);
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/attachstop', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attachstop', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
@@ -406,7 +406,7 @@ namespace tf.graph.controls {
       params.set('iteration_number', iteration_number);
       params.set('identification',this.attachList[this.selectedIdentification]);
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/attachcontinue', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attachcontinue', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){

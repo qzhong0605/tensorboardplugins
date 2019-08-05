@@ -56,7 +56,7 @@ module tf.graph.scene.node {
    *
    * @param sceneGroup selection of the container
    * @param nodeData array of render node information to map
-   * @param sceneElement <tf-debugDB-scene> polymer element
+   * @param sceneElement <tf-debugdb-scene> polymer element
    * @return selection of the created nodeGroups
    */
   export function buildGroup(
@@ -148,7 +148,7 @@ module tf.graph.scene.node {
  *
  * @param nodeGroup selection of the container
  * @param renderNodeInfo the render information for the node.
- * @param sceneElement <tf-debugDB-scene> polymer element.
+ * @param sceneElement <tf-debugdb-scene> polymer element.
  * @return Selection of the subscene group, or null if node group does not have
  *        a subscene. Op nodes, bridge nodes and unexpanded group nodes will
  *        not have a subscene.
@@ -183,7 +183,7 @@ function subscenePosition(nodeGroup, d: render.RenderNodeInfo) {
  *
  * @param selection The group node selection.
  * @param d Info about the node being rendered.
- * @param sceneElement <tf-debugDB-scene> polymer element.
+ * @param sceneElement <tf-debugdb-scene> polymer element.
  */
 function addButton(selection, d: render.RenderNodeInfo, sceneElement) {
   let group =
@@ -344,7 +344,7 @@ export function getGroupSettingLabel(node: Node) {
  * Append svg text for label and assign data.
  * @param nodeGroup
  * @param renderNodeInfo The render node information for the label.
- * @param sceneElement <tf-debugDB-scene> polymer element.
+ * @param sceneElement <tf-debugdb-scene> polymer element.
  */
 function labelBuild(nodeGroup, renderNodeInfo: render.RenderNodeInfo,
     sceneElement) {

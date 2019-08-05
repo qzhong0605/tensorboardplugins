@@ -1,15 +1,15 @@
 # Graph plugin HTTP API
 
-The graph plugin name is `graphdebug`, so all its routes are under
-`/data/plugin/graphdebug`.
+The graph plugin name is `debugdb`, so all its routes are under
+`/data/plugin/debugdb`.
 
-## `/data/plugin/graphdebug/info`
+## `/data/plugin/debugdb/info`
 
 Returns meta information about data availabilities for a given run and a tag.
 Below fields describe the data availabilities:
 - "run_graph": v1 only. Whether a GraphDef of op nodes is present for an entire run.
       Historically, in v1, an op graph was written out for an entire run as a field on
-      Event proto. In v2, graphdebug are written out as a Summary with respective tags.
+      Event proto. In v2, debugdb are written out as a Summary with respective tags.
 - "op_graph": v2 only. Whether a GraphDef of op nodes is present with a tag.
 - "profile": Whether a profile information is present with a RunMetadata and a tag.
 - "conceptual_graph": Whether a GraphDef describing conceptual graph is present.
@@ -33,7 +33,7 @@ Please refer to below example for the full structure.
       }
     }
 
-## `/data/plugin/graphdebug/graph?run=foo&limit_attr_size=1024&large_attrs_key=key`
+## `/data/plugin/debugdb/graph?run=foo&limit_attr_size=1024&large_attrs_key=key`
 
 Returns the graph definition for the given run and/or tag in pbtxt format.
 The graph is composed of a list of nodes, where each node is a specific
@@ -55,7 +55,7 @@ optional, and function as follows:
 
 For instance, for the query
 
-    /data/plugin/graphdebug/graph?run=foo&limit_attr_size=1024&large_attrs_key=_too_large
+    /data/plugin/debugdb/graph?run=foo&limit_attr_size=1024&large_attrs_key=_too_large
 
 there follows an example pbtxt response of a graph with 3 nodes, where
 the second node had two large attributes "a" and "b" that were filtered

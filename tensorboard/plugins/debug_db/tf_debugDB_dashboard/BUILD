@@ -6,9 +6,9 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "tf_debugDB_dashboard",
-    srcs = ["tf-debugDB-dashboard.html"],
-    path = "/tf-debugDB-dashboard",
+    name = "tf_debugdb_dashboard",
+    srcs = ["tf-debugdb-dashboard.html"],
+    path = "/tf-debugdb-dashboard",
     visibility = ["//visibility:public"],
     deps = [
         "//tensorboard/components/tf_backend",
@@ -17,10 +17,10 @@ tf_web_library(
         "//tensorboard/components/tf_storage",
         "//tensorboard/components/tf_tensorboard:registry",
         "//tensorboard/components/vz_sorting",
-        "//tensorboard/plugins/debug_db/tf_debugDB",
-        "//tensorboard/plugins/debug_db/tf_debugDB_board",
-        "//tensorboard/plugins/debug_db/tf_debugDB_controls",
-        "//tensorboard/plugins/debug_db/tf_debugDB_loader:tf_debugDB_dashboard_loader",
+        "//tensorboard/plugins/debug_db/tf_debugdb",
+        "//tensorboard/plugins/debug_db/tf_debugdb_board",
+        "//tensorboard/plugins/debug_db/tf_debugdb_controls",
+        "//tensorboard/plugins/debug_db/tf_debugdb_loader:tf_debugdb_dashboard_loader",
         "@org_polymer_paper_tabs",
         "@org_polymer_paper_icon_button",
     ],
@@ -28,16 +28,16 @@ tf_web_library(
 
 tensorboard_webcomponent_library(
     name = "legacy",
-    srcs = [":tf_debugDB_dashboard"],
-    destdir = "tf-debugDB-dashboard",
+    srcs = [":tf_debugdb_dashboard"],
+    destdir = "tf-debugdb-dashboard",
     deps = [
         "//tensorboard/components/tf_backend:legacy",
         "//tensorboard/components/tf_dashboard_common:legacy",
         "//tensorboard/components/vz_sorting:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_board:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_controls:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_loader:legacy_dashboard_loader",
+        "//tensorboard/plugins/debug_db/tf_debugdb:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_board:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_controls:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_loader:legacy_dashboard_loader",
         "//third_party/javascript/polymer/v1/polymer:lib",
         "//third_party/javascript/polymer/v1/paper-tabs:lib",
         "//third_party/javascript/polymer/v1/paper-icon-button:lib",

@@ -20,7 +20,7 @@ interface GraphRunTag {
 }
 
 Polymer({
-  is: 'tf-debugDB-dashboard-loader',
+  is: 'tf-debugdb-dashboard-loader',
 
   properties: {
     datasets: Array,
@@ -96,7 +96,7 @@ Polymer({
             String(selectionType === tf.graph.SelectionType.CONCEPTUAL_GRAPH));
         if (tag) params.set('tag', tag);
         const graphPath =
-            tf_backend.getRouter().pluginRoute('graphdebug', '/graph', params);
+            tf_backend.getRouter().pluginRoute('debugdb', '/graph', params);
         return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
           this._graphRunTag = {run, tag};
         })
@@ -125,7 +125,7 @@ Polymer({
         params.set('tag', tag);
         params.set('run', run);
         const metadataPath = tf_backend.getRouter().pluginRoute(
-            'graphdebug', '/run_metadata', params);
+            'debugdb', '/run_metadata', params);
         return maybeFetchGraphPromise
             .then(() => this._readAndParseMetadata(metadataPath));
       }

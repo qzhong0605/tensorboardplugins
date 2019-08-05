@@ -18,9 +18,9 @@ limitations under the License.
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../tf-backend/tf-backend.html">
 <link rel="import" href="../tf-dashboard-common/tf-dashboard-layout.html">
-<link rel="import" href="../tf-debugDB-board/tf-debugDB-board.html">
-<link rel="import" href="../tf-debugDB-controls/tf-debugDB-controls.html">
-<link rel="import" href="../tf-debugDB-loader/tf-debugDB-dashboard-loader.html">
+<link rel="import" href="../tf-debugdb-board/tf-debugdb-board.html">
+<link rel="import" href="../tf-debugdb-controls/tf-debugdb-controls.html">
+<link rel="import" href="../tf-debugdb-loader/tf-debugdb-dashboard-loader.html">
 <link rel="import" href="../tf-storage/tf-storage.html">
 <link rel="import" href="../tf-tensorboard/registry.html">
 <link rel="import" href="../vz-sorting/vz-sorting.html">
@@ -28,16 +28,16 @@ limitations under the License.
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <!--
-tf-debugDB-dashboard displays a graph from a TensorFlow run.
+tf-debugdb-dashboard displays a graph from a TensorFlow run.
 
 It has simple behavior: Creates a url-generator and run-generator
 to talk to the backend, and then passes the runsWithGraph (list of runs with
-associated graphs) along with the url generator into tf-debugDB-board for display.
+associated graphs) along with the url generator into tf-debugdb-board for display.
 
 If there are multiple runs with graphs, the first run's graph is shown
 by default. The user can select a different run from a dropdown menu.
 -->
-<dom-module id="tf-debugDB-dashboard">
+<dom-module id="tf-debugdb-dashboard">
 <template>
 <paper-dialog id="error-dialog" with-backdrop></paper-dialog>
 <template is="dom-if" if="[[_datasetsEmpty(_datasets)]]">
@@ -65,7 +65,7 @@ by default. The user can select a different run from a dropdown menu.
 </template>
 <template is="dom-if" if="[[!_datasetsEmpty(_datasets)]]">
 <tf-dashboard-layout>
-  <tf-debugDB-controls
+  <tf-debugdb-controls
         id="controls"
         class="sidebar"
         devices-for-stats="{{_devicesForStats}}"
@@ -79,7 +79,7 @@ by default. The user can select a different run from a dropdown menu.
         selected-node="{{_selectedNode}}"
         health-pills-feature-enabled="[[_debuggerDataEnabled]]"
         health-pills-toggled-on="{{healthPillsToggledOn}}"
-  ></tf-debugDB-controls>
+  ></tf-debugdb-controls>
   <div class="center">
     <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
       <paper-tab>MAIN</paper-tab>
@@ -87,7 +87,7 @@ by default. The user can select a different run from a dropdown menu.
           <!-- <paper-icon-button noink icon="close" on-click='closePage'></paper-icon-button> -->
       </paper-tab>
     </paper-tabs>
-    <tf-debugDB-dashboard-loader id="loader"
+    <tf-debugdb-dashboard-loader id="loader"
           datasets="[[_datasets]]"
           selection="[[_selection]]"
           selected-file="[[_selectedFile]]"
@@ -97,8 +97,8 @@ by default. The user can select a different run from a dropdown menu.
           progress="{{_progress}}"
           hierarchy-params="[[_hierarchyParams]]"
           compatibility-provider="[[_compatibilityProvider]]"
-    ></tf-debugDB-dashboard-loader>
-      <tf-debugDB-board id="graphboard"
+    ></tf-debugdb-dashboard-loader>
+      <tf-debugdb-board id="graphboard"
           devices-for-stats="[[_devicesForStats]]"
           color-by="[[_colorBy]]"
           color-by-params="{{_colorByParams}}"
@@ -116,7 +116,7 @@ by default. The user can select a different run from a dropdown menu.
           render-hierarchy="{{_renderHierarchy}}"
           selected-node="{{_selectedNode}}"
           stats="[[_stats]]"
-      ></tf-debugDB-board>
+      ></tf-debugdb-board>
   </div>
 </tf-dashboard-layout>
 </template>
@@ -166,7 +166,7 @@ paper-icon-button {
 
 <script>
 Polymer({
-  is: 'tf-debugDB-dashboard',
+  is: 'tf-debugdb-dashboard',
   properties: {
     _selectedPage:{
       type: Number,
@@ -309,7 +309,7 @@ Polymer({
       }),
   _fetchDataset() {
     return this._requestManager.request(
-        tf_backend.getRouter().pluginRoute('graphdebug', '/info'));
+        tf_backend.getRouter().pluginRoute('debugdb', '/info'));
   },
   /*
    * See also _maybeFetchHealthPills, _initiateNetworkRequestForHealthPills.
@@ -336,7 +336,7 @@ Polymer({
   },
   _graphUrl(run, limitAttrSize, largeAttrsKey) {
     return tf_backend.getRouter().pluginRoute(
-        'graphdebug',
+        'debugdb',
         '/graph',
         new URLSearchParams({
           'run': run,

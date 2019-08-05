@@ -6,16 +6,16 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "tf_debugDB_controls",
+    name = "tf_debugdb_controls",
     srcs = [
-        "tf-debugDB-controls.html",
-        "tf-debugDB-controls.ts",
+        "tf-debugdb-controls.html",
+        "tf-debugdb-controls.ts",
     ],
-    path = "/tf-debugDB-controls",
+    path = "/tf-debugdb-controls",
     deps = [
         "//tensorboard/components/tf_dashboard_common",
         "//tensorboard/components/tf_imports:polymer",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common",
         "@org_polymer_iron_icon",
         "@org_polymer_iron_ajax",
         "@org_polymer_paper_button",
@@ -31,11 +31,11 @@ tf_web_library(
 
 tensorboard_webcomponent_library(
     name = "legacy",
-    srcs = [":tf_debugDB_controls"],
-    destdir = "tf-debugDB-controls",
+    srcs = [":tf_debugdb_controls"],
+    destdir = "tf-debugdb-controls",
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common:legacy",
         "//third_party/javascript/polymer/v1/paper-button:lib",
         "//third_party/javascript/polymer/v1/paper-dropdown-menu:lib",
         "//third_party/javascript/polymer/v1/paper-icon-button:lib",

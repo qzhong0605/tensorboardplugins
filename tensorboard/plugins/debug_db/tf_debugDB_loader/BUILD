@@ -6,51 +6,51 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "tf_debugDB_loader",
+    name = "tf_debugdb_loader",
     srcs = [
-        "tf-debugDB-loader.html",
-        "tf-debugDB-loader.ts",
+        "tf-debugdb-loader.html",
+        "tf-debugdb-loader.ts",
     ],
-    path = "/tf-debugDB-loader",
+    path = "/tf-debugdb-loader",
     deps = [
-        "//tensorboard/plugins/debug_db/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common",
         "//tensorboard/components/tf_imports:polymer",
     ],
 )
 
 tensorboard_webcomponent_library(
     name = "legacy",
-    srcs = [":tf_debugDB_loader"],
-    destdir = "tf-debugDB-loader",
+    srcs = [":tf_debugdb_loader"],
+    destdir = "tf-debugdb-loader",
     deps = [
-        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common:legacy",
         "//third_party/javascript/polymer/v1/polymer:lib",
     ],
 )
 
 tf_web_library(
-    name = "tf_debugDB_dashboard_loader",
+    name = "tf_debugdb_dashboard_loader",
     srcs = [
-        "tf-debugDB-dashboard-loader.html",
-        "tf-debugDB-dashboard-loader.ts",
+        "tf-debugdb-dashboard-loader.html",
+        "tf-debugdb-dashboard-loader.ts",
     ],
-    path = "/tf-debugDB-loader",
+    path = "/tf-debugdb-loader",
     deps = [
         "//tensorboard/components/tf_backend",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common",
-        "//tensorboard/plugins/debug_db/tf_debugDB_controls",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common",
+        "//tensorboard/plugins/debug_db/tf_debugdb_controls",
         "//tensorboard/components/tf_imports:polymer",
     ],
 )
 
 tensorboard_webcomponent_library(
     name = "legacy_dashboard_loader",
-    srcs = [":tf_debugDB_dashboard_loader"],
-    destdir = "tf-debugDB-loader",
+    srcs = [":tf_debugdb_dashboard_loader"],
+    destdir = "tf-debugdb-loader",
     deps = [
         "//tensorboard/components/tf_backend:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_controls:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_controls:legacy",
         "//third_party/javascript/polymer/v1/polymer:lib",
     ],
 )

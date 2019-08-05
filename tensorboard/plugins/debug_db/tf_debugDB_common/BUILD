@@ -6,7 +6,7 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "tf_debugDB_common",
+    name = "tf_debugdb_common",
     srcs = [
         "annotation.ts",
         "colors.ts",
@@ -26,10 +26,10 @@ tf_web_library(
         "render.ts",
         "scene.ts",
         "template.ts",
-        "tf-debugDB-common.html",
+        "tf-debugdb-common.html",
         "util.ts",
     ],
-    path = "/tf-debugDB-common",
+    path = "/tf-debugdb-common",
     deps = [
         "//tensorboard/components/tf_imports:d3",
         "//tensorboard/components/tf_imports:dagre",
@@ -41,8 +41,8 @@ tf_web_library(
 
 tensorboard_webcomponent_library(
     name = "legacy",
-    srcs = [":tf_debugDB_common"],
-    destdir = "tf-debugDB-common",
+    srcs = [":tf_debugdb_common"],
+    destdir = "tf-debugdb-common",
     deps = [
         "//tensorboard/components/tf_imports_google:lib",
         "//third_party/javascript/polymer/v1/polymer:lib",

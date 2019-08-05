@@ -351,7 +351,7 @@ export function selectChild(
  *
  * @param container D3 selection of the parent.
  * @param renderNode render node of a metanode or series node.
- * @param sceneElement <tf-debugDB-scene> polymer element.
+ * @param sceneElement <tf-debugdb-scene> polymer element.
  * @param sceneClass class attribute of the scene (default='scene').
  */
 export function buildGroup(container,

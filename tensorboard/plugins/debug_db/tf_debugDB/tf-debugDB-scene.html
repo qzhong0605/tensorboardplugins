@@ -16,15 +16,15 @@ limitations under the License.
 -->
 
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../tf-debugDB-common/tf-debugDB-common.html">
+<link rel="import" href="../tf-debugdb-common/tf-debugdb-common.html">
 <link rel="import" href="../tf-dashboard-common/tensorboard-color.html">
-<link rel="import" href="tf-debugDB-minimap.html">
+<link rel="import" href="tf-debugdb-minimap.html">
 
 <!--
   A module that takes a render hierarchy as input and produces an SVG DOM using
   dagre and d3.
 -->
-<dom-module id="tf-debugDB-scene">
+<dom-module id="tf-debugdb-scene">
 <template>
 <style>
 :host {
@@ -646,11 +646,11 @@ limitations under the License.
   <rect fill="white" width="10000" height="10000"></rect>
   <g id="root"></g>
 </svg>
-<tf-debugDB-minimap id="minimap"></tf-debugDB-minimap>
+<tf-debugdb-minimap id="minimap"></tf-debugdb-minimap>
 </template>
 <script>
 Polymer({
-  is: 'tf-debugDB-scene',
+  is: 'tf-debugdb-scene',
   properties: {
     renderHierarchy: Object,
     name: String,
@@ -831,12 +831,12 @@ Polymer({
   /** Main method for building the scene */
   _build: function(renderHierarchy) {
     this.templateIndex = renderHierarchy.hierarchy.getTemplateIndex();
-    tf.graph.util.time('tf-debugDB-scene (layout):', function() {
+    tf.graph.util.time('tf-debugdb-scene (layout):', function() {
       // layout the scene for this meta / series node
       tf.graph.layout.layoutScene(renderHierarchy.root, this);
     }.bind(this));
 
-    tf.graph.util.time('tf-debugDB-scene (build scene):', function() {
+    tf.graph.util.time('tf-debugdb-scene (build scene):', function() {
       tf.graph.scene.buildGroup(d3.select(this.$.root), renderHierarchy.root, this);
       tf.graph.scene.addGraphClickListener(this.$.svg, this);
       // tf.graph.scene.node.traceInputs(renderHierarchy);

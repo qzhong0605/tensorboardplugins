@@ -1,5 +1,5 @@
 # Description:
-# TensorBoard plugin for debugDB
+# TensorBoard plugin for debugdb
 
 package(default_visibility = ["//tensorboard:internal"])
 
@@ -7,7 +7,7 @@ licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
 
-## debugDB Plugin ##
+## debugdb Plugin ##
 py_library(
     name = "debugdb_plugin",
     srcs = ["debugdb_plugin.py"],

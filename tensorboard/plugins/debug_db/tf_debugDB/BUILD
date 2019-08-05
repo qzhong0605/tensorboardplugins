@@ -6,16 +6,16 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "tf_debugDB",
+    name = "tf_debugdb",
     srcs = [
-        "tf-debugDB.html",
-        "tf-debugDB-minimap.html",
-        "tf-debugDB-scene.html",
+        "tf-debugdb.html",
+        "tf-debugdb-minimap.html",
+        "tf-debugdb-scene.html",
     ],
-    path = "/tf-debugDB",
+    path = "/tf-debugdb",
     deps = [
         "//tensorboard/components/tf_dashboard_common",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common",
         "//tensorboard/components/tf_imports:polymer",
         "@org_polymer_iron_flex_layout",
         "@org_polymer_iron_icons",
@@ -33,11 +33,11 @@ tf_web_library(
 
 tensorboard_webcomponent_library(
     name = "legacy",
-    srcs = [":tf_debugDB"],
-    destdir = "tf-debugDB",
+    srcs = [":tf_debugdb"],
+    destdir = "tf-debugdb",
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common:legacy",
         "//third_party/javascript/polymer/v1/iron-flex-layout:lib",
         "//third_party/javascript/polymer/v1/iron-icons:lib",
         "//third_party/javascript/polymer/v1/paper-button:lib",

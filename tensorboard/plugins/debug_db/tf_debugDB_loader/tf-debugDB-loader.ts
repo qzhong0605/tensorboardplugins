@@ -15,7 +15,7 @@ limitations under the License.
 namespace tf.graph.loader {
 
 Polymer({
-  is: 'tf-debugDB-loader',
+  is: 'tf-debugdb-loader',
 
   properties: {
     /**

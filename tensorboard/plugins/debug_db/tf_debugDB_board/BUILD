@@ -6,12 +6,12 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "tf_debugDB_board",
-    srcs = ["tf-debugDB-board.html"],
-    path = "/tf-debugDB-board",
+    name = "tf_debugdb_board",
+    srcs = ["tf-debugdb-board.html"],
+    path = "/tf-debugdb-board",
     deps = [
-        "//tensorboard/plugins/debug_db/tf_debugDB",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugdb",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common",
         "//tensorboard/components/tf_imports:polymer",
         "@org_polymer_paper_progress",
     ],
@@ -19,11 +19,11 @@ tf_web_library(
 
 tensorboard_webcomponent_library(
     name = "legacy",
-    srcs = [":tf_debugDB_board"],
-    destdir = "tf-debugDB-board",
+    srcs = [":tf_debugdb_board"],
+    destdir = "tf-debugdb-board",
     deps = [
-        "//tensorboard/plugins/debug_db/tf_debugDB:legacy",
-        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugdb_common:legacy",
         "//third_party/javascript/polymer/v1/paper-progress:lib",
         "//third_party/javascript/polymer/v1/polymer:lib",
     ],

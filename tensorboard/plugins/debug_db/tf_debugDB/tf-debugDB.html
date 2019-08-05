@@ -21,12 +21,12 @@ limitations under the License.
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../tf-debugDB-common/tf-debugDB-common.html">
-<link rel="import" href="tf-debugDB-scene.html">
+<link rel="import" href="../tf-debugdb-common/tf-debugdb-common.html">
+<link rel="import" href="tf-debugdb-scene.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
 
-<dom-module id="tf-debugDB">
+<dom-module id="tf-debugdb">
 <template>
 <style>
 .container {
@@ -93,7 +93,7 @@ paper-button.cancel-bt{
     <template is="dom-if" if="[[title]]">
       <h2>[[title]]</h2>
     </template>
-    <tf-debugDB-scene id="scene" class="auto"
+    <tf-debugdb-scene id="scene" class="auto"
           render-hierarchy="[[renderHierarchy]]"
           highlighted-node="[[_getVisible(highlightedNode)]]"
           selected-node="{{selectedNode}}"
@@ -104,7 +104,7 @@ paper-button.cancel-bt{
           node-names-to-health-pills="[[nodeNamesToHealthPills]]"
           health-pill-step-index="{{healthPillStepIndex}}"
           handle-edge-selected="[[handleEdgeSelected]]"
-    ></tf-debugDB-scene>
+    ></tf-debugdb-scene>
   </div>
 </div>
 
@@ -131,7 +131,7 @@ paper-button.cancel-bt{
 <script>
 Polymer({
 
-  is: 'tf-debugDB',
+  is: 'tf-debugdb',
 
   properties: {
     _inputlist:{
@@ -275,7 +275,7 @@ Polymer({
    * @param nodeName {string} The name of the node to pan to.
    */
   panToNode(nodeName) {
-    this.$$('tf-debugDB-scene').panToNode(nodeName);
+    this.$$('tf-debugdb-scene').panToNode(nodeName);
   },
   _buildNewRenderHierarchy(graphHierarchy) {
     this._buildRenderHierarchy(graphHierarchy);
@@ -294,7 +294,7 @@ Polymer({
     tf.graph.util.time('new tf.graph.render.Hierarchy', function() {
       if (graphHierarchy.root.type !== tf.graph.NodeType.META) {
         // root must be metanode but sometimes Polymer's dom-if has not
-        // remove tf-debugDB element yet in <tf-node-info>
+        // remove tf-debugdb element yet in <tf-node-info>
         // and thus mistakenly pass non-metanode to this module.
         return;
       }
@@ -304,7 +304,7 @@ Polymer({
       renderGraph.edgeWidthFunction = this.edgeWidthFunction;
 
       // Producing the 'color by' parameters to be consumed
-      // by the tf-debugDB-controls panel. It contains information about the
+      // by the tf-debugdb-controls panel. It contains information about the
       // min and max values and their respective colors, as well as list
       // of devices with their respective colors.
       function getColorParamsFromScale(scale) {
@@ -411,7 +411,7 @@ Polymer({
       params.set('output', JSON.stringify(data.output));
     
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/debug', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/debug', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
@@ -515,7 +515,7 @@ Polymer({
     params.set('method', 'breakpoint');
     params.set('node', event.detail.name)
     new Promise(() => {
-      fetch(tf_backend.getRouter().pluginRoute('graphdebug', '/debug', params)).then((res) => {
+      fetch(tf_backend.getRouter().pluginRoute('debugdb', '/debug', params)).then((res) => {
         // Fetch does not reject for 400+.
         if(res.ok){
           res.text().then(function(msg){
@@ -685,7 +685,7 @@ Polymer({
 
         if (!selectedMarker) {
           // The marker for a selected edge of this size does not exist yet. Create it.
-          const originalMarker = this.$$('tf-debugDB-scene').querySelector('#' + markerId);
+          const originalMarker = this.$$('tf-debugdb-scene').querySelector('#' + markerId);
           selectedMarker = originalMarker.cloneNode(true);
           selectedMarker.setAttribute('id', selectedMarkerId);
           selectedMarker.classList.add('selected-arrowhead');

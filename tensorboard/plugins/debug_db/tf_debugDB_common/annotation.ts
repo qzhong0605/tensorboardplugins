@@ -31,7 +31,7 @@ module tf.graph.scene.annotation {
    * @param container selection of the container.
    * @param annotationData node.{in|out}Annotations
    * @param d node to build group for.
-   * @param sceneElement <tf-debugDB-scene> polymer element.
+   * @param sceneElement <tf-debugdb-scene> polymer element.
    * @return selection of appended objects
    */
   export function buildGroup(
@@ -181,7 +181,7 @@ function addInteraction(selection, d: render.RenderNodeInfo,
  * @param aGroup selection of a 'g.annotation' element.
  * @param d Host node data.
  * @param a annotation node data.
- * @param sceneElement <tf-debugDB-scene> polymer element.
+ * @param sceneElement <tf-debugdb-scene> polymer element.
  */
 function update(aGroup, d: render.RenderNodeInfo, a: render.Annotation,
     sceneElement) {

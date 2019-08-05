@@ -73,7 +73,7 @@ export function getEdgeKey(edgeObj: EdgeData) {
  *
  * @param sceneGroup container
  * @param graph
- * @param sceneElement <tf-debugDB-scene> polymer element.
+ * @param sceneElement <tf-debugdb-scene> polymer element.
  * @return selection of the created nodeGroups
  */
 export function buildGroup(sceneGroup,

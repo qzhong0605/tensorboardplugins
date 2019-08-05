@@ -17,18 +17,18 @@ limitations under the License.
 
 <link rel="import" href="../paper-progress/paper-progress.html">
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../tf-debugDB-common/tf-debugDB-common.html">
-<link rel="import" href="../tf-debugDB/tf-debugDB.html">
+<link rel="import" href="../tf-debugdb-common/tf-debugdb-common.html">
+<link rel="import" href="../tf-debugdb/tf-debugdb.html">
 
 <!--
-Element for putting tf-debugDB
+Element for putting tf-debugdb
 
 Example
 
-  <tf-debugDB-board graph=[[graph]]></tf-debugDB-board>
+  <tf-debugdb-board graph=[[graph]]></tf-debugdb-board>
 
 -->
-<dom-module id="tf-debugDB-board">
+<dom-module id="tf-debugdb-board">
 <template>
 <style>
 ::host {
@@ -131,7 +131,7 @@ paper-progress {
 </template>
 <div class$="[[_getContainerClass(progress)]]">
   <div id="main">
-    <tf-debugDB id="graph"
+    <tf-debugdb id="graph"
               graph-hierarchy="{{graphHierarchy}}"
               basic-graph="[[graph]]"
               hierarchy-params="[[hierarchyParams]]"
@@ -149,7 +149,7 @@ paper-progress {
               health-pill-step-index="[[healthPillStepIndex]]"
               handle-node-selected="[[handleNodeSelected]]"
               handle-edge-selected="[[handleEdgeSelected]]"
-    ></tf-debugDB>
+    ></tf-debugdb>
   </div>
   
   <div class="context-menu"></div>
@@ -159,7 +159,7 @@ paper-progress {
 
 <script>
 Polymer({
-  is: 'tf-debugDB-board',
+  is: 'tf-debugdb-board',
   properties: {
     // Public API.
     graphHierarchy: Object,
