@@ -15,8 +15,8 @@ tf_web_library(
     deps = [
         "//tensorboard/components/tf_dashboard_common",
         "//tensorboard/components/tf_imports:polymer",
-        "//tensorboard/plugins/graph/tf_graph_common",
-        "//tensorboard/plugins/graph/tf_graph_node_search",
+        "//tensorboard/plugins/convert/tf_graph_common",
+        "//tensorboard/plugins/convert/tf_graph_node_search",
         "@org_polymer_iron_icon",
         "@org_polymer_iron_ajax",
         "@org_polymer_paper_button",
@@ -37,8 +37,8 @@ tensorboard_webcomponent_library(
     destdir = "tf-graph-controls",
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
-        "//tensorboard/plugins/graph/tf_graph_common:legacy",
-        "//tensorboard/plugins/graph/tf_graph_node_search:legacy",
+        "//tensorboard/plugins/convert/tf_graph_common:legacy",
+        "//tensorboard/plugins/convert/tf_graph_node_search:legacy",
         "//third_party/javascript/polymer/v1/paper-button:lib",
         "//third_party/javascript/polymer/v1/paper-dropdown-menu:lib",
         "//third_party/javascript/polymer/v1/paper-icon-button:lib",
