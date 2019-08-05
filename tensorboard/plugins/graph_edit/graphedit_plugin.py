@@ -98,6 +98,10 @@ class GraphEditPlugin(base_plugin.TBPlugin):
       model_type = request.args.get("source_type")
       file_type = request.args.get("file_type")
       model_file = request.args.get('model_file')
+      if not os.path.exists(model_file):
+          # send a response to frontend and report file not existing
+          pass
+
       if model_type == "torch":
           pass
       elif model_type == "caffe2":
@@ -115,10 +119,6 @@ class GraphEditPlugin(base_plugin.TBPlugin):
           pass
       else:
           # send a response to frontend and report model type error
-          pass
-
-      if not os.path.exists(model_file):
-          # send a response to frontend and report file not existing
           pass
 
       self._tb_graph.ConvertNet()

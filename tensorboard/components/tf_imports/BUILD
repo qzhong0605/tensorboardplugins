@@ -6,16 +6,6 @@ load("//tensorboard/defs:web.bzl", "tf_web_library")
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "katex",
-    srcs = [
-        "katex.html",
-        "@org_katex//:katex.min.js",
-    ],
-    path = "/tf-imports",
-    visibility = ["//visibility:public"],
-)
-
-tf_web_library(
     name = "webcomponentsjs",
     srcs = ["@org_definitelytyped//:webcomponents.js.d.ts"],
     path = "/webcomponentsjs",
@@ -116,6 +106,15 @@ tf_web_library(
         "d3.d.ts",
         "d3.html",
         "@org_d3js//:d3.min.js",
+    ],
+    path = "/tf-imports",
+    visibility = ["//visibility:public"],
+)
+
+tf_web_library(
+    name = "loaderjs",
+    srcs = [
+        "loaderjs.html",
     ],
     path = "/tf-imports",
     visibility = ["//visibility:public"],
