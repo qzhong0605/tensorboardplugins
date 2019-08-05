@@ -58,6 +58,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
     Args:
       context: A base_plugin.TBContext instance.
     """
+    logger.warn('convert')
     self._multiplexer = context.multiplexer
 
   def get_plugin_apps(self):
@@ -73,7 +74,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
 
   def frontend_metadata(self):
     return super(ConvertPlugin, self).frontend_metadata()._replace(
-        element_name='tf-graph-dashboard',
+        element_name='tf-convert-dashboard',
         # TODO(@chihuahua): Reconcile this setting with Health Pills.
         disable_reload=True,
     )

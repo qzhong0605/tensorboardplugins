@@ -75,7 +75,6 @@ class GraphEditPlugin(base_plugin.TBPlugin):
     Args:
       context: A base_plugin.TBContext instance.
     """
-    logger.warn('__init__')
     self._multiplexer = context.multiplexer
     self._tb_graph = None
 
