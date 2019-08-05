@@ -77,7 +77,7 @@ class DebugDBPlugin(base_plugin.TBPlugin):
 
   def is_active(self):
     """The debugdb plugin is active iff any run has a graph."""
-    return bool(self._multiplexer and self.info_impl())
+    return True
 
   def frontend_metadata(self):
     return super(DebugDBPlugin, self).frontend_metadata()._replace(
