@@ -18,11 +18,10 @@ limitations under the License.
 <link rel="import" href="../paper-progress/paper-progress.html">
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../tf-graph-common/tf-graph-common.html">
-<link rel="import" href="../tf-graph-info/tf-graph-info.html">
 <link rel="import" href="../tf-graph/tf-graph.html">
 
 <!--
-Element for putting tf-graph and tf-graph-info side by side.
+Element for putting tf-graph
 
 Example
 
@@ -153,28 +152,6 @@ paper-progress {
               handle-edge-selected="[[handleEdgeSelected]]"
     ></tf-graph>
   </div>
-  <!-- <div id="info">
-    <tf-graph-info id="graph-info"
-              title="selected"
-              graph-hierarchy="[[graphHierarchy]]"
-              hierarchy-params="[[hierarchyParams]]"
-              render-hierarchy="[[renderHierarchy]]"
-              graph="[[graph]]"
-              selected-node="{{selectedNode}}"
-              selected-node-include="{{_selectedNodeInclude}}"
-              highlighted-node="{{_highlightedNode}}"
-              color-by="[[colorBy]]"
-              color-by-params="[[colorByParams]]"
-              debugger-data-enabled="[[debuggerDataEnabled]]"
-              are-health-pills-loading="[[areHealthPillsLoading]]"
-              debugger-numeric-alerts="[[debuggerNumericAlerts]]"
-              node-names-to-health-pills="[[nodeNamesToHealthPills]]"
-              all-steps-mode-enabled="{{allStepsModeEnabled}}"
-              specific-health-pill-step="{{specificHealthPillStep}}"
-              health-pill-step-index="{{healthPillStepIndex}}"
-              compat-node-title="[[compatNodeTitle]]"
-    ></tf-graph-info>
-  </div> -->
   <div class="context-menu"></div>
 </div>
 </template>

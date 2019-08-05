@@ -96,7 +96,7 @@ Polymer({
             String(selectionType === tf.graph.SelectionType.CONCEPTUAL_GRAPH));
         if (tag) params.set('tag', tag);
         const graphPath =
-            tf_backend.getRouter().pluginRoute('graphconvert', '/graph', params);
+            tf_backend.getRouter().pluginRoute('convert', '/graph', params);
         return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
           this._graphRunTag = {run, tag};
         })
@@ -125,7 +125,7 @@ Polymer({
         params.set('tag', tag);
         params.set('run', run);
         const metadataPath = tf_backend.getRouter().pluginRoute(
-            'graphconvert', '/run_metadata', params);
+            'convert', '/run_metadata', params);
         return maybeFetchGraphPromise
             .then(() => this._readAndParseMetadata(metadataPath));
       }
