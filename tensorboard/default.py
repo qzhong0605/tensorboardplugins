@@ -40,7 +40,6 @@ from tensorboard.plugins.beholder import beholder_plugin_loader
 from tensorboard.plugins.core import core_plugin
 from tensorboard.plugins.custom_scalar import custom_scalars_plugin
 from tensorboard.plugins.debugger import debugger_plugin_loader
-from tensorboard.plugins.distribution import distributions_plugin
 from tensorboard.plugins.graph_edit import graphedit_plugin
 from tensorboard.plugins.debug_db import debugdb_plugin
 from tensorboard.plugins.convert import convert_plugin
@@ -73,7 +72,6 @@ _PLUGINS = [
     debugdb_plugin.DebugDBPlugin,
     convert_plugin.ConvertPlugin,
     inference_plugin.InferencePlugin,
-    distributions_plugin.DistributionsPlugin,
     histograms_plugin.HistogramsPlugin,
     text_plugin.TextPlugin,
     pr_curves_plugin.PrCurvesPlugin,
