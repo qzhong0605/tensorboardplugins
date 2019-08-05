@@ -10,7 +10,7 @@ exports_files(["LICENSE"])
 ## Convert Plugin ##
 py_library(
     name = "convert_plugin",
-    srcs = ["graphs_plugin.py"],
+    srcs = ["convert_plugin.py"],
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [

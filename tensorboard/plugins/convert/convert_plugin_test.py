@@ -29,7 +29,7 @@ from google.protobuf import text_format
 from tensorboard.backend.event_processing import plugin_event_multiplexer as event_multiplexer  # pylint: disable=line-too-long
 from tensorboard.compat.proto import config_pb2
 from tensorboard.plugins import base_plugin
-from tensorboard.plugins.graph import graphs_plugin
+from tensorboard.plugins.convert import convert_plugin
 from tensorboard.util import test_util
 
 tf.compat.v1.disable_v2_behavior()
@@ -75,7 +75,7 @@ class GraphsPluginBaseTest(object):
     multiplexer.AddRunsFromDirectory(self.logdir)
     multiplexer.Reload()
     context = base_plugin.TBContext(logdir=self.logdir, multiplexer=multiplexer)
-    self.plugin = graphs_plugin.GraphsPlugin(context)
+    self.plugin = convert_plugin.ConvertPlugin(context)
 
   def testRoutesProvided(self):
     """Tests that the plugin offers the correct routes."""

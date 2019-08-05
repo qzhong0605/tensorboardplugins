@@ -28,8 +28,8 @@ from tensorboard.backend.event_processing import plugin_event_accumulator as eve
 from tensorboard.compat.proto import config_pb2
 from tensorboard.compat.proto import graph_pb2
 from tensorboard.plugins import base_plugin
-from tensorboard.plugins.graph import graph_util
-from tensorboard.plugins.graph import keras_util
+from tensorboard.plugins.convert import graph_util
+from tensorboard.plugins.convert import keras_util
 from tensorboard.util import tb_logging
 
 logger = tb_logging.get_logger()
@@ -47,7 +47,7 @@ _PLUGIN_NAME_RUN_METADATA_WITH_GRAPH = 'graph_run_metadata_graph'
 _PLUGIN_NAME_KERAS_MODEL = 'graph_keras_model'
 
 
-class GraphsPlugin(base_plugin.TBPlugin):
+class ConvertPlugin(base_plugin.TBPlugin):
   """Graphs Plugin for TensorBoard."""
 
   plugin_name = _PLUGIN_PREFIX_ROUTE
