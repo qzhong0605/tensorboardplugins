@@ -179,32 +179,6 @@ paper-dialog {
 </dom-module>
 
 <script>
-/**
- * The (string) name for the run of the selected dataset in the graph dashboard.
- */
-const RUN_STORAGE_KEY = 'run';
-
-/**
- * TODO(stephanwlee): Convert this to proper type when converting to TypeScript.
- * @typedef {{
- *   tag: ?string,
- *   displayName: string,
- *   conceptualGraph: boolean,
- *   opGraph: boolean,
- *   profile: boolean,
- * }}
- */
- const TagItem = {};
-
-/**
- * TODO(stephanwlee): Convert this to proper type when converting to TypeScript.
- * @typedef {{
- *   name: string,
- *   tags: !Array<!TagItem>,
- * }}
- */
-const RunItem = {};
-
 Polymer({
   is: 'tf-graph-dashboard',
   properties: {
@@ -280,7 +254,7 @@ Polymer({
       type: String,
       notify: true,
       value: tf_storage.getStringInitializer(
-          RUN_STORAGE_KEY, {
+        'run', {
             defaultValue: '',
             useLocalStorage: false,
           }),
@@ -348,7 +322,7 @@ Polymer({
     this._maybeFetchHealthPills();
   },
   _runObserver: tf_storage.getStringObserver(
-      RUN_STORAGE_KEY, {
+    'run', {
         defaultValue: '',
         polymerProperty: 'run',
         useLocalStorage: false,

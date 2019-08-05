@@ -70,7 +70,6 @@ tf_web_library(
         "//tensorboard/plugins/debugger/tf_debugger_dashboard",
         "//tensorboard/plugins/distribution/tf_distribution_dashboard",
         "//tensorboard/plugins/graph_edit/tf_graph_dashboard",
-        "//tensorboard/plugins/convert/tf_graph_dashboard",
         "//tensorboard/plugins/histogram/tf_histogram_dashboard",
         "//tensorboard/plugins/hparams/tf_hparams_dashboard",
         "//tensorboard/plugins/image/tf_image_dashboard",
