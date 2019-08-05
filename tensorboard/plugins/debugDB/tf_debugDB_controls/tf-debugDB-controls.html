@@ -1,0 +1,243 @@
+<!--
+@license
+Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+
+<dom-module id="tf-debugDB-controls">
+<template>
+<style>
+.allcontrols {
+  padding: 0 20px 20px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/** Otherwise, polymer UI controls appear atop node search. */
+paper-input {
+  --paper-input-container-focus-color: #f57c00;
+  width: 100%
+}
+
+paper-button.half{
+  width: 45%;
+  background-color: #f57c00 !important;
+  font: 900 !important;
+  color: white !important;
+  margin-top: 10px;
+}
+
+paper-button.full{
+  width: 100%;
+  background-color: #f57c00 !important;
+  font: 900 !important;
+  color: white !important;
+  margin-top: 10px;
+}
+
+paper-dropdown-menu {
+  flex-grow: 1;
+  width: 100%;
+}
+
+paper-toggle-button.title {
+  --paper-toggle-button-checked-bar-color:  #f57c00;
+  --paper-toggle-button-checked-button-color:  #f57c00;
+  --paper-toggle-button-checked-ink-color: #f57c00;
+  --paper-toggle-button-unchecked-bar-color:  #f57c00;
+  --paper-toggle-button-unchecked-button-color:  #f57c00;
+  --paper-toggle-button-unchecked-ink-color: #f57c00;
+}
+
+.title {
+  font-size: 16px;
+  margin: 8px 5px 8px 0;
+  color: black;
+}
+
+paper-dropdown-menu {
+  --paper-input-container-focus-color: #f57c00;
+  --paper-input-container-input: {
+    font-size: large !important;
+    font-weight: 900 !important;
+  }
+}
+
+.half-input {
+  width: 95%;
+}
+
+.list-label {
+  margin-top: 10px;
+}
+
+paper-button.ok-bt{
+  font: 900 !important;
+  height: 30px;
+  color: #f57c00;
+  margin-bottom: 10px;
+  margin-top: 5px;
+  width: 25px;
+  float: right;
+}
+
+paper-button.cancel-bt{
+  font: 900 !important;
+  height: 30px;
+  color: #f57c00;
+  float: right;
+  width: 50px;
+  margin-right: 20px;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+</style>
+<custom-style>
+    <style is="custom-style">
+      .flex {
+        @apply --layout-horizontal;
+      }
+    </style>
+  </custom-style>
+<svg width="0" height="0">
+  <defs>
+    <g id="legend-rect">
+      <rect x="1" y="1" stroke-width="2px" height="14" width="35" rx="5" ry="5"></rect>
+    </g>
+    <g id="grey-rect">
+       <use xmlns:xlink="http://www.w3.org/1999/xlink"
+            xlink:href="#legend-rect"/>
+     </g>
+     <g id="faded-rect">
+       <use xmlns:xlink="http://www.w3.org/1999/xlink"
+            xlink:href="#legend-rect"/>
+     </g>
+     <g id="unfilled-rect">
+       <use xmlns:xlink="http://www.w3.org/1999/xlink"
+            xlink:href="#legend-rect"/>
+     </g>
+  </defs>
+</svg>
+
+<div class="allcontrols">
+  <div class="" style="margin-top: 10px">
+    <paper-toggle-button noink class="title" checked="{{loadType}}">[[loadTypeText]]</paper-toggle-button>
+  </div>
+
+    <div id="newPage">
+      <div>
+          <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
+            <paper-menu class="dropdown-content" selected="{{_srcMode}}">
+              <template is="dom-repeat" items="{{_srcTypes}}">
+                  <paper-item>[[item]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+        <paper-input class="path" label="File Type" id="fileType"></paper-input>
+        <div id="not-caffe2">
+          <paper-input class="path" label="Source Path" id="srcPath"></paper-input>
+        </div>
+        <div id="is-caffe2">
+          <paper-input class="path" label="Predict Net" id="predictNet"></paper-input>
+          <paper-input class="path" label="Init Net" id="initNet"></paper-input>
+        </div>
+      </div>
+    
+      <paper-input class="path" label="Batch Size" id="batchSize"></paper-input>
+      <paper-input class="path" label="Memory Size" id="memorySize"></paper-input>
+      <paper-input class="path" label="Optimization Method" id="optimizationMethod"></paper-input>
+      <paper-input class="path" label="Learning Rate" id="learningRate"></paper-input>
+      <paper-input class="path" label="Total Iteration" id="totalIteration"></paper-input>
+
+      <paper-dropdown-menu label="Device Type" no-animations noink horizontal-align="left" class="device_type">
+        <paper-menu class="dropdown-content" selected="{{selctedDeviceType}}">
+          <template is="dom-repeat" items="{{_deviceTypes}}">
+              <paper-item>[[item]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
+      <div class="machineList" id="machineList"></div>
+      <div class="container flex">
+        <div>
+          <paper-icon-button icon="add" on-click="addMachine" style="margin-left: -10px;"></paper-icon-button>
+        </div>
+        <div class="list-label">Add new Machine</div>
+      </div>
+
+      <!-- <div class="container flex">
+        <div><paper-icon-button icon='remove' on-tap='removeMachine' style='margin-left: -10px;margin-top: 20px;'></paper-icon-button></div>
+        <div><paper-input class='half-input' id='machine' label='Machine' value=''></paper-input></div>
+        <div><paper-input class='half-input' id='device_id' label='Device Id' value=''></paper-input></div>
+      </div> -->
+      <paper-button raised noink id="start" class="half" on-click="newStart" style="float: left">START</paper-button>
+      <template is="dom-if" if="{{!newIsStop}}">
+          <paper-button raised noink id="stop" class="half" on-click="newStop" style="float: right">STOP</paper-button>
+      </template>
+      <template is="dom-if" if="{{newIsStop}}">
+        <paper-button raised noink id="continue" class="half" onclick="newContinue.open()" style="float: right">CONTINUE</paper-button>
+      </template>
+    </div>
+
+  <div id="attachPage" style="display: none">
+    <paper-input id="network_identification" label="Network Identification" value=""></paper-input>
+    <paper-button raised noink id="attach" class="full" on-click="attach">ATTACH</paper-button>
+    <br>
+    <paper-dropdown-menu label="Attach List" no-animations noink horizontal-align="left" class="attach-list">
+      <paper-menu class="dropdown-content" selected="{{selectedIdentification}}">
+        <template is="dom-repeat" items="{{attachList}}">
+            <paper-item>[[item]]</paper-item>
+        </template>
+      </paper-menu>
+    </paper-dropdown-menu>
+    <div id="attachInfo" style="display: none">
+      <paper-input disabled class="path" label="Model Type" id="model_type"></paper-input>
+      <template is="dom-repeat" items="{{machineidList}}">
+          <paper-input disabled class="path" label="Machine" id="" value="[[item.m]]"></paper-input>
+          <paper-input disabled class="path" label="Id" id="" value="[[item.id]]"></paper-input>
+          <paper-input disabled class="path" label="Batch Size" id="" value="[[item.batch_size]]"></paper-input>
+          <paper-input disabled class="path" label="Memory Size" id="" value="[[item.memory_size]]"></paper-input>
+      </template>
+    </div>
+    <paper-button raised noink id="stop" class="half" on-click="attachStop" style="float: left">STOP</paper-button>
+    <paper-button raised noink id="continue" class="half" onclick="attachContinue.open()" style="float: right">CONTINUE</paper-button>
+  </div>
+
+  <paper-dialog id="newContinue">
+    <paper-input label="Iteration Number" value="" id="iteration_number" style="width: 80%;"></paper-input>
+    <paper-button  noink class="cancel-bt" id="cancel-bt" dialog-dismiss>CANCEL</paper-button>
+    <paper-button  noink class="ok-bt" on-click="newContinue">OK</paper-button>
+  </paper-dialog>
+
+  <paper-dialog id="attachContinue">
+    <paper-input label="Iteration Number" value="" id="iteration_number_2" style="width: 80%;"></paper-input>
+    <paper-button  noink class="cancel-bt" id="cancel-bt" dialog-dismiss>CANCEL</paper-button>
+    <paper-button  noink class="ok-bt" on-click="attachContinue">OK</paper-button>
+  </paper-dialog>
+
+</div>
+
+</template>
+</dom-module>
+
+<script src="tf-debugDB-controls.js"></script>
