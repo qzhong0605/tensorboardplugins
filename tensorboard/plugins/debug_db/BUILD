@@ -9,8 +9,8 @@ exports_files(["LICENSE"])
 
 ## debugDB Plugin ##
 py_library(
-    name = "debugDB_plugin",
-    srcs = ["debugDB_plugin.py"],
+    name = "debugdb_plugin",
+    srcs = ["debugdb_plugin.py"],
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [

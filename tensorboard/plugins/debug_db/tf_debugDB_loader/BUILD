@@ -13,7 +13,7 @@ tf_web_library(
     ],
     path = "/tf-debugDB-loader",
     deps = [
-        "//tensorboard/plugins/debugDB/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugDB_common",
         "//tensorboard/components/tf_imports:polymer",
     ],
 )
@@ -23,7 +23,7 @@ tensorboard_webcomponent_library(
     srcs = [":tf_debugDB_loader"],
     destdir = "tf-debugDB-loader",
     deps = [
-        "//tensorboard/plugins/debugDB/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
         "//third_party/javascript/polymer/v1/polymer:lib",
     ],
 )
@@ -37,8 +37,8 @@ tf_web_library(
     path = "/tf-debugDB-loader",
     deps = [
         "//tensorboard/components/tf_backend",
-        "//tensorboard/plugins/debugDB/tf_debugDB_common",
-        "//tensorboard/plugins/debugDB/tf_debugDB_controls",
+        "//tensorboard/plugins/debug_db/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugDB_controls",
         "//tensorboard/components/tf_imports:polymer",
     ],
 )
@@ -49,8 +49,8 @@ tensorboard_webcomponent_library(
     destdir = "tf-debugDB-loader",
     deps = [
         "//tensorboard/components/tf_backend:legacy",
-        "//tensorboard/plugins/debugDB/tf_debugDB_common:legacy",
-        "//tensorboard/plugins/debugDB/tf_debugDB_controls:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugDB_controls:legacy",
         "//third_party/javascript/polymer/v1/polymer:lib",
     ],
 )

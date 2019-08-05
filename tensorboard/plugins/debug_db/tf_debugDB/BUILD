@@ -15,7 +15,7 @@ tf_web_library(
     path = "/tf-debugDB",
     deps = [
         "//tensorboard/components/tf_dashboard_common",
-        "//tensorboard/plugins/debugDB/tf_debugDB_common",
+        "//tensorboard/plugins/debug_db/tf_debugDB_common",
         "//tensorboard/components/tf_imports:polymer",
         "@org_polymer_iron_flex_layout",
         "@org_polymer_iron_icons",
@@ -37,7 +37,7 @@ tensorboard_webcomponent_library(
     destdir = "tf-debugDB",
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
-        "//tensorboard/plugins/debugDB/tf_debugDB_common:legacy",
+        "//tensorboard/plugins/debug_db/tf_debugDB_common:legacy",
         "//third_party/javascript/polymer/v1/iron-flex-layout:lib",
         "//third_party/javascript/polymer/v1/iron-icons:lib",
         "//third_party/javascript/polymer/v1/paper-button:lib",

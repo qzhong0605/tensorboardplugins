@@ -28,8 +28,8 @@ from tensorboard.backend.event_processing import plugin_event_accumulator as eve
 from tensorboard.compat.proto import config_pb2
 from tensorboard.compat.proto import graph_pb2
 from tensorboard.plugins import base_plugin
-from tensorboard.plugins.graph import graph_util
-from tensorboard.plugins.graph import keras_util
+from tensorboard.plugins.debug_db import graph_util
+from tensorboard.plugins.debug_db import keras_util
 from tensorboard.util import tb_logging
 
 logger = tb_logging.get_logger()
@@ -47,7 +47,7 @@ _PLUGIN_NAME_RUN_METADATA_WITH_GRAPH = 'graph_run_metadata_graph'
 _PLUGIN_NAME_KERAS_MODEL = 'graph_keras_model'
 
 
-class debugDBPlugin(base_plugin.TBPlugin):
+class DebugDBPlugin(base_plugin.TBPlugin):
   """debugDB Plugin for TensorBoard."""
 
   plugin_name = _PLUGIN_PREFIX_ROUTE
@@ -80,7 +80,7 @@ class debugDBPlugin(base_plugin.TBPlugin):
     return bool(self._multiplexer and self.info_impl())
 
   def frontend_metadata(self):
-    return super(debugDBPlugin, self).frontend_metadata()._replace(
+    return super(DebugDBPlugin, self).frontend_metadata()._replace(
         element_name='tf-debugDB-dashboard',
         # TODO(@chihuahua): Reconcile this setting with Health Pills.
         disable_reload=True,
@@ -295,21 +295,21 @@ class debugDBPlugin(base_plugin.TBPlugin):
   def new_stop(self, request):
     logger.warn('stop')
     return http_util.Respond(request, 'ok', 'text/plain')
-  
+
   @wrappers.Request.application
   def new_continue(self, request):
     iteration_number = request.args.get('iteration_number')
     logger.warn(iteration_number)
     return http_util.Respond(request, 'ok', 'text/plain')
 
-  @wrappers.Request.application  
+  @wrappers.Request.application
   def attach(self, request):
     network_identification = request.args.get('network_identification')
     logger.warn(network_identification)
     respond = json.dumps({'model_type':'model','list':[{'m':'cpu','id':1,'batch_size':12,'memory_size':8}]})
     return http_util.Respond(request, respond, 'application/json')
 
-  @wrappers.Request.application  
+  @wrappers.Request.application
   def attach_stop(self, request):
     identification = request.args.get('identification')
     logger.warn(identification)
