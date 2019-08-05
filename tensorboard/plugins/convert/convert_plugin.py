@@ -34,7 +34,7 @@ from tensorboard.util import tb_logging
 
 logger = tb_logging.get_logger()
 
-_PLUGIN_PREFIX_ROUTE = 'graphs'
+_PLUGIN_PREFIX_ROUTE = 'graphconvert'
 
 # The Summary API is implemented in TensorFlow because it uses TensorFlow internal APIs.
 # As a result, this SummaryMetadata is a bit unconventional and uses non-public

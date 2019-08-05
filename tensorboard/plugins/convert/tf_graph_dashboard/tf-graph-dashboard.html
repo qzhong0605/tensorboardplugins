@@ -355,7 +355,7 @@ Polymer({
       }),
   _fetchDataset() {
     return this._requestManager.request(
-        tf_backend.getRouter().pluginRoute('graphs', '/info'));
+        tf_backend.getRouter().pluginRoute('graphconvert', '/info'));
   },
   /*
    * See also _maybeFetchHealthPills, _initiateNetworkRequestForHealthPills.
@@ -382,7 +382,7 @@ Polymer({
   },
   _graphUrl(run, limitAttrSize, largeAttrsKey) {
     return tf_backend.getRouter().pluginRoute(
-        'graphs',
+        'graphconvert',
         '/graph',
         new URLSearchParams({
           'run': run,
