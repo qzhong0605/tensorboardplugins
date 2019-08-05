@@ -396,7 +396,7 @@ class GraphEditPlugin(base_plugin.TBPlugin):
   def op_default(self, request):
     output = request.args.get('output')
     logger.warn(output)
-    # default 属性默认值信息
+    # default attribute value
     default = [{'name':'kernel','type':'a','default':'0'},{'name':'stride','type':'b','default':'0'}]
     data = json.dumps(default)
     return http_util.Respond(request, data, 'application/json')

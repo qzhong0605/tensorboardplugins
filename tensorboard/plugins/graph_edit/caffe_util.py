@@ -997,6 +997,7 @@ def _shuffle_channel_param_to_attr(node, caffe_layer):
 
 class CaffeGraph(tbgraph_base.TBGraph):
     def __init__(self, caffemodel, model_type='txt'):
+        super(CaffeGraph, self).__init__()
         self._caffe_model = caffe_pb2.NetParameter()
         if model_type == "txt":
             with open(caffemodel, "r") as caffe_stream:
