@@ -36,3 +36,10 @@ torch >= 1.0.1
 future 
 tensorflow >=1.12
 ```
+
+# Plugins 
+
+- GraphEdit: A web-based graph editor for different deep learning framework, including caffe/caffe2, pytorch, onnx and tensorflow 
+- Convert: A tool for transformation among different deep learning frameworks  
+- DebugDB: A grapg debug tool for tracing the training process of different deep learning frameworks  
+- Inference: A tool for checking a pretrained deep learning model, including features, data and model comparison
