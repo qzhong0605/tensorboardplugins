@@ -44,6 +44,7 @@ from tensorboard.plugins.distribution import distributions_plugin
 from tensorboard.plugins.graph_edit import graphedit_plugin
 from tensorboard.plugins.debug_db import debugdb_plugin
 from tensorboard.plugins.convert import convert_plugin
+from tensorboard.plugins.inference import inference_plugin
 from tensorboard.plugins.histogram import histograms_plugin
 from tensorboard.plugins.hparams import hparams_plugin_loader
 from tensorboard.plugins.image import images_plugin
@@ -71,6 +72,7 @@ _PLUGINS = [
     graphedit_plugin.GraphEditPlugin,
     debugdb_plugin.DebugDBPlugin,
     convert_plugin.ConvertPlugin,
+    inference_plugin.InferencePlugin,
     distributions_plugin.DistributionsPlugin,
     histograms_plugin.HistogramsPlugin,
     text_plugin.TextPlugin,

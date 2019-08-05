@@ -22,6 +22,7 @@ py_library(
         "//tensorboard/compat:tensorflow",
         "//tensorboard/plugins:base_plugin",
         "//tensorboard/plugins/inference:inference_loader",
+        "//tensorboard/plugins/inference:summary",
         "@org_pocoo_werkzeug",
         "@org_pythonhosted_six",
     ],
