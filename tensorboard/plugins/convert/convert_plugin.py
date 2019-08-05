@@ -72,7 +72,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
     return True
 
   def frontend_metadata(self):
-    return super(GraphsPlugin, self).frontend_metadata()._replace(
+    return super(ConvertPlugin, self).frontend_metadata()._replace(
         element_name='tf-graph-dashboard',
         # TODO(@chihuahua): Reconcile this setting with Health Pills.
         disable_reload=True,
