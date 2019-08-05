@@ -36,6 +36,7 @@ torch >= 1.0.1
 future 
 tensorflow >=1.12
 onnx
+requests
 ```
 
 # Plugins 
