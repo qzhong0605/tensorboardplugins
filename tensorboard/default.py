@@ -41,7 +41,7 @@ from tensorboard.plugins.core import core_plugin
 from tensorboard.plugins.custom_scalar import custom_scalars_plugin
 from tensorboard.plugins.debugger import debugger_plugin_loader
 from tensorboard.plugins.distribution import distributions_plugin
-from tensorboard.plugins.graph_edit import graphs_plugin
+from tensorboard.plugins.graph_edit import graphedit_plugin
 from tensorboard.plugins.convert import convert_plugin
 from tensorboard.plugins.histogram import histograms_plugin
 from tensorboard.plugins.hparams import hparams_plugin_loader
@@ -67,7 +67,7 @@ _PLUGINS = [
     images_plugin.ImagesPlugin,
     audio_plugin.AudioPlugin,
     debugger_plugin_loader.DebuggerPluginLoader(),
-    graphs_plugin.GraphEditPlugin,
+    graphedit_plugin.GraphEditPlugin,
     convert_plugin.ConvertPlugin,
     distributions_plugin.DistributionsPlugin,
     histograms_plugin.HistogramsPlugin,
