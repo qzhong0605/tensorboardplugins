@@ -35,6 +35,7 @@ In order to run TensorBoard, you must install the following package:
 torch >= 1.0.1
 future 
 tensorflow >=1.12
+onnx
 ```
 
 # Plugins 
