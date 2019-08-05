@@ -1,0 +1,296 @@
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js"></script> -->
+
+<dom-module id="tf-graph-edit-add-op">
+<template>
+<style>
+  paper-input {
+    --paper-input-container-focus-color: #f57c00;
+  }
+
+  paper-dropdown-menu.op-type {
+    width: 100%;
+    --paper-input-container-focus-color: gray;
+    --paper-input-container-input: {
+      font-size: large !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  paper-input.op-type {
+    width: 100%;
+    --paper-input-container-input: {
+      font-size: large !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  paper-input.node-name {
+    width: 100%;
+    --paper-input-container-input: {
+      font-size: large !important;
+    }
+  }
+  .sub-list-group {
+    font-size: 12pt;
+    padding-bottom: 8px;
+    width: 100%;
+  }
+
+  .sub-list {
+    max-height: 300px;
+    overflow-y: scroll;
+  }
+
+  paper-button.full-width-bt{
+    width: 100%;
+    background-color: #f57c00 !important;
+    font: 900 !important;
+    color: white !important;
+  }
+
+  .intro {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+
+</style>
+<custom-style>
+  <style is="custom-style">
+    .flex-horizontal {
+      @apply --layout-horizontal;
+    }
+  </style>
+</custom-style>
+
+
+<div class="control-holder">
+  <div class="container flex-horizontal">
+    <div>
+      <paper-input id="op-type" class="op-type" no-label-float value="[[op]]" on-value-changed="_onSearchTermChanged" ></paper-input>
+    </div>
+    <div>
+      <paper-menu-button slot="suffix">
+        <paper-icon-button icon="search" class="dropdown-trigger" id="search"></paper-icon-button>
+        <paper-menu class="dropdown-content" selected="{{_selectedOp}}">
+            <template is="dom-repeat" items="{{subOpTypes}}">
+                <paper-item>[[item]]</paper-item>
+            </template>
+        </paper-menu>
+      </paper-menu-button>
+    </div>
+  </div>
+</div>
+<div class="control-holder">
+  <div class="container flex-horizontal">
+    <div>
+      <paper-input id="node-name" class="node-name" label="Node Name" value="{{nodeName}}"></paper-input>
+    </div>
+    <div>
+      <paper-icon-button icon="done" class="dropdown-trigger" id="node-name-done" style="margin-top: 20px;" on-click='_getDefault'></paper-icon-button>
+    </div>
+  </div>
+</div>
+<!-- <div class="container flex-horizontal">
+  <div>
+    <paper-input class="node-name" label="Node Name" value="{{nodeName}}"></paper-input> 
+  </div>
+  <div>
+      <paper-icon-button icon="done" class="" id="node-name-done"></paper-icon-button>
+  </div>
+</div> -->
+<div class="sub-list-group attributes">
+    <template is="dom-repeat" items="{{_selectedOpAttributes}}">
+        <paper-input class="" label="[[item]]" id="[[item]]" value=""></paper-input> 
+    </template>
+</div>
+<paper-button raised noink class="full-width-bt" on-click="newOpNode">CREATE</paper-button>
+<div id="intro" class="intro"></div>
+
+
+</template>
+</dom-module>
+<script>
+(function(){
+
+Polymer({
+  is: 'tf-graph-edit-add-op',
+  properties: {
+    nodeName: String,
+    op: String,
+    opTypes: {
+      type: Array,
+      value: [],
+    },
+    subOpTypes: {
+      type: Array,
+      value: [],
+    },
+    opAttributes: {
+      type: Array,
+      value: [],
+    },
+    _selectedOp: {
+      type: Number,
+      value: -1,
+      observer: '_OpChange',
+    },
+    _selectedOpAttributes: {
+      type: Array,
+      computed: '_getAttributes(_selectedOp)',
+    },
+  },
+  ready: function() {
+    this._loadOpTypes()
+  },
+  _loadOpTypes: function(){
+    this.opTypes =["Conv","BatchNormalization","ReluN","Relu","FC",
+        "MaxPooling","AveragePooling","Reshape","MatMul","Concat",
+        "Pad","PRelu","RowMul","Resize","Squeeze",
+        "TopK","Transpose","Sub","Sum","Softmax",
+        "Split","ChannelShuﬄe","Dropout","LRN","Sigmoid"
+    ]
+
+    this.opAttributes = [
+      ['kernel','stride','pad','dilation','group','order'],
+      ['is_test','momentum','epsilon','order','num_batches'],
+      ['n'],
+      [],
+      ['axis','axis_w'],
+      ['kernel','stride','pad','dilation','order','global_pooling'],
+      ['kernel','stride','pad','dilation','order','global_pooling'],
+      ['shape'],
+      ['axis_a','axis_b','trans_a','trans_b'],
+      ['axis','order'],
+      ['mode','value','pads'],
+      ['order'],
+      [],
+      ['mode'],
+      ['axes'],
+      ['axis','k'],
+      ['axes'],
+      [],
+      [],
+      ['axis'],
+      ['axis','split'],
+      ['group','order'],
+      ['radio','is_test'],
+      ['size','alpha','beta','bias'],
+      [],
+    ]
+    this.op = 'Conv'
+    this.subOpTypes = ['Conv']
+    this._selectedOp = 0
+  },
+  _getDefault:function(){
+    const params = new URLSearchParams();
+    params.set('output', this.nodeName);
+    
+    new Promise(() => {
+      fetch(tf_backend.getRouter().pluginRoute('graphedit', '/op_default', params)).then((res) => {
+        // Fetch does not reject for 400+.
+        if(res.ok){
+          res.json().then(function(respond){
+            console.info(respond)
+            respond.forEach(attr => {
+              document.getElementById(attr.name).value = attr.default
+            })
+          })
+        }
+      });
+    });
+  },
+  _onSearchTermChanged: function(){
+    if(document.getElementById('op-type')){
+      var opname = document.getElementById('op-type').value
+      if(opname == ''){
+        this.subOpTypes = this.opTypes
+      }
+      else{
+        this._updataSubOpTypes(opname)
+      }
+    }
+  },
+  _updataSubOpTypes: function(sub){
+    // this.$.search.click()
+    var subOpTypes = []
+    var regex = new RegExp(sub);
+    this.opTypes.forEach(op => {
+      if(regex.test(op)){
+        subOpTypes.push(op)
+      }
+    })
+    this.subOpTypes = subOpTypes
+    // console.info(subOpTypes)
+  },
+  _OpChange: function() {
+    this.op = this.subOpTypes[this._selectedOp]
+    const params = new URLSearchParams();
+    params.set('op', this.op);
+    
+    new Promise(() => {
+      fetch(tf_backend.getRouter().pluginRoute('graphedit', '/op_intro', params)).then((res) => {
+        // Fetch does not reject for 400+.
+        if(res.ok){
+          res.text().then(function(respond){
+            document.getElementById('intro').innerHTML = respond
+          })
+        }
+      });
+    });
+  },
+  _getAttributes: function(_selectedOp) {
+    if(this.opAttributes[_selectedOp]==undefined){
+      return []
+    }
+    this.nodeName = ""
+    this._selectedOpAttributes.forEach(d => {
+      document.getElementById(d).value = ""
+    });
+    return this.opAttributes[_selectedOp]
+  },
+  newOpNode: function() {
+    var attrList = []
+    this._selectedOpAttributes.forEach(d => {
+      var value = document.getElementById(d).value;
+      if(value.indexOf(',')!=-1){
+        var v = [];
+        while(1){
+          var t = value.indexOf(',');
+          if(t==-1){
+            break;
+          }
+          var num = Number(value.substr(0,t))
+          v.push(num)
+          value = value.substring(t+1)
+        }
+        v.push(Number(value))
+        value = v
+      }
+      attrList.push({"key":d,"value":value})
+      document.getElementById(d).value = ""
+    });
+    var node = {
+      "name": this.nodeName,
+      "op": this.op,
+      "attr": attrList,
+      'input':[],
+    }
+  
+    var loader = document.querySelector('#loader');
+    loader._addOp(node);
+    this.nodeName = ""
+  },
+});
+})();
+</script>

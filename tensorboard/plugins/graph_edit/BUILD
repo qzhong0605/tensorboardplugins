@@ -43,21 +43,6 @@ py_library(
     ],
 )
 
-py_test(
-    name = "keras_util_test",
-    size = "small",
-    srcs = ["keras_util_test.py"],
-    main = "keras_util_test.py",
-    srcs_version = "PY2AND3",
-    deps = [
-        ":keras_util",
-        "//tensorboard:expect_tensorflow_installed",
-        "//tensorboard/compat/proto:protos_all_py_pb2",
-        "//tensorboard/util:test_util",
-        "@com_google_protobuf//:protobuf_python",
-    ],
-)
-
 py_library(
     name = "graph_util",
     srcs = ["graph_util.py"],
@@ -134,17 +119,3 @@ py_library(
     ],
 )
 
-py_test(
-    name = "graph_util_test",
-    size = "small",
-    srcs = ["graph_util_test.py"],
-    main = "graph_util_test.py",
-    srcs_version = "PY2AND3",
-    deps = [
-        ":graph_util",
-        "//tensorboard:expect_tensorflow_installed",
-        "//tensorboard/compat/proto:protos_all_py_pb2",
-        "@com_google_protobuf//:protobuf_python",
-        "@org_pythonhosted_six",
-    ],
-)
