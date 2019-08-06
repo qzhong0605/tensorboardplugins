@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
 <link rel="import" href="../paper-slider/paper-slider.html">
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../tf-backend/tf-backend.html">
@@ -109,6 +110,13 @@ TensorFlow run.
         <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
         </div>-->
         <div class="center-content" id="channelimage">
+        <template is="dom-if" if="[[!_isDone]]">
+          <div id="progress-bar">
+            <div id="progress-msg">demo</div>
+              <paper-progress value="40"></paper-progress>
+            </div>
+        </template>
+        <template is="dom-if" if="[[_isDone]]">
         <template is="dom-if" if="[[_dataNotFound]]">
           <div class="no-data-warning">
             <h3>No image data was found.</h3>
@@ -163,6 +171,7 @@ TensorFlow run.
             </tf-category-pane>
           </template>
         </template>
+       </template>
       </div>
       <div class="resizer" id="resizer">
         <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
@@ -383,6 +392,10 @@ TensorFlow run.
         _selectedRuns: Array,
         _runToTagInfo: Object,
         _actualSize: Boolean,
+        __isDone: {
+          type: Boolean,
+          value: true,
+        },
         _dataNotFound: {
           type: Boolean, 
           value:true,
@@ -471,10 +484,13 @@ TensorFlow run.
       ready: function() {
         this.reload();
         if(this._dataNotFound){
+          this.set('_isDone',false);
           this._clearTags();
-          this.loadAnimation();
-          this.$.form.submit();
+          if(this._isDone){
+            //this.$.form.submit();
+          }
         }
+        this.set('_isDone',true);
         const img = d3.select(this.$.channelimage);
         const infoImg = d3.select(this.$.infoImg);
         const infoDistribution = d3.select(this.$.infoDistribution);
@@ -517,16 +533,7 @@ TensorFlow run.
           this._reloadImages();
         });
       },
-      loadAnimation() {
-        const loading = d3.select(this.$.loading);
-        const center = d3.select(this.$.center);
-        loading.style('display', 'block');
-        center.style('display', 'none');
-        setTimeout(function(){
-                     loading.style('display','block');
-                     center.style('display', 'flex');
-                   },1000);
-      },
+
       _revealInfo(e){
         const img = d3.select(this.$.channelimage);
         const info = d3.select(this.$.channelinfo);
@@ -577,9 +584,11 @@ TensorFlow run.
         const url = tf_backend.getRouter().pluginRoute('inference', '/cleartags');
         const a = Promise.resolve(this._requestManager.request(url,{'path':'/tmp/mnist'}));
         console.log(this.dataLocation);
+        const that = this
         a.then(function(result) {
-          var ifDone = result['ifDone'];
-          console.log(ifDone);
+          var i = result['ifDone'];
+          that.set('_isDone',true);
+          console.log(that._isDone);
         });
       },
       _fetchTags() {
@@ -594,6 +603,7 @@ TensorFlow run.
           const runToTag = _.mapValues(runToTagInfo, x => Object.keys(x));
           const tags = tf_backend.getTags(runToTag);
           this.set('_dataNotFound', tags.length === 0);
+          this.set('_isDone',true);
           this.set('_runToTagInfo', runToTagInfo);
           this.async(() => {
             // See the comment above `_categoriesDomReady`.
@@ -662,13 +672,14 @@ TensorFlow run.
                 if(modelpath != "" && data != ""){ // whatever input check                   
                     const url = tf_backend.getRouter().pluginRoute('inference', '/distribution');
                     const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'batchsize':batch,'modeltype':modeltype}));
+                    const that = this;
                     a.then(function(result) {
-                      var ifDone = result['ifDone'];
-                      console.log(ifDone);
+                      var i = result['ifDone'];
+                      console.log(that._isDone);
                     });
-                    this.set('_dataNotFound',false);
+                    this.set('_dataNotFound',true);
+                    this.set('_isDone',false);
                     alert("start!")
-                    this.loadAnimation();
                 }
        }
 });
