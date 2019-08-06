@@ -96,26 +96,33 @@ class GraphEditPlugin(base_plugin.TBPlugin):
       """ It used to parse model file and convert it to tensorboard IR
       """
       model_type = request.args.get("source_type")
-      file_type = request.args.get("file_type")
-      model_file = request.args.get('model_file')
-      if not os.path.exists(model_file):
-          # send a response to frontend and report file not existing
-          pass
 
       if model_type == "torch":
+          input_tensor_size = request.args.get("input_tensor_size")
+          model_file = request.args.get('model_file')
+          if not os.path.exists(model_file):
+            # send a response to frontend and report file not existing
+            pass
           pass
       elif model_type == "caffe2":
           predict_net = request.args.get("predict_net")
           init_net = request.args.get("init_net")
+          file_type = request.args.get("file_type")
           if not (os.path.exists(predict_net) and os.path.exists(init_net)):
               # send a response to frontend and report that model file doesnot exist
               pass
           self._tb_graph = c2graph_util.C2Graph(predict_net, file_type, init_net)
       elif model_type == "caffe":
+          file_type = request.args.get("file_type")
+          model_file = request.args.get('model_file')
           self._tb_graph = caffe_util.CaffeGraph(model_file, file_type)
       elif model_type == "onnx":
+          file_type = request.args.get("file_type")
+          model_file = request.args.get('model_file')
           self._tb_graph = onnx_util.OnnxGraph(model_file, file_type)
       elif model_type == "tf":
+          file_type = request.args.get("file_type")
+          model_file = request.args.get('model_file')
           pass
       else:
           # send a response to frontend and report model type error

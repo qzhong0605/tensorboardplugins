@@ -118,70 +118,25 @@ Polymer({
       this._ReConstructHierarchicalGraph()
     }
   },
-  // _load: function(selection: tf.graph.controls.Selection): Promise<void> {
-  //   const {run, tag, type: selectionType} = selection;
-
-  //   switch (selectionType) {
-  //     case tf.graph.SelectionType.OP_GRAPH:
-  //     case tf.graph.SelectionType.CONCEPTUAL_GRAPH: {
-  //       // Clear stats about the previous graph.
-  //       this._setOutStats(null);
-  //       const params = new URLSearchParams();
-  //       params.set('run', run);
-  //       params.set(
-  //           'conceptual',
-  //           String(selectionType === tf.graph.SelectionType.CONCEPTUAL_GRAPH));
-  //       if (tag) params.set('tag', tag);
-  //       const graphPath =
-  //           tf_backend.getRouter().pluginRoute('graphedit', '/graph', params);
-  //       return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
-  //         this._graphRunTag = {run, tag};
-  //       })
-  //     }
-  //     case tf.graph.SelectionType.PROFILE: {
-  //       const {tags} = this.datasets.find(({name}) => name === run);
-  //       const tagMeta = tags.find(t => t.tag === tag);
-  //       // In case current tag misses opGraph but has profile information,
-  //       // we fallback to the v1 behavior of fetching the run graph.
-  //       const requiredOpGraphTag = tagMeta.opGraph ? tag : null;
-
-  //       console.assert(
-  //           tags.find(t => t.tag === requiredOpGraphTag),
-  //           `Required tag (${requiredOpGraphTag}) is missing.`);
-
-  //       const shouldFetchGraph = !this._graphRunTag ||
-  //           this._graphRunTag.run !== run ||
-  //           this._graphRunTag.tag !== requiredOpGraphTag;
-  //       const maybeFetchGraphPromise = shouldFetchGraph ?
-  //           this._load({
-  //             run,
-  //             tag: requiredOpGraphTag,
-  //             type: tf.graph.SelectionType.OP_GRAPH,
-  //           }) : Promise.resolve();
-  //       const params = new URLSearchParams();
-  //       params.set('tag', tag);
-  //       params.set('run', run);
-  //       const metadataPath = tf_backend.getRouter().pluginRoute(
-  //           'graphedit', '/run_metadata', params);
-  //       return maybeFetchGraphPromise
-  //           .then(() => this._readAndParseMetadata(metadataPath));
-  //     }
-  //     default:
-  //       return Promise.reject(new Error(`Unknown selection type: ${selectionType}`));
-  //   }
-  // },
-  // TODO:
   _load: function(loadparams): Promise<void> {
     // Clear stats about the previous graph.
     this._setOutStats(null);
     const params = new URLSearchParams();
-    params.set('file_type', loadparams.fileType);
     params.set('source_type', loadparams.modelType);
     if(loadparams.modelType == 'caffe2'){
+      params.set('file_type', loadparams.fileType);
       params.set('predict_net',loadparams.predictNet)
       params.set('init_net',loadparams.initNet)
-    }else{
-      params.set('model_file', loadparams.srcPath);
+    }
+    else{
+      if(loadparams.modelType == 'torch'){
+        params.set('input_tensor_size', loadparams.inputTensorSize);
+        params.set('model_file', loadparams.srcPath);
+      }
+      else{
+        params.set('file_type', loadparams.fileType);
+        params.set('model_file', loadparams.srcPath);
+      }
     }
     
     const graphPath =
