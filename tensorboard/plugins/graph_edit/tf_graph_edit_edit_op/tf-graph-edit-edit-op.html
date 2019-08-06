@@ -184,7 +184,7 @@ Polymer({
       return {
         name: name,
         node: this._getNode(name, this.graphHierarchy),
-        edgeLabel: tf.graph.scene.edge.getLabelForBaseEdge(baseEdge,
+        edgeLabel: tf.graph.edit.scene.edge.getLabelForBaseEdge(baseEdge,
             this.renderHierarchy),
         renderInfo: this._getRenderInfo(name, this.renderHierarchy)
       };
@@ -207,7 +207,7 @@ Polymer({
         edgeInfoList.push({
           name: name,
           node: this._getNode(name, this.graphHierarchy),
-          edgeLabel: tf.graph.scene.edge.getLabelForEdge(metaedge,
+          edgeLabel: tf.graph.edit.scene.edge.getLabelForEdge(metaedge,
               this.renderHierarchy),
           renderInfo: this._getRenderInfo(name, this.renderHierarchy)
         });

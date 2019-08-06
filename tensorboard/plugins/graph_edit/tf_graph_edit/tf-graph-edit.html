@@ -133,7 +133,7 @@ Polymer({
       type: Boolean,
       value: true
     },
-    // A mapping between node name to the tf.graph.scene.HealthPill to render.
+    // A mapping between node name to the tf.graph.edit.scene.HealthPill to render.
     nodeNamesToHealthPills: Object,
     // The step of health pills to show throughout the graph.
     healthPillStepIndex: Number,
@@ -175,7 +175,7 @@ Polymer({
     },
     /**
      * An optional callback that implements the
-     * tf.graph.edge.EdgeSelectionCallback signature. If provided, edges are
+     * tf.graph.edit.edge.EdgeSelectionCallback signature. If provided, edges are
      * selectable, and this callback is run when an edge is selected.
      *
      * We initialize with the empty string value so that the observer that
@@ -212,22 +212,22 @@ Polymer({
   _statsChanged: function(stats, devicesForStats) {
     if (this.graphHierarchy) {
       if (stats && devicesForStats) {
-        tf.graph.joinStatsInfoWithGraph(this.basicGraph, stats, devicesForStats);
-        tf.graph.hierarchy.joinAndAggregateStats(this.graphHierarchy, stats);
+        tf.graph.edit.joinStatsInfoWithGraph(this.basicGraph, stats, devicesForStats);
+        tf.graph.edit.hierarchy.joinAndAggregateStats(this.graphHierarchy, stats);
       }
       // Recompute the rendering information.
       this._buildRenderHierarchy(this.graphHierarchy);
     }
   },
   _buildRenderHierarchy: function(graphHierarchy) {
-    tf.graph.util.time('new tf.graph.render.Hierarchy', function() {
-      if (graphHierarchy.root.type !== tf.graph.NodeType.META) {
+    tf.graph.edit.util.time('new tf.graph.edit.render.Hierarchy', function() {
+      if (graphHierarchy.root.type !== tf.graph.edit.NodeType.META) {
         // root must be metanode but sometimes Polymer's dom-if has not
         // remove tf-graph-edit element yet in <tf-node-info>
         // and thus mistakenly pass non-metanode to this module.
         return;
       }
-      var renderGraph = new tf.graph.render.RenderGraphInfo(
+      var renderGraph = new tf.graph.edit.render.RenderGraphInfo(
           graphHierarchy, !!this.stats /** displayingStats */);
       renderGraph.edgeLabelFunction = this.edgeLabelFunction;
       renderGraph.edgeWidthFunction = this.edgeWidthFunction;
@@ -344,7 +344,7 @@ Polymer({
     // Visually mark this new edge as selected.
     if (selectedEdge) {
       this._lastSelectedEdgeGroup.classed(
-          tf.graph.scene.Class.Edge.SELECTED, true);
+          tf.graph.edit.scene.Class.Edge.SELECTED, true);
 
       // Update the color of the marker too if the edge has one.
       this._updateMarkerOfSelectedEdge(selectedEdge);
@@ -389,7 +389,7 @@ Polymer({
     var nodeName = event.detail.name;
     var renderNode = this.renderHierarchy.getRenderNodeByName(nodeName);
     // Op nodes are not expandable.
-    if (renderNode.node.type === tf.graph.NodeType.OP) {
+    if (renderNode.node.type === tf.graph.edit.NodeType.OP) {
       return;
     }
     this.renderHierarchy.buildSubhierarchy(nodeName);
@@ -406,14 +406,14 @@ Polymer({
     // Toggle the include setting of the specified node appropriately.
     var nodeName = event.detail.name;
     var renderNode = this.renderHierarchy.getRenderNodeByName(nodeName);
-    if (renderNode.node.include == tf.graph.InclusionType.INCLUDE) {
-      renderNode.node.include = tf.graph.InclusionType.EXCLUDE;
-    } else if (renderNode.node.include == tf.graph.InclusionType.EXCLUDE) {
-      renderNode.node.include = tf.graph.InclusionType.INCLUDE;
+    if (renderNode.node.include == tf.graph.edit.InclusionType.INCLUDE) {
+      renderNode.node.include = tf.graph.edit.InclusionType.EXCLUDE;
+    } else if (renderNode.node.include == tf.graph.edit.InclusionType.EXCLUDE) {
+      renderNode.node.include = tf.graph.edit.InclusionType.INCLUDE;
     } else {
       renderNode.node.include =
        this.renderHierarchy.isNodeAuxiliary(renderNode)
-          ? tf.graph.InclusionType.INCLUDE : tf.graph.InclusionType.EXCLUDE;
+          ? tf.graph.edit.InclusionType.INCLUDE : tf.graph.edit.InclusionType.EXCLUDE;
     }
 
     // Rebuild the render hierarchy.
@@ -422,27 +422,27 @@ Polymer({
   _nodeToggleSeriesGroup: function(event) {
     // Toggle the group setting of the specified node appropriately.
     var nodeName = event.detail.name;
-    tf.graph.toggleNodeSeriesGroup(this.hierarchyParams.seriesMap, nodeName);
+    tf.graph.edit.toggleNodeSeriesGroup(this.hierarchyParams.seriesMap, nodeName);
 
     // Rebuild the render hierarchy with the updated series grouping map.
     this.set('progress', {
       value: 0,
       msg: ''
     });
-    var tracker = tf.graph.util.getTracker(this);
-    var hierarchyTracker = tf.graph.util.getSubtaskTracker(tracker, 100,
+    var tracker = tf.graph.edit.util.getTracker(this);
+    var hierarchyTracker = tf.graph.edit.util.getSubtaskTracker(tracker, 100,
           'Namespace hierarchy');
-    tf.graph.hierarchy.build(this.basicGraph, this.hierarchyParams, hierarchyTracker)
+    tf.graph.edit.hierarchy.build(this.basicGraph, this.hierarchyParams, hierarchyTracker)
     .then(function(graphHierarchy) {
       this.set('graphHierarchy', graphHierarchy);
       this._buildRenderHierarchy(this.graphHierarchy);
     }.bind(this));
   },
   _deselectPreviousEdge() {
-    const selected = '.' + tf.graph.scene.Class.Edge.SELECTED;
+    const selected = '.' + tf.graph.edit.scene.Class.Edge.SELECTED;
     var selectedEdge = null
     var edge = d3.select(selected)
-        .classed(tf.graph.scene.Class.Edge.SELECTED, false) 
+        .classed(tf.graph.edit.scene.Class.Edge.SELECTED, false) 
         .each((d,i)=>{
           selectedEdge = d
         })

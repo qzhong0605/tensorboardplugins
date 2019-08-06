@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.controls {
+namespace tf.graph.edit.controls {
 
 interface DeviceNameExclude {
   regex: RegExp,
@@ -44,7 +44,7 @@ const DEVICE_STATS_DEFAULT_OFF: StatsDefaultOff[] = [];
 export interface Selection {
   run: string,
   tag: string | null,
-  type: tf.graph.SelectionType,
+  type: tf.graph.edit.SelectionType,
 }
 
 export interface DeviceForStats {
@@ -145,7 +145,7 @@ Polymer({
       computed: '_editModelChange(edgeMode)'
     },
     /**
-     * @type {?tf.graph.proto.StepStats}
+     * @type {?tf.graph.edit.proto.StepStats}
      */
     stats: {
       value: null,
@@ -163,7 +163,7 @@ Polymer({
       readonly: true,
     },
     /**
-     * @type {!tf.graph.controls.ColorBy}
+     * @type {!tf.graph.edit.controls.ColorBy}
      */
     colorBy: {
       type: String,
@@ -182,7 +182,7 @@ Polymer({
       value: () => [],
     },
     /**
-     * @type {tf.graph.render.RenderGraphInfo}
+     * @type {tf.graph.edit.render.RenderGraphInfo}
      */
     renderHierarchy: {
       type: Object,
@@ -212,11 +212,11 @@ Polymer({
       observer: '_selectedTagIndexChanged',
     },
     /**
-     * @type {tf.graph.SelectionType}
+     * @type {tf.graph.edit.SelectionType}
      */
     _selectedGraphType: {
       type: String,
-      value: tf.graph.SelectionType.OP_GRAPH,
+      value: tf.graph.edit.SelectionType.OP_GRAPH,
     },
     selectedNode: {
       type: String,
@@ -274,17 +274,17 @@ Polymer({
     // Flip the state of the trace inputs flag.
     const toggleButton: any = event.target;
     this.renderHierarchy.traceInputs = toggleButton.active;
-    tf.graph.scene.node.traceInputs(this.renderHierarchy);
+    tf.graph.edit.scene.node.traceInputs(this.renderHierarchy);
   },
 
   _xlaClustersProvided: function(
-      renderHierarchy: tf.graph.render.RenderGraphInfo | null) {
+      renderHierarchy: tf.graph.edit.render.RenderGraphInfo | null) {
     return renderHierarchy &&
         renderHierarchy.hierarchy &&
         renderHierarchy.hierarchy.xlaClusters.length > 0;
   },
 
-  _statsChanged: function(stats: tf.graph.proto.StepStats): void {
+  _statsChanged: function(stats: tf.graph.edit.proto.StepStats): void {
     if (stats == null) {
       return;
     }
@@ -308,8 +308,8 @@ Polymer({
   _getCurrentDevices: function(
       devicesForStats: DeviceForStats): CurrentDevice[] {
 
-    const stats: tf.graph.proto.StepStats | null = this.stats;
-    const devStats: tf.graph.proto.DevStat[] = stats ? stats.dev_stats : [];
+    const stats: tf.graph.edit.proto.StepStats | null = this.stats;
+    const devStats: tf.graph.edit.proto.DevStat[] = stats ? stats.dev_stats : [];
     const allDevices = devStats.map((d) => d.device);
     const devices = allDevices.filter((deviceName) => {
       return DEVICE_NAMES_INCLUDE.some((rule) => {
@@ -318,7 +318,7 @@ Polymer({
     });
     // Devices names can be long so we remove the longest common prefix
     // before showing the devices in a list.
-    const suffixes = tf.graph.util.removeCommonPrefix(devices);
+    const suffixes = tf.graph.edit.util.removeCommonPrefix(devices);
     if (suffixes.length == 1) {
       const found = suffixes[0].match(DEVICE_NAME_REGEX);
       if (found) {
@@ -400,7 +400,7 @@ Polymer({
   },
 
   _isGradientColoring: function(
-      stats: tf.graph.proto.StepStats, colorBy: ColorBy): boolean {
+      stats: tf.graph.edit.proto.StepStats, colorBy: ColorBy): boolean {
 
     return GRADIENT_COMPATIBLE_COLOR_BY.has(colorBy) && stats != null;
   },
@@ -419,7 +419,7 @@ Polymer({
     });
     // Remove common prefix and merge back corresponding color. If
     // there is only one device then remove everything up to "/device:".
-    const suffixes = tf.graph.util.removeCommonPrefix(
+    const suffixes = tf.graph.edit.util.removeCommonPrefix(
         deviceParams.map((d) => d.device));
     if (suffixes.length == 1) {
       var found = suffixes[0].match(DEVICE_NAME_REGEX);
@@ -447,15 +447,15 @@ Polymer({
     let minValue = params.minValue;
     let maxValue = params.maxValue;
     if (colorBy === ColorBy.MEMORY) {
-      minValue = tf.graph.util.convertUnitsToHumanReadable(
-          minValue, tf.graph.util.MEMORY_UNITS);
-      maxValue = tf.graph.util.convertUnitsToHumanReadable(
-          maxValue, tf.graph.util.MEMORY_UNITS);
+      minValue = tf.graph.edit.util.convertUnitsToHumanReadable(
+          minValue, tf.graph.edit.util.MEMORY_UNITS);
+      maxValue = tf.graph.edit.util.convertUnitsToHumanReadable(
+          maxValue, tf.graph.edit.util.MEMORY_UNITS);
     } else if (colorBy === ColorBy.COMPUTE_TIME) {
-      minValue = tf.graph.util.convertUnitsToHumanReadable(
-          minValue, tf.graph.util.TIME_UNITS);
-      maxValue = tf.graph.util.convertUnitsToHumanReadable(
-          maxValue, tf.graph.util.TIME_UNITS);
+      minValue = tf.graph.edit.util.convertUnitsToHumanReadable(
+          minValue, tf.graph.edit.util.TIME_UNITS);
+      maxValue = tf.graph.edit.util.convertUnitsToHumanReadable(
+          maxValue, tf.graph.edit.util.TIME_UNITS);
     }
     return {
       minValue,
@@ -496,7 +496,7 @@ Polymer({
   },
 
   _computeSelection: function(datasets: Dataset, _selectedRunIndex: number,
-      _selectedTagIndex: number, _selectedGraphType: tf.graph.SelectionType) {
+      _selectedTagIndex: number, _selectedGraphType: tf.graph.edit.SelectionType) {
 
     if (!datasets[_selectedRunIndex] ||
         !datasets[_selectedRunIndex].tags[_selectedTagIndex]) {
@@ -525,7 +525,7 @@ Polymer({
       this._selectedGraphType = this._getDefaultSelectionType();
   },
 
-  _getDefaultSelectionType(): tf.graph.SelectionType {
+  _getDefaultSelectionType(): tf.graph.edit.SelectionType {
     const {
       datasets,
       _selectedRunIndex: run,
@@ -535,15 +535,15 @@ Polymer({
         !datasets[run] ||
         !datasets[run].tags[tag] ||
         datasets[run].tags[tag].opGraph) {
-      return tf.graph.SelectionType.OP_GRAPH;
+      return tf.graph.edit.SelectionType.OP_GRAPH;
     }
     if (datasets[run].tags[tag].profile) {
-      return tf.graph.SelectionType.PROFILE;
+      return tf.graph.edit.SelectionType.PROFILE;
     }
     if (datasets[run].tags[tag].conceptualGraph) {
-      return tf.graph.SelectionType.CONCEPTUAL_GRAPH;
+      return tf.graph.edit.SelectionType.CONCEPTUAL_GRAPH;
     }
-    return tf.graph.SelectionType.OP_GRAPH;
+    return tf.graph.edit.SelectionType.OP_GRAPH;
   },
 
   _getFile: function(): void {
@@ -572,4 +572,4 @@ Polymer({
   },
 });
 
-}  // namespace tf.graph.controls
+}  // namespace tf.graph.edit.controls

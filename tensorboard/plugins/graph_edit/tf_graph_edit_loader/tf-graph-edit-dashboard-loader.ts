@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.loader {
+namespace tf.graph.edit.loader {
 
 interface GraphRunTag {
   run: string;
@@ -47,11 +47,11 @@ Polymer({
     selectedFile: Object,
     compatibilityProvider: {
       type: Object,
-      value: () => new tf.graph.op.TpuCompatibilityProvider(),
+      value: () => new tf.graph.edit.op.TpuCompatibilityProvider(),
     },
     hierarchyParams: {
       type: Object,
-      value: () => tf.graph.hierarchy.DefaultHierarchyParams,
+      value: () => tf.graph.edit.hierarchy.DefaultHierarchyParams,
     },
     outGraphHierarchy: {
       type: Object,
@@ -152,8 +152,8 @@ Polymer({
       value: 0,
       msg: '',
     });
-    var tracker = tf.graph.util.getTracker(this);
-    tf.graph.parser.fetchAndParseMetadata(path, tracker)
+    var tracker = tf.graph.edit.util.getTracker(this);
+    tf.graph.edit.parser.fetchAndParseMetadata(path, tracker)
         .then((stats) => {
           this._setOutStats(stats);
         });
@@ -165,8 +165,8 @@ Polymer({
       value: 0,
       msg: '',
     });
-    const tracker = tf.graph.util.getTracker(this);
-    return tf.graph.loader.fetchAndConstructHierarchicalGraph(
+    const tracker = tf.graph.edit.util.getTracker(this);
+    return tf.graph.edit.loader.fetchAndConstructHierarchicalGraph(
       tracker,
       path,
       pbTxtFile,
@@ -183,8 +183,8 @@ Polymer({
   _ReConstructHierarchicalGraph: async function(){
     var mthis = this
     var graph = this.outGraph
-    const tracker = tf.graph.util.getTracker(this)
-    tf.graph.loader.ReConstructHierarchicalGraph(
+    const tracker = tf.graph.edit.util.getTracker(this)
+    tf.graph.edit.loader.ReConstructHierarchicalGraph(
       graph,
       tracker,
       this.compatibilityProvider,
@@ -373,4 +373,4 @@ Polymer({
   },
 });
 
-}  // namespace tf.graph.loader
+}  // namespace tf.graph.edit.loader
