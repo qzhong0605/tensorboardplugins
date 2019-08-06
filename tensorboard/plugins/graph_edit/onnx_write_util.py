@@ -188,8 +188,9 @@ def ConvertNet(tb_graph):
         onnx_model.graph.node.extend([onnx_nodes[node]])
     return onnx_model
 
-def WriteToOnnx(onnx_model):
-    onnx_write_model = open("/tmp/onnx_graph.onnx", "wb")
+def WriteToOnnx(onnx_model, path):
+    # onnx_write_model = open("/tmp/onnx_graph.onnx", "wb")
+    onnx_write_model = open(path, "wb")
     onnx_to_write = onnx_model
     onnx_write_model.write(onnx_to_write.SerializeToString())
     onnx_write_model.close()
@@ -197,5 +198,5 @@ def WriteToOnnx(onnx_model):
     # onnx_read.ParseFromString(open("/tmp/onnx_graph.onnx", "rb").read())
     # logger.warn(onnx_read.graph.node[0])
 
-def SaveInOnnxModel(tb_graph):
-    WriteToOnnx(ConvertNet(tb_graph))
+def SaveInOnnxModel(tb_graph, path):
+    WriteToOnnx(ConvertNet(tb_graph), path)

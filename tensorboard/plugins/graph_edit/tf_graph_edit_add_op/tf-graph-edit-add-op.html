@@ -28,7 +28,7 @@
   }
 
   paper-input.op-type {
-    width: 100%;
+    width: 200px;
     --paper-input-container-input: {
       font-size: large !important;
       font-weight: 900 !important;
@@ -36,7 +36,7 @@
   }
 
   paper-input.node-name {
-    width: 100%;
+    width: 200px;
     --paper-input-container-input: {
       font-size: large !important;
     }
@@ -97,18 +97,10 @@
       <paper-input id="node-name" class="node-name" label="Node Name" value="{{nodeName}}"></paper-input>
     </div>
     <div>
-      <paper-icon-button icon="done" class="dropdown-trigger" id="node-name-done" style="margin-top: 20px;" on-click='_getDefault'></paper-icon-button>
+      <paper-icon-button icon="done" class="dropdown-trigger" id="node-name-done" style="margin-top: 20px;margin-left: 8px;" on-click='_getDefault'></paper-icon-button>
     </div>
   </div>
 </div>
-<!-- <div class="container flex-horizontal">
-  <div>
-    <paper-input class="node-name" label="Node Name" value="{{nodeName}}"></paper-input> 
-  </div>
-  <div>
-      <paper-icon-button icon="done" class="" id="node-name-done"></paper-icon-button>
-  </div>
-</div> -->
 <div class="sub-list-group attributes">
     <template is="dom-repeat" items="{{_selectedOpAttributes}}">
         <paper-input class="" label="[[item]]" id="[[item]]" value=""></paper-input> 

@@ -327,10 +327,10 @@ class GraphEditPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def save_model(self, request):
     model_type = request.args.get('type')
+    path = request.args.get('path')
     graph = self.graph
-    logger.warn(len(graph.node))
     if model_type=='onnx':
-      onnx_write_util.SaveInOnnxModel(graph)
+      onnx_write_util.SaveInOnnxModel(graph, path)
     return http_util.Respond(request, 'save progress success', 'text/plain')
 
   @wrappers.Request.application
