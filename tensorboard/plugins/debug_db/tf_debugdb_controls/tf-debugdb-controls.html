@@ -217,12 +217,30 @@ paper-button.cancel-bt{
     </paper-dropdown-menu>
     <div id="attachInfo" style="display: none">
       <paper-input disabled class="path" label="Model Type" id="model_type"></paper-input>
-      <template is="dom-repeat" items="{{machineidList}}">
-          <paper-input disabled class="path" label="Machine" id="" value="[[item.m]]"></paper-input>
-          <paper-input disabled class="path" label="Id" id="" value="[[item.id]]"></paper-input>
-          <paper-input disabled class="path" label="Batch Size" id="" value="[[item.batch_size]]"></paper-input>
-          <paper-input disabled class="path" label="Memory Size" id="" value="[[item.memory_size]]"></paper-input>
-      </template>
+      
+      <div class="container flex">
+        <div>
+          <paper-dropdown-menu label="Machine List" no-animations noink horizontal-align="left" class="machine-list">
+            <paper-menu class="dropdown-content" selected="{{selectedMachine}}">
+              <template is="dom-repeat" items="{{selectedMachineList}}">
+                  <paper-item>[[item]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+        </div>
+        <div>
+          <paper-dropdown-menu label="Device Id List" no-animations noink horizontal-align="left" class="id-list">
+            <paper-menu class="dropdown-content" selected="{{selectedId}}">
+              <template is="dom-repeat" items="{{idList}}">
+                  <paper-item>[[item]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+        </div>
+      </div>
+
+      <paper-input disabled class="path" label="Batch Size" id="batch_size"></paper-input>
+      <paper-input disabled class="path" label="Memory Size" id="memory_size"></paper-input>
     </div>
     <paper-button raised noink id="stop" class="half" on-click="attachStop" style="float: left">STOP</paper-button>
     <paper-button raised noink id="continue" class="half" onclick="attachContinue.open()" style="float: right">CONTINUE</paper-button>

@@ -78,8 +78,17 @@ class DebugDBPlugin(base_plugin.TBPlugin):
         '/attach': self.attach,
         '/attachstop': self.attach_stop,
         '/attachcontinue': self.attach_continue,
-        '/load': self.parse_from_model,
+        '/newload': self.parse_from_model,
+        '/attachload': self.attach_load,
     }
+
+  @wrappers.Request.application
+  def attach_load(self, request):
+    network_identification = request.args.get('network_identification')
+    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
+    self._tb_graph.ConvertNet()
+    graph = self._tb_graph._tb_graph
+    return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   @wrappers.Request.application
   def parse_from_model(self, request):
@@ -353,7 +362,9 @@ class DebugDBPlugin(base_plugin.TBPlugin):
   def attach(self, request):
     network_identification = request.args.get('network_identification')
     logger.warn(network_identification)
-    respond = json.dumps({'model_type':'model','list':[{'m':'cpu','id':1,'batch_size':12,'memory_size':8}]})
+    respond = json.dumps({'model_type':'model','list':[{'m':'cpu','id':1,'batch_size':12,'memory_size':8},
+    {'m':'cpu','id':2,'batch_size':12,'memory_size':8},
+    {'m':'gpu','id':1,'batch_size':12,'memory_size':8}]})
     return http_util.Respond(request, respond, 'application/json')
 
   @wrappers.Request.application

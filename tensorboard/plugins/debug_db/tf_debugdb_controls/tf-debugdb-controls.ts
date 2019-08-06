@@ -118,7 +118,19 @@ namespace tf.graph.controls {
   Polymer({
     is: 'tf-debugdb-controls',
     properties: {
-      machineidList:{
+      selectedMachine:{
+        type: Number,
+        observer:'_selectedMachineChanged',
+      },
+      selectedId:{
+        type: Number,
+        observer:'_selectedIdChanged'
+      },
+      selectedMachineList:{
+        type: Array,
+        value: [],
+      },
+      idList:{
         type: Array,
         value: [],
       },
@@ -208,7 +220,10 @@ namespace tf.graph.controls {
         type: Object,
         notify: true,
       },
-      
+      attachParam: {
+        type: Object,
+        notify: true,
+      },
       _selectedRunIndex: {
         type: Number,
         value: 0,
@@ -393,6 +408,7 @@ namespace tf.graph.controls {
         attachList.push(element);
       });
       var network_identification = (<HTMLInputElement>document.getElementById('network_identification')).value;
+      this.attachParam = network_identification;
       const params = new URLSearchParams();
       params.set('network_identification',network_identification);
       new Promise(() => {
@@ -414,7 +430,14 @@ namespace tf.graph.controls {
       var selectedIdentification = this.attachList[this.selectedIdentification];
       var attachInfo = this.attachMap[selectedIdentification];
       (<HTMLInputElement>document.getElementById('model_type')).value = attachInfo.model_type;
-      this.machineidList = attachInfo.list
+      var machineList = [];
+      attachInfo.list.forEach(item => {
+        if(machineList.indexOf(item.m)==-1){
+          machineList.push(item.m);
+        }
+      })
+      this.selectedMachineList = machineList;
+      this._selectedMachineChanged()
     },
     attachStop: function(){
       const params = new URLSearchParams();
@@ -447,28 +470,32 @@ namespace tf.graph.controls {
         });
       });
     },
-    dragLeft(){
-      var left = document.getElementsByClassName('source-graphboard') as HTMLCollectionOf<HTMLElement>;
-      var right = document.getElementsByClassName('target-graphboard') as HTMLCollectionOf<HTMLElement>;
-      // left[0].style.width = '20%'
-      this.left_width -= 2
-      this.right_width += 2 
-      left[0].style.width = this.left_width.toString() + '%'
-      right[0].style.width = this.right_width.toString() + '%'
-      // console.info(left[0],right[0])
-      // console.info('left')
+    _selectedMachineChanged: function(){
+      var machine = this.selectedMachineList[this.selectedMachine]
+      var selectedIdentification = this.attachList[this.selectedIdentification];
+      var attachInfo = this.attachMap[selectedIdentification];
+      var idList = [];
+      attachInfo.list.forEach(item => {
+        if(item.m == machine){
+          idList.push(item.id);
+        }
+      })
+      this.idList = idList
+      this._selectedIdChanged()
     },
-    dragRight(){
-      var left = document.getElementsByClassName('source-graphboard') as HTMLCollectionOf<HTMLElement>;
-      var right = document.getElementsByClassName('target-graphboard') as HTMLCollectionOf<HTMLElement>;
-      // left[0].style.width = '20%'
-      this.left_width += 2
-      this.right_width -= 2 
-      left[0].style.width = this.left_width.toString() + '%'
-      right[0].style.width = this.right_width.toString() + '%'
-      // console.info('right')
+    _selectedIdChanged: function(){
+      var id = this.idList[this.selectedId]
+      var machine = this.selectedMachineList[this.selectedMachine]
+      var selectedIdentification = this.attachList[this.selectedIdentification];
+      var attachInfo = this.attachMap[selectedIdentification];
+      
+      attachInfo.list.forEach(item => {
+        if(item.m == machine && item.id == id){
+          (<HTMLInputElement>document.getElementById('batch_size')).value = item.batch_size;
+          (<HTMLInputElement>document.getElementById('memory_size')).value = item.memory_size;
+        }
+      })
     },
-    
   
     _datasetsChanged: function(newDatasets: Dataset, oldDatasets: Dataset) {
       if (oldDatasets != null) {

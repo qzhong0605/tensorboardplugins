@@ -36,7 +36,11 @@ Polymer({
     },
     selection: {
       type: Object,
-      observer:'_load'
+      observer:'_newload'
+    },
+    attachParam: {
+      type: Object,
+      observer:'_attachload'
     },
     compatibilityProvider: {
       type: Object,
@@ -65,8 +69,19 @@ Polymer({
     _graphRunTag: Object,
   },
   observers: [],
-  _load: function(): Promise<void> {
-    // Clear stats about the previous graph.
+  _attachload: function(): Promise<void> {
+    const params = new URLSearchParams();
+    params.set('network_identification', this.attachParam);
+    
+    const graphPath =
+        tf_backend.getRouter().pluginRoute('debugdb', '/attachload', params);
+    return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
+      document.getElementById('graphboard').style.display = ''
+    })
+    return ;
+  },
+
+  _newload: function(): Promise<void> {
     var loadparams = this.selection
     const params = new URLSearchParams();
     params.set('model_type', loadparams.model_type);
@@ -87,7 +102,7 @@ Polymer({
     }
     
     const graphPath =
-        tf_backend.getRouter().pluginRoute('debugdb', '/load', params);
+        tf_backend.getRouter().pluginRoute('debugdb', '/newload', params);
     return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
       document.getElementById('graphboard').style.display = ''
     })
