@@ -131,12 +131,6 @@ by default. The user can select a different run from a dropdown menu.
           graph="[[_graph]]"
           hierarchy-params="[[_hierarchyParams]]"
           progress="[[_progress]]"
-          are-health-pills-loading="[[_areHealthPillsLoading]]"
-          debugger-numeric-alerts="[[_debuggerNumericAlerts]]"
-          node-names-to-health-pills="[[_nodeNamesToHealthPills]]"
-          all-steps-mode-enabled="{{allStepsModeEnabled}}"
-          specific-health-pill-step="{{specificHealthPillStep}}"
-          health-pill-step-index="[[_healthPillStepIndex]]"
           render-hierarchy="{{_renderHierarchy}}"
           selected-node="{{_selectedNode}}"
           stats="[[_stats]]"
@@ -231,32 +225,12 @@ Polymer({
       value: 0,
     },
     _datasets: Array,
-    allStepsModeEnabled: Boolean,
-    specificHealthPillStep: {type: Number, value: 0},
     selectedNode: {
       type: String,
       notify: true,
     },
     _isAttached: Boolean,
-    // Whether health pills are currently being loaded, in which case we may want to say show a
-    // spinner.
-    _areHealthPillsLoading: Boolean,
-    // An array of alerts (in chronological order) provided by debugging libraries on when bad
-    // values (NaN, +/- Inf) appear.
-    _debuggerNumericAlerts: {
-      type: Array,
-      value: [],
-      notify: true,
-    },
-    // Maps the names of nodes to an array of health pills (HealthPillDatums).
-    _nodeNamesToHealthPills: {
-      type: Object,
-      value: {},
-    },
-    _healthPillStepIndex: Number,
-    _selection: {
-      type: Object,
-    },
+
     _compatibilityProvider: Object,
     _hierarchyParams: {
       type: Object,

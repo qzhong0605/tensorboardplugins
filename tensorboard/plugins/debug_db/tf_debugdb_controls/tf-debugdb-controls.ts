@@ -308,16 +308,17 @@ namespace tf.graph.controls {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
-              (<HTMLInputElement>document.getElementById('fileType')).value = '';
-              (<HTMLInputElement>document.getElementById('srcPath')).value = '';
-              (<HTMLInputElement>document.getElementById('predictNet')).value = '';
-              (<HTMLInputElement>document.getElementById('initNet')).value = '';
-              (<HTMLInputElement>document.getElementById('batchSize')).value = '';
-              (<HTMLInputElement>document.getElementById('memorySize')).value = '';
-              (<HTMLInputElement>document.getElementById('optimizationMethod')).value = '';
-              (<HTMLInputElement>document.getElementById('learningRate')).value = '';
-              (<HTMLInputElement>document.getElementById('totalIteration')).value = '';
-              document.getElementById('machineList').innerHTML = ""
+              // (<HTMLInputElement>document.getElementById('fileType')).value = '';
+              // (<HTMLInputElement>document.getElementById('srcPath')).value = '';
+              // (<HTMLInputElement>document.getElementById('predictNet')).value = '';
+              // (<HTMLInputElement>document.getElementById('initNet')).value = '';
+              // (<HTMLInputElement>document.getElementById('batchSize')).value = '';
+              // (<HTMLInputElement>document.getElementById('memorySize')).value = '';
+              // (<HTMLInputElement>document.getElementById('optimizationMethod')).value = '';
+              // (<HTMLInputElement>document.getElementById('learningRate')).value = '';
+              // (<HTMLInputElement>document.getElementById('totalIteration')).value = '';
+              // document.getElementById('machineList').innerHTML = ""
+              
             })
           }
         });

@@ -88,11 +88,9 @@ Polymer({
     // selection can change a lot within a microtask.
     // Don't fetch too much too fast and introduce race condition.
     if(this.datasource == 2){
-      // console.info(this.loadparams)
       this.debounce('selectionchange', () => {
         // TODO:
         this._load(this.loadparams);
-        // this._load(this.selection)
       });
     }
     if(this.datasource == 1){
@@ -251,7 +249,6 @@ Polymer({
     if(pos!=-1){
       inputs.splice(pos,1);
     }
-    // this._reload(this.selection)
     this._ReConstructHierarchicalGraph()
   },
 
@@ -286,7 +283,6 @@ Polymer({
       name: src,
       outputTensorKey: '0',
     })
-    // this._reload(this.selection)
     this._ReConstructHierarchicalGraph()
   },
 
@@ -334,7 +330,6 @@ Polymer({
     this.outGraph.nodes[n.name] = node;
     // inputs
     this.outGraph.nodes[n.name].compatible = true;
-    // this._reload(this.selection)
     this._ReConstructHierarchicalGraph()
   },
 
