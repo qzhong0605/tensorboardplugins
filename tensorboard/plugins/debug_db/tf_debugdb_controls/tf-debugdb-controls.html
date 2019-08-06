@@ -154,11 +154,16 @@ paper-button.cancel-bt{
               </template>
             </paper-menu>
           </paper-dropdown-menu>
-        <paper-input class="path" label="File Type" id="fileType"></paper-input>
-        <div id="not-caffe2">
+        <div id="elsefile">
+          <paper-input class="path" label="File Type" id="fileType"></paper-input>
+        </div>
+        <div id="torch" style="display: none">
+            <paper-input class="path" label="Input Tensor Size" id="inputTensorSize"></paper-input>
+          </div>
+        <div id="elsepath">
           <paper-input class="path" label="Source Path" id="srcPath"></paper-input>
         </div>
-        <div id="is-caffe2">
+        <div id="c2" style="display: none">
           <paper-input class="path" label="Predict Net" id="predictNet"></paper-input>
           <paper-input class="path" label="Init Net" id="initNet"></paper-input>
         </div>

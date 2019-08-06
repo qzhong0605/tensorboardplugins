@@ -32,6 +32,11 @@ from tensorboard.plugins.debug_db import graph_util
 from tensorboard.plugins.debug_db import keras_util
 from tensorboard.util import tb_logging
 
+from tensorboard.plugins.graph_edit import c2graph_util
+from tensorboard.plugins.graph_edit import caffe_util
+from tensorboard.plugins.graph_edit import onnx_util
+from tensorboard.plugins.graph_edit import onnx_write_util
+
 logger = tb_logging.get_logger()
 
 _PLUGIN_PREFIX_ROUTE = 'debugdb'
@@ -58,8 +63,8 @@ class DebugDBPlugin(base_plugin.TBPlugin):
     Args:
       context: A base_plugin.TBContext instance.
     """
-    logger.warn('debugdb')
     self._multiplexer = context.multiplexer
+    self._tb_graph = None
 
   def get_plugin_apps(self):
     return {
@@ -73,7 +78,49 @@ class DebugDBPlugin(base_plugin.TBPlugin):
         '/attach': self.attach,
         '/attachstop': self.attach_stop,
         '/attachcontinue': self.attach_continue,
+        '/load': self.parse_from_model,
     }
+
+  @wrappers.Request.application
+  def parse_from_model(self, request):
+      """ It used to parse model file and convert it to tensorboard IR
+      """
+      model_type = request.args.get("model_type")
+      logger.warn(model_type)
+      if model_type == "torch":
+          input_tensor_size = request.args.get("input_tensor_size")
+          model_file = request.args.get('source_path')
+          if not os.path.exists(model_file):
+            # send a response to frontend and report file not existing
+            pass
+          pass
+      elif model_type == "caffe2":
+          predict_net = request.args.get("predict_net")
+          init_net = request.args.get("init_net")
+          file_type = request.args.get("file_type")
+          if not (os.path.exists(predict_net) and os.path.exists(init_net)):
+              # send a response to frontend and report that model file doesnot exist
+              pass
+          self._tb_graph = c2graph_util.C2Graph(predict_net, file_type, init_net)
+      elif model_type == "caffe":
+          file_type = request.args.get("file_type")
+          model_file = request.args.get('source_path')
+          self._tb_graph = caffe_util.CaffeGraph(model_file, file_type)
+      elif model_type == "onnx":
+          file_type = request.args.get("file_type")
+          model_file = request.args.get('source_path')
+          self._tb_graph = onnx_util.OnnxGraph(model_file, file_type)
+      elif model_type == "tf":
+          file_type = request.args.get("file_type")
+          model_file = request.args.get('source_path')
+          pass
+      else:
+          # send a response to frontend and report model type error
+          pass
+
+      self._tb_graph.ConvertNet()
+      graph = self._tb_graph._tb_graph
+      return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   def is_active(self):
     """The debugdb plugin is active iff any run has a graph."""

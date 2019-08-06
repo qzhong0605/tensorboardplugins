@@ -65,20 +65,16 @@ by default. The user can select a different run from a dropdown menu.
     <div id="elsefile">
       <paper-input class="path" label="File Type" value="{{fileType}}"></paper-input>
     </div>
-    <!-- <template is="dom-if" if="[[_srcMode]]"> -->
     <div id="torch" style="display: none">
       <paper-input class="path" label="Input Tensor Size" value="{{inputTensorSize}}"></paper-input>
     </div>
     <div id="elsepath">
       <paper-input class="path" label="Source Path" value="{{srcPath}}"></paper-input>
     </div>
-    <!-- </template> -->
-    <!-- <template is="dom-if" if="[[_srcMode]]"> -->
     <div id="c2" style="display: none">
       <paper-input class="path" label="Predict Net" value="{{predictNet}}"></paper-input>
       <paper-input class="path" label="Init Net" value="{{initNet}}"></paper-input>
     </div>
-    <!-- </template> -->
     <paper-button class="icon-button" on-click="load" alt="">
       <iron-icon icon="create" class="button-icon"></iron-icon>
       <span class="button-text">Load graph from the server</span>
@@ -86,10 +82,6 @@ by default. The user can select a different run from a dropdown menu.
   </div>
 </template>
 <template is="dom-if" if="[[init]]">
-  <!-- <template is="dom-if" if="[[_datasetsEmpty(_datasets)]]">
-    
-  </template>
-  <template is="dom-if" if="[[!_datasetsEmpty(_datasets)]]"> -->
   <tf-dashboard-layout>
     <tf-graph-edit-controls
           id="controls"

@@ -34,7 +34,10 @@ Polymer({
       type: Object,
       notify: true,
     },
-    selection: Object,
+    selection: {
+      type: Object,
+      observer:'_load'
+    },
     compatibilityProvider: {
       type: Object,
       value: () => new tf.graph.op.TpuCompatibilityProvider(),
@@ -62,34 +65,33 @@ Polymer({
     _graphRunTag: Object,
   },
   observers: [],
-  _load: function(loadparams): Promise<void> {
+  _load: function(): Promise<void> {
     // Clear stats about the previous graph.
-    this._setOutStats(null);
+    var loadparams = this.selection
     const params = new URLSearchParams();
-    params.set('source_type', loadparams.modelType);
+    params.set('model_type', loadparams.model_type);
     if(loadparams.modelType == 'caffe2'){
-      params.set('file_type', loadparams.fileType);
-      params.set('predict_net',loadparams.predictNet)
-      params.set('init_net',loadparams.initNet)
+      params.set('file_type', loadparams.file_type);
+      params.set('predict_net',loadparams.predict_net)
+      params.set('init_net',loadparams.init_net)
     }
     else{
       if(loadparams.modelType == 'torch'){
-        params.set('input_tensor_size', loadparams.inputTensorSize);
-        params.set('model_file', loadparams.srcPath);
+        params.set('input_tensor_size', loadparams.input_tensor_size);
+        params.set('source_path', loadparams.source_path);
       }
       else{
-        params.set('file_type', loadparams.fileType);
-        params.set('model_file', loadparams.srcPath);
+        params.set('file_type', loadparams.file_type);
+        params.set('source_path', loadparams.source_path);
       }
     }
     
     const graphPath =
-        tf_backend.getRouter().pluginRoute('graphedit', '/load', params);
+        tf_backend.getRouter().pluginRoute('debugdb', '/load', params);
     return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
-      // console.info('yes')
+      document.getElementById('graphboard').style.display = ''
     })
     return ;
-      
   },
 
   _fetchAndConstructHierarchicalGraph: async function(

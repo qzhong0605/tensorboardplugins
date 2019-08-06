@@ -141,12 +141,12 @@ namespace tf.graph.controls {
       },
       _srcMode:{
         type: Number,
-        value: 2,
+        value: 0,
         observer:'_modeChanged'
       },
       _srcTypes:{
         type: Array,
-        value: ['caffe2', 'caffe', 'onnx', 'torch', 'tf'],
+        value: ['onnx', 'caffe', 'caffe2', 'torch', 'tf'],
       },
       _deviceTypes:{
         type: Array,
@@ -207,8 +207,6 @@ namespace tf.graph.controls {
       selection: {
         type: Object,
         notify: true,
-        readOnly: true,
-        computed: '_computeSelection(datasets, _selectedRunIndex, _selectedTagIndex, _selectedGraphType)',
       },
       
       _selectedRunIndex: {
@@ -234,14 +232,25 @@ namespace tf.graph.controls {
   
     ready: function(){},
     _modeChanged: function(){
-      if(document.getElementById('not-caffe2')){
-        if(this._srcMode){
-          document.getElementById('not-caffe2').style.display = ''
-          document.getElementById('is-caffe2').style.display = 'none'
-        }else{
-          document.getElementById('not-caffe2').style.display = 'none'
-          document.getElementById('is-caffe2').style.display = ''
+      if(document.getElementById('c2')){
+        if(this._srcMode == 2){//c2
+          document.getElementById('elsefile').style.display = ''
+          document.getElementById('elsepath').style.display = 'none'
+          document.getElementById('torch').style.display = 'none'
+          document.getElementById('c2').style.display = ''
+          return 
         }
+        if(this._srcMode == 3){//torch
+          document.getElementById('elsefile').style.display = 'none'
+          document.getElementById('elsepath').style.display = ''
+          document.getElementById('torch').style.display = ''
+          document.getElementById('c2').style.display = 'none'
+          return 
+        }
+        document.getElementById('elsefile').style.display = ''
+        document.getElementById('elsepath').style.display = ''
+        document.getElementById('torch').style.display = 'none'
+        document.getElementById('c2').style.display = 'none'
       }
     },
     _loadTypeChanged: function(loadType){
@@ -265,22 +274,43 @@ namespace tf.graph.controls {
       document.getElementById('machineList').appendChild(item)
     },
     newStart: function(){
+      var loadparams = {}
       const params = new URLSearchParams();
-      
       var model_type = this._srcTypes[this._srcMode];
-      var file_type = (<HTMLInputElement>document.getElementById('fileType')).value;
       params.set('model_type', model_type);
-      params.set('file_type', file_type);
+      loadparams['model_type'] = model_type;
 
-      if(this._srcMode){
-        var source_path = (<HTMLInputElement>document.getElementById('srcPath')).value;
-        params.set('source_path', source_path);
-      }else{
+      if(this._srcMode == 2){
+        var file_type = (<HTMLInputElement>document.getElementById('fileType')).value;
         var predict_net = (<HTMLInputElement>document.getElementById('predictNet')).value;
         var init_net = (<HTMLInputElement>document.getElementById('initNet')).value;
         params.set('predict_net', predict_net);
         params.set('init_net', init_net);
+        params.set('file_type', file_type);
+        loadparams['predict_net'] = predict_net
+        loadparams['init_net'] = init_net
+        loadparams['file_type'] = file_type
       }
+      else{
+        if(this._srcMode == 3){
+          var inputTensorSize = (<HTMLInputElement>document.getElementById('inputTensorSize')).value;
+          var source_path = (<HTMLInputElement>document.getElementById('srcPath')).value;
+          params.set('source_path', source_path);
+          params.set('input_tensor_size', inputTensorSize);
+          loadparams['source_path'] = source_path
+          loadparams['input_tensor_size'] = inputTensorSize
+        }
+        else{
+          var file_type = (<HTMLInputElement>document.getElementById('fileType')).value;
+          var source_path = (<HTMLInputElement>document.getElementById('srcPath')).value;
+          params.set('source_path', source_path);
+          params.set('file_type', file_type);
+          loadparams['source_path'] = source_path
+          loadparams['file_type'] = file_type
+        }
+      }
+      this.selection = loadparams
+
       var batchSize = (<HTMLInputElement>document.getElementById('batchSize')).value;
       var memorySize = (<HTMLInputElement>document.getElementById('memorySize')).value;
       var optimizationMethod = (<HTMLInputElement>document.getElementById('optimizationMethod')).value;
@@ -317,8 +347,8 @@ namespace tf.graph.controls {
               // (<HTMLInputElement>document.getElementById('optimizationMethod')).value = '';
               // (<HTMLInputElement>document.getElementById('learningRate')).value = '';
               // (<HTMLInputElement>document.getElementById('totalIteration')).value = '';
+              // (<HTMLInputElement>document.getElementById('inputTensorSize')).value = '';
               // document.getElementById('machineList').innerHTML = ""
-              
             })
           }
         });
