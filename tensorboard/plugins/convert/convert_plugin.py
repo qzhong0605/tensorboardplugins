@@ -32,6 +32,11 @@ from tensorboard.plugins.convert import graph_util
 from tensorboard.plugins.convert import keras_util
 from tensorboard.util import tb_logging
 
+from tensorboard.plugins.graph_edit import c2graph_util
+from tensorboard.plugins.graph_edit import caffe_util
+from tensorboard.plugins.graph_edit import onnx_util
+from tensorboard.plugins.graph_edit import onnx_write_util
+
 logger = tb_logging.get_logger()
 
 _PLUGIN_PREFIX_ROUTE = 'convert'
@@ -58,15 +63,39 @@ class ConvertPlugin(base_plugin.TBPlugin):
     Args:
       context: A base_plugin.TBContext instance.
     """
-    logger.warn('convert')
     self._multiplexer = context.multiplexer
+    self._tb_graph = None
 
   def get_plugin_apps(self):
     return {
         '/graph': self.graph_route,
         '/info': self.info_route,
         '/run_metadata': self.run_metadata_route,
+        '/load': self.load_model,
+        '/convert': self.convert_model
     }
+
+  @wrappers.Request.application
+  def load_model(self, request):
+    source_type = request.args.get('source_type')
+    source_path = request.args.get('source_path')
+    logger.warn(source_path)
+    logger.warn(source_type)
+    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
+    self._tb_graph.ConvertNet()
+    graph = self._tb_graph._tb_graph
+    return http_util.Respond(request,str(graph) ,'text/x-protobuf')
+  
+  @wrappers.Request.application
+  def convert_model(self, request):
+    destination_type = request.args.get('destination_type')
+    destination_path = request.args.get('destination_path')
+    logger.warn(destination_type)
+    logger.warn(destination_path)
+    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
+    self._tb_graph.ConvertNet()
+    graph = self._tb_graph._tb_graph
+    return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   def is_active(self):
     """The graphs plugin is active iff any run has a graph."""

@@ -130,8 +130,12 @@ Polymer({
     },
     srcPath: String,
     desPath: String,
-    srcType: String,
-    desType: String,
+    srcType: Number,
+    desType: Number,
+    _modelTypes:{
+      type: Array,
+      value: ['onnx', 'caffe', 'caffe2', 'torch', 'tf'],
+    },
     // Public API.
     /**
      * @type {?tf.convert.proto.StepStats}
@@ -156,55 +160,15 @@ Polymer({
       // TODO(stephanwlee): Change readonly -> readOnly and fix the setter.
       readonly: true,
     },
-    datasets: {
-      type: Array,
-      observer: '_datasetsChanged',
-      value: () => [],
-    },
-    /**
-     * @type {tf.convert.render.RenderGraphInfo}
-     */
-    renderHierarchy: {
-      type: Object,
-      notify: true,
-    },
     /**
      * @type {!Selection}
      */
     selection: {
       type: Object,
       notify: true,
-      readOnly: true,
-      computed: '_computeSelection(datasets, _selectedRunIndex, _selectedTagIndex, _selectedGraphType)',
     },
-    
-    _selectedRunIndex: {
-      type: Number,
-      value: 0,
-      observer: '_selectedRunIndexChanged',
-    },
-    _selectedTagIndex: {
-      type: Number,
-      value: 0,
-      observer: '_selectedTagIndexChanged',
-    },
-    /**
-     * @type {tf.convert.SelectionType}
-     */
-    _selectedGraphType: {
-      type: String,
-      value: tf.convert.SelectionType.OP_GRAPH,
-    },
-    selectedNode: {
-      type: String,
-      notify: true,
-    },
-    selectedNodeInclude: {
-      type: Number,
-      notify: true,
-    },
-    highlightedNode: {
-      type: String,
+    targetParams: {
+      type: Object,
       notify: true,
     },
     left_width:{
@@ -241,72 +205,24 @@ Polymer({
     right[0].style.width = this.right_width.toString() + '%'
     // console.info('right')
   },
-  _isGradientColoring: function(
-      stats: tf.convert.proto.StepStats, colorBy: ColorBy): boolean {
-    return GRADIENT_COMPATIBLE_COLOR_BY.has(colorBy) && stats != null;
-  },
-
-  _datasetsChanged: function(newDatasets: Dataset, oldDatasets: Dataset) {
-    if (oldDatasets != null) {
-      // Select the first dataset by default.
-      this._selectedRunIndex = 0;
-    }
-  },
-
-  _computeSelection: function(datasets: Dataset, _selectedRunIndex: number,
-      _selectedTagIndex: number, _selectedGraphType: tf.convert.SelectionType) {
-    if (!datasets[_selectedRunIndex] ||
-        !datasets[_selectedRunIndex].tags[_selectedTagIndex]) {
-      return null;
-    }
-
-    return {
-      run: datasets[_selectedRunIndex].name,
-      tag: datasets[_selectedRunIndex].tags[_selectedTagIndex].tag,
-      type: _selectedGraphType,
-    }
-  },
-
-  _selectedRunIndexChanged: function(runIndex: number): void {
-    if (!this.datasets) return;
-    // Reset the states when user pick a different run.
-    this.colorBy = ColorBy.STRUCTURE;
-    this._selectedTagIndex = 0;
-    this._selectedGraphType = this._getDefaultSelectionType();
-  },
-
-  _selectedTagIndexChanged(): void {
-      this._selectedGraphType = this._getDefaultSelectionType();
-  },
-
-  _getDefaultSelectionType(): tf.convert.SelectionType {
-    const {
-      datasets,
-      _selectedRunIndex: run,
-      _selectedTagIndex: tag,
-    } = this;
-    if (!datasets ||
-        !datasets[run] ||
-        !datasets[run].tags[tag] ||
-        datasets[run].tags[tag].opGraph) {
-      return tf.convert.SelectionType.OP_GRAPH;
-    }
-    if (datasets[run].tags[tag].profile) {
-      return tf.convert.SelectionType.PROFILE;
-    }
-    if (datasets[run].tags[tag].conceptualGraph) {
-      return tf.convert.SelectionType.CONCEPTUAL_GRAPH;
-    }
-    return tf.convert.SelectionType.OP_GRAPH;
-  },
-
-  showSuccess: function(){
-    console.info('success')
-  },
 
   transformModel: function(){
-    console.info(this.srcPath,this.desPath,this.srcType,this.desType)
+    var data = {
+      'destination_path': this.desType,
+      'destination_type': this._modelTypes[this.desType],
+    }
+    this.targetParams = data
+    console.info(this.targetParams)
   },
+
+  loadModel: function(){
+    var data = {
+      'source_path': this.srcPath,
+      'source_type': this._modelTypes[this.srcType],
+    }
+    this.selection = data
+  },
+
 });
 
 }  // namespace tf.convert.controls

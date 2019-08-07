@@ -96,26 +96,33 @@ paper-dropdown-menu {
 
       <iron-icon icon="chevron-right" class="button-icon-right" on-click="dragRight" id="drag-right"></iron-icon>
     </div>
-    <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input> 
+
+    <!-- <paper-input class="" label="Source Model Type" value="{{srcType}}"></paper-input>  -->
+    <paper-dropdown-menu label="Source Model Type" no-animations noink horizontal-align="left">
+      <paper-menu class="dropdown-content" selected="{{srcType}}">
+        <template is="dom-repeat" items="{{_modelTypes}}">
+            <paper-item>[[item]]</paper-item>
+        </template>
+      </paper-menu>
+    </paper-dropdown-menu>
+
+    <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input>
+
+    <paper-button raised noink class="full-width-bt" on-click="loadModel">LOAD</paper-button>
+
+    <!-- <paper-input class="" label="Destination Model Type" value="{{desType}}"></paper-input>   -->
+    <paper-dropdown-menu label="Destination Model Type" no-animations noink horizontal-align="left">
+      <paper-menu class="dropdown-content" selected="{{desType}}">
+        <template is="dom-repeat" items="{{_modelTypes}}">
+            <paper-item>[[item]]</paper-item>
+        </template>
+      </paper-menu>
+    </paper-dropdown-menu>
 
     <paper-input class="" label="Storage Path " value="{{desPath}}"></paper-input>
 
-    <paper-input class="" label="Source Model Type" value="{{srcType}}"></paper-input> 
+    <paper-button raised noink class="full-width-bt" on-click="transformModel">CONVERT</paper-button>
 
-    <paper-input class="" label="Destination Model Type" value="{{desType}}"></paper-input> 
-
-    <paper-button raised noink class="full-width-bt" on-click="transformModel">TRANSFORM</paper-button>
-
-    <iron-ajax 
-          id="transform" 
-          url="" 
-          method="POST" 
-          verbose 
-          handle-as="json" 
-          params="[[param]]"
-          on-response="showSuccess" 
-          contentType="application/json">  
-      </iron-ajax> 
   </div>
 </template>
 

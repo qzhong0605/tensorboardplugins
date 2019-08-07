@@ -38,40 +38,16 @@ by default. The user can select a different run from a dropdown menu.
 <dom-module id="tf-convert-dashboard">
 <template>
 <paper-dialog id="error-dialog" with-backdrop></paper-dialog>
-<template is="dom-if" if="[[_datasetsEmpty(_datasets)]]">
-  <div style="max-width: 540px; margin: 80px auto 0 auto;">
-    <h3>No graph definition files were found.</h3>
-    <p>
-    To store a graph, create a
-    <code>tf.summary.FileWriter</code>
-    and pass the graph either via the constructor, or by calling its
-    <code>add_graph()</code> method.
-    You may want to check out the
-    <a
-      href="https://www.tensorflow.org/get_started/graph_viz"
-    >graph visualizer tutorial</a>.
-    <p>
-    If you’re new to using TensorBoard, and want to find out how
-    to add data and set up your event files, check out the
-    <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md">README</a>
-    and perhaps the <a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard tutorial</a>.
-    <p>
-    If you think TensorBoard is configured properly, please see
-    <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md#my-tensorboard-isnt-showing-any-data-whats-wrong">the section of the README devoted to missing data problems</a>
-    and consider filing an issue on GitHub.
-  </div>
-</template>
-<template is="dom-if" if="[[!_datasetsEmpty(_datasets)]]">
-<!-- <tf-dashboard-layout> -->
 <div class="container flex">
-  <!-- <div class="center"> -->
     <tf-convert-dashboard-loader 
           id="loader"
-          datasets="[[_datasets]]"
           selection="[[_selection]]"
+          target-params="[[targetParams]]"
           selected-file="[[_selectedFile]]"
           out-graph-hierarchy="{{_graphHierarchy}}"
           out-graph="{{_graph}}"
+          out-graph-hierarchy-tar="{{_graphHierarchyTar}}"
+          out-graph-tar="{{_graphTar}}"
           out-stats="{{_stats}}"
           progress="{{_progress}}"
           hierarchy-params="[[_hierarchyParams]]"
@@ -82,7 +58,6 @@ by default. The user can select a different run from a dropdown menu.
         id="source-graphboard"
         label="SOURCE"
         selected-node="{{_selectedNodeSrc}}"
-        devices-for-stats="[[_devicesForStats]]"
         color-by="[[_colorBy]]"
         color-by-params="{{_colorByParams}}"
         graph-hierarchy="[[_graphHierarchy]]"
@@ -105,14 +80,12 @@ by default. The user can select a different run from a dropdown menu.
           id="controls"
           graph-hierarchy="{{_graphHierarchy}}"
           graph="{{_graph}}"
-          devices-for-stats="{{_devicesForStats}}"
           color-by-params="[[_colorByParams]]"
           stats="[[_stats]]"
           color-by="{{_colorBy}}"
-          datasets="[[_datasets]]"
           render-hierarchy="[[_renderHierarchy]]"
+          target-params="{{targetParams}}"
           selection="{{_selection}}"
-          health-pills-feature-enabled="[[_debuggerDataEnabled]]"
           selected-node="{{_selectedNode}}"
           selected-graph = "{{_selectedGraph}}"
     ></tf-convert-controls>
@@ -122,11 +95,10 @@ by default. The user can select a different run from a dropdown menu.
         id="target-graphboard"
         label="DESTINATION"
         selected-node="{{_selectedNodeTar}}"
-        devices-for-stats="[[_devicesForStats]]"
         color-by="[[_colorBy]]"
         color-by-params="{{_colorByParams}}"
-        graph-hierarchy="[[_graphHierarchy]]"
-        graph="[[_graph]]"
+        graph-hierarchy="[[_graphHierarchyTar]]"
+        graph="[[_graphTar]]"
         hierarchy-params="[[_hierarchyParams]]"
         progress="[[_progress]]"
         debugger-data-enabled="[[_debuggerDataEnabled]]"
@@ -140,30 +112,28 @@ by default. The user can select a different run from a dropdown menu.
         stats="[[_stats]]"
     ></tf-convert-board>
   </div>
-<!-- </tf-dashboard-layout> -->
 </div>
-</template>
 <custom-style>
-    <style is="custom-style">
-      .flex {
-        @apply --layout-horizontal;
-        height: 100%;
-      }
-      .sidebar {
-        width: 20%;
-        overflow-y: auto;
-        text-overflow: ellipsis;
-      }
-      .source-graphboard {
-        /* @apply --layout-flex; */
-        width: 40%;
-      }
-      .target-graphboard {
-        /* @apply --layout-flex; */
-        width: 40%
-      }
-    </style>
-  </custom-style>
+  <style is="custom-style">
+    .flex {
+      @apply --layout-horizontal;
+      height: 100%;
+    }
+    .sidebar {
+      width: 20%;
+      overflow-y: auto;
+      text-overflow: ellipsis;
+    }
+    .source-graphboard {
+      /* @apply --layout-flex; */
+      width: 40%;
+    }
+    .target-graphboard {
+      /* @apply --layout-flex; */
+      width: 40%
+    }
+  </style>
+</custom-style>
 <style>
 
 :host /deep/ {
@@ -185,17 +155,19 @@ Polymer({
     /**
      * @type {!Array<!RunItem>}
      */
-     _selectedNodeSrc: {
-       type: Object,
-       observer: '_selectedNodeSrcChanged'
-     },
-     _selectedNodeTar: {
-       type: Object,
-       observer: '_selectedNodeTarChanged'
-     },
-     _selectedNode: String,
-     _selectedGraph: String,
-    _datasets: Array,
+    _selectedNodeSrc: {
+      type: Object,
+      observer: '_selectedNodeSrcChanged'
+    },
+    _selectedNodeTar: {
+      type: Object,
+      observer: '_selectedNodeTarChanged'
+    },
+    _selectedNode: {
+    type: String,
+    value:'',
+    },
+    _selectedGraph: String,
     _renderHierarchy: {type: Object, observer: '_renderHierarchyChanged'},
     _requestManager: {
       type: Object,
@@ -269,16 +241,8 @@ Polymer({
       value: () => tf.convert.hierarchy.DefaultHierarchyParams,
     },
   },
-  listeners: {
-    'node-toggle-expand': '_handleNodeToggleExpand',
-  },
-  observers: [
-    '_maybeFetchHealthPills(_debuggerDataEnabled, allStepsModeEnabled, ' +
-        'specificHealthPillStep, _selectedNode)',
-    '_maybeInitializeDashboard(_isAttached)',
-    '_determineSelectedDataset(_datasets, run)',
-    '_updateSelectedDatasetName(_datasets, _selectedDataset)',
-  ],
+  listeners: {},
+  observers: [],
   ready: function(){
     // var drag_left = document.getElementsByClassName('button-icon-left')
     // var drag_right = document.getElementsByClassName('button-icon-right')
@@ -298,252 +262,6 @@ Polymer({
   },
   detached: function() {
     this.set('_isAttached', false);
-  },
-  reload: function() {
-    if (!this._debuggerDataEnabled) {
-      // Check if the debugger plugin is enabled now.
-      this._requestManager
-          .request(tf_backend.getRouter().pluginsListing())
-          .then(this._canceller.cancellable(result => {
-            if (result.cancelled) {
-              return;
-            }
-
-            if (result.value['debugger']) {
-              // The debugger plugin is enabled. Request debugger-related
-              // data. Perhaps the debugger plugin had been disabled
-              // beforehand because no bad values (NaN, -/+ Inf) had been
-              // found and muted_if_healthy had been on.
-              this.set('_debuggerDataEnabled', true);
-            }
-          }));
-    }
-
-    this._maybeFetchHealthPills();
-  },
-  _runObserver: tf_storage.getStringObserver(
-    'run', {
-        defaultValue: '',
-        polymerProperty: 'run',
-        useLocalStorage: false,
-      }),
-  _fetchDataset() {
-    return this._requestManager.request(
-        tf_backend.getRouter().pluginRoute('convert', '/info'));
-  },
-  /*
-   * See also _maybeFetchHealthPills, _initiateNetworkRequestForHealthPills.
-   * This function returns a promise with the raw health pill data.
-   */
-  _fetchHealthPills(nodeNames, step) {
-    const postData = {
-      'node_names': JSON.stringify(nodeNames),
-
-      // Events files with debugger data fall under this special run.
-      'run': '__debugger_data__',
-    };
-    if (step !== undefined) {
-      // The user requested health pills for a specific step. This request
-      // might be slow since the backend reads events sequentially from disk.
-      postData['step'] = step;
-    }
-    const url = tf_backend.getRouter().pluginRoute('debugger', '/health_pills');
-    return this._requestManager.request(url, postData);
-  },
-  _fetchDebuggerNumericsAlerts() {
-    return this._requestManager.request(
-        tf_backend.getRouter().pluginRoute('debugger', '/numerics_alert_report'));
-  },
-  _graphUrl(run, limitAttrSize, largeAttrsKey) {
-    return tf_backend.getRouter().pluginRoute(
-        'convert',
-        '/graph',
-        new URLSearchParams({
-          'run': run,
-          'limit_attr_size': limitAttrSize,
-          'large_attrs_key': largeAttrsKey,
-        }),
-    );
-  },
-  _shouldRequestHealthPills: function() {
-    // Do not load debugger data if the feature is disabled, if the user toggled off the feature,
-    // or if the graph itself has not loaded yet. We need the graph to load so that we know which
-    // nodes to request health pills for.
-    return this._debuggerDataEnabled &&
-        this.healthPillsToggledOn &&
-        this._renderHierarchy &&
-        !this._datasetsEmpty(this._datasets);
-  },
-  _maybeInitializeDashboard: function(isAttached) {
-    if (this._initialized || !isAttached) {
-      // Either this dashboard is already initialized ... or we are not yet ready to initialize.
-      return;
-    }
-
-    this.set('_compatibilityProvider', new tf.convert.op.TpuCompatibilityProvider());
-
-    // Set this to true so we only initialize once.
-    this._initialized = true;
-    this._fetchDataset().then(dataset => {
-      const runNames = Object.keys(dataset);
-      // Transform raw data into UI friendly data.
-      this._datasets = runNames.sort(vz_sorting.compareTagNames).map(runName => {
-        const runData = dataset[runName];
-
-        const tagNames = Object.keys(runData.tags).sort(vz_sorting.compareTagNames);
-        const tags = tagNames
-            .map(name => runData.tags[name])
-            .map(({tag, conceptual_graph, op_graph, profile}) => ({
-              tag,
-              displayName: tag,
-              conceptualGraph: conceptual_graph,
-              opGraph: op_graph,
-              profile,
-            }));
-
-        // Translate a run-wide GraphDef into specially named (without a tag) op graph
-        // to abstract the difference between run_graph vs. op_graph from other
-        // components.
-        const tagsWithV1Graph = runData.run_graph ?
-            [
-                {
-                  tag: null,
-                  displayName: 'Default',
-                  conceptualGraph: false,
-                  opGraph: true,
-                  profile: false,
-                },
-                ...tags,
-            ] : tags;
-
-        return {name: runName, tags: tagsWithV1Graph};
-      });
-    });
-  },
-  _determineSelectedDataset(datasets, run) {
-    // By default, load the first dataset.
-    if (!run) {
-      // By default, load the first dataset.
-      this.set('_selectedDataset', 0);
-      return;
-    }
-
-    // If the URL specifies a dataset, load it.
-    const dataset = datasets.findIndex(d => d.name === run);
-    if (dataset === -1) {
-      // Tell the user if the dataset cannot be found to avoid misleading
-      // the user.
-      const dialog = this.$$('#error-dialog');
-      dialog.textContent =
-          `No dataset named "${run}" could be found.`;
-      dialog.open();
-      return;
-    }
-
-    this.set('_selectedDataset', dataset);
-  },
-  _updateSelectedDatasetName(datasets, selectedDataset) {
-    // Cannot update `run` to update the hash in case datasets for graph is empty.
-    if (datasets.length <= selectedDataset) return;
-    this.set('run', datasets[selectedDataset].name);
-  },
-  _requestHealthPills: function() {
-    this.set('_areHealthPillsLoading', true);
-    var requestId = ++this._healthPillRequestId;
-
-    if (this._healthPillStepRequestTimerId !== null) {
-      // A request for health pills is already scheduled to be initiated. Clear it, and schedule a
-      // new request.
-      window.clearTimeout(this._healthPillStepRequestTimerId);
-      this._healthPillStepRequestTimerId = null;
-    }
-
-    if (this.allStepsModeEnabled) {
-      // This path may be slow. Schedule network requests to start some time later. If another
-      // request is scheduled in the mean time, drop this current request.
-      this._healthPillStepRequestTimerId = setTimeout(function() {
-        this._healthPillStepRequestTimerId = null;
-        this._initiateNetworkRequestForHealthPills(requestId);
-      }.bind(this), this._healthPillStepRequestTimerDelay);
-    } else {
-      // The user is fetching sampled steps. This path is fast, so no need to throttle. Directly
-      // fetch the health pills across the network.
-      this._initiateNetworkRequestForHealthPills(requestId);
-    }
-  },
-  // Initiates the network request for health pills. Do not directly call this method - network
-  // requests may be throttled. Instead, call _requestHealthPills, which uses this method.
-  _initiateNetworkRequestForHealthPills: function(requestId) {
-    if (this._healthPillRequestId !== requestId) {
-      // This possibly scheduled request was outdated before it was even sent across the network. Do
-      // not bother initiating it.
-      return;
-    }
-
-    const specificStep =
-      this.allStepsModeEnabled ? this.specificHealthPillStep : undefined;
-
-    const healthPillsPromise = this._fetchHealthPills(
-        this._renderHierarchy.getNamesOfRenderedOps(), specificStep);
-    const alertsPromise = this._fetchDebuggerNumericsAlerts();
-
-    Promise.all([healthPillsPromise, alertsPromise]).then(
-        function(result) {
-      var healthPillsResult = result[0];
-      var alertsResult = result[1];
-
-      if (!this.healthPillsToggledOn) {
-        // The user has opted to hide health pills via the toggle button.
-        return;
-      }
-
-      if (requestId !== this._healthPillRequestId) {
-        // This response is no longer relevant.
-        return;
-      }
-
-      // Set the index for which step to show for the health pills. By default, show the last step.
-      // A precondition we assume (that Tensorboard's reservoir sampling guarantees) is that all
-      // node names should be mapped to the same number of steps.
-      for (var nodeName in healthPillsResult) {
-        this.set('_healthPillStepIndex', healthPillsResult[nodeName].length - 1);
-        break;
-      }
-
-      this.set('_debuggerNumericAlerts', alertsResult);
-      this.set('_nodeNamesToHealthPills', healthPillsResult);
-      this.set('_areHealthPillsLoading', false);
-      this.set('_healthPillStepRequestTimerId', null);
-    }.bind(this));
-  },
-  _datasetsEmpty: function(datasets) {
-    return !datasets || !datasets.length;
-  },
-  _renderHierarchyChanged: function(renderHierarchy) {
-    // Reload any data on the graph when the render hierarchy (which determines which nodes are
-    // rendered) changes.
-    this.reload();
-  },
-  _handleNodeToggleExpand: function() {
-    // Nodes were toggled. We may need to request health pills for more nodes.
-    this._maybeFetchHealthPills();
-  },
-  _healthPillsToggledOnChanged: function(healthPillsToggledOn) {
-    if (healthPillsToggledOn) {
-      // Load health pills.
-      this.reload();
-    } else {
-      // Remove all health pills by setting an empty mapping.
-      this.set('_nodeNamesToHealthPills', {});
-    }
-  },
-  // Fetch health pills for a specific step if applicable.
-  _maybeFetchHealthPills: function() {
-    if (!this._shouldRequestHealthPills()) {
-      return;
-    }
-
-    this._requestHealthPills();
   },
 
   _selectedNodeSrcChanged: function(){

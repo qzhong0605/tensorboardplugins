@@ -23,7 +23,6 @@ Polymer({
   is: 'tf-convert-dashboard-loader',
 
   properties: {
-    datasets: Array,
     /**
      * @type {{value: number, msg: string}}
      *
@@ -34,13 +33,19 @@ Polymer({
       type: Object,
       notify: true,
     },
-    selection: Object,
+    selection: {
+      type: Object,
+      observer:'_load'
+    },
+    targetParams: {
+      type: Object,
+      observer:'_tranform'
+    },
     /**
      * TODO(stephanwlee): This should be changed to take in FileList or
      * the prop should be changed to `fileInput`.
      * @type {?Event}
      */
-    selectedFile: Object,
     compatibilityProvider: {
       type: Object,
       value: () => new tf.convert.op.TpuCompatibilityProvider(),
@@ -51,12 +56,18 @@ Polymer({
     },
     outGraphHierarchy: {
       type: Object,
-      readOnly: true, //readonly so outsider can't change this via binding
       notify: true
     },
     outGraph: {
       type: Object,
-      readOnly: true, //readonly so outsider can't change this via binding
+      notify: true
+    },
+    outGraphHierarchyTar: {
+      type: Object,
+      notify: true
+    },
+    outGraphTar: {
+      type: Object,
       notify: true
     },
     /** @type {Object} */
@@ -70,87 +81,36 @@ Polymer({
      */
     _graphRunTag: Object,
   },
-  observers: [
-    '_selectionChanged(selection, compatibilityProvider)',
-    '_selectedFileChanged(selectedFile, compatibilityProvider)',
-  ],
-  _selectionChanged(): void {
-    // selection can change a lot within a microtask.
-    // Don't fetch too much too fast and introduce race condition.
-    this.debounce('selectionchange', () => {
-      this._load(this.selection);
-    });
+  observers: [],
+  _load: function(): Promise<void> {
+    const params = new URLSearchParams();
+    params.set('source_path', this.selection.source_path);
+    params.set('source_type', this.selection.source_type);
+    
+    const graphPath =
+        tf_backend.getRouter().pluginRoute('convert', '/load', params);
+    return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
+    })
+    return ;
   },
-  _load: function(selection: tf.convert.controls.Selection): Promise<void> {
-    const {run, tag, type: selectionType} = selection;
-
-    switch (selectionType) {
-      case tf.convert.SelectionType.OP_GRAPH:
-      case tf.convert.SelectionType.CONCEPTUAL_GRAPH: {
-        // Clear stats about the previous graph.
-        this._setOutStats(null);
-        const params = new URLSearchParams();
-        params.set('run', run);
-        params.set(
-            'conceptual',
-            String(selectionType === tf.convert.SelectionType.CONCEPTUAL_GRAPH));
-        if (tag) params.set('tag', tag);
-        const graphPath =
-            tf_backend.getRouter().pluginRoute('convert', '/graph', params);
-        return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
-          this._graphRunTag = {run, tag};
-        })
-      }
-      case tf.convert.SelectionType.PROFILE: {
-        const {tags} = this.datasets.find(({name}) => name === run);
-        const tagMeta = tags.find(t => t.tag === tag);
-        // In case current tag misses opGraph but has profile information,
-        // we fallback to the v1 behavior of fetching the run graph.
-        const requiredOpGraphTag = tagMeta.opGraph ? tag : null;
-
-        console.assert(
-            tags.find(t => t.tag === requiredOpGraphTag),
-            `Required tag (${requiredOpGraphTag}) is missing.`);
-
-        const shouldFetchGraph = !this._graphRunTag ||
-            this._graphRunTag.run !== run ||
-            this._graphRunTag.tag !== requiredOpGraphTag;
-        const maybeFetchGraphPromise = shouldFetchGraph ?
-            this._load({
-              run,
-              tag: requiredOpGraphTag,
-              type: tf.convert.SelectionType.OP_GRAPH,
-            }) : Promise.resolve();
-        const params = new URLSearchParams();
-        params.set('tag', tag);
-        params.set('run', run);
-        const metadataPath = tf_backend.getRouter().pluginRoute(
-            'convert', '/run_metadata', params);
-        return maybeFetchGraphPromise
-            .then(() => this._readAndParseMetadata(metadataPath));
-      }
-      default:
-        return Promise.reject(new Error(`Unknown selection type: ${selectionType}`));
-    }
+  _tranform: function(): Promise<void> {
+    const params = new URLSearchParams();
+    params.set('destination_path', this.targetParams.destination_path);
+    params.set('destination_type', this.targetParams.destination_type);
+    
+    const graphPath =
+        tf_backend.getRouter().pluginRoute('convert', '/convert', params);
+    return this._fetchAndConstructHierarchicalGraphTransform(graphPath).then(() => {
+    })
+    return ;
   },
-  _readAndParseMetadata: function(path: string): void {
-    // Reset the progress bar to 0.
-    this.set('progress', {
-      value: 0,
-      msg: '',
-    });
-    var tracker = tf.convert.util.getTracker(this);
-    tf.convert.parser.fetchAndParseMetadata(path, tracker)
-        .then((stats) => {
-          this._setOutStats(stats);
-        });
-  },
+
   _fetchAndConstructHierarchicalGraph: async function(
       path: (string|null), pbTxtFile?: Blob): Promise<void> {
     // Reset the progress bar to 0.
     this.set('progress', {
-      value: 0,
-      msg: '',
+      value: 100,
+      msg: "Namespace hierarchy: Finding similar subgraphs",
     });
     const tracker = tf.convert.util.getTracker(this);
     return tf.convert.loader.fetchAndConstructHierarchicalGraph(
@@ -160,26 +120,29 @@ Polymer({
       this.compatibilityProvider,
       this.hierarchyParams,
     ).then(({graph, graphHierarchy}) => {
-      this._setOutGraph(graph);
-      this._setOutGraphHierarchy(graphHierarchy);
+      this.outGraph = graph
+      this.outGraphHierarchy = graphHierarchy
     });
   },
-  _selectedFileChanged: function(e: Event|null): void {
-    if (!e) {
-      return;
-    }
-    const target = (e.target as HTMLInputElement);
-    const file = target.files[0];
-    if (!file) {
-      return;
-    }
 
-    // Clear out the value of the file chooser. This ensures that if the user
-    // selects the same file, we'll re-read it.
-    target.value = '';
-
-    this._fetchAndConstructHierarchicalGraph(null, file);
-  },
+  _fetchAndConstructHierarchicalGraphTransform: async function(
+    path: (string|null), pbTxtFile?: Blob): Promise<void> {
+  // Reset the progress bar to 0.
+  this.set('progress', {
+    value: 100,
+    msg: "Namespace hierarchy: Finding similar subgraphs",
+  });
+  const tracker = tf.convert.util.getTracker(this);
+  return tf.convert.loader.fetchAndConstructHierarchicalGraph(
+    tracker,
+    path,
+    pbTxtFile,
+    this.compatibilityProvider,
+    this.hierarchyParams,
+  ).then(({graph, graphHierarchy}) => {
+    this.outGraphTar = graph
+    this.outGraphHierarchyTar = graphHierarchy
+  });
+},
 });
-
 }  // namespace tf.convert.loader
