@@ -17,7 +17,7 @@ limitations under the License.
  * @fileoverview Utility functions for the tensorflow graph visualizer.
  */
 
-module tf.graph.util {
+module tf.debug.util {
   /**
    * Recommended delay (ms) when running an expensive task asynchronously
    * that gives enough time for the progress bar to update its UI.
@@ -115,7 +115,7 @@ module tf.graph.util {
     // Run the expensive task with a delay that gives enough time for the
     // UI to update.
     try {
-      let result = tf.graph.util.time(msg, task);
+      let result = tf.debug.util.time(msg, task);
       // Update the progress value.
       tracker.updateProgress(incProgressValue);
       // Return the result to be used by other tasks.
@@ -140,7 +140,7 @@ module tf.graph.util {
       // UI to update.
       setTimeout(function() {
         try {
-          let result = tf.graph.util.time(msg, task);
+          let result = tf.debug.util.time(msg, task);
           // Update the progress value.
           tracker.updateProgress(incProgressValue);
           // Return the result to be used by other tasks.
@@ -236,7 +236,7 @@ module tf.graph.util {
       value: number, units: Units, unitIndex: number = 0) {
     if (unitIndex + 1 < units.length &&
         value >= units[unitIndex + 1].numUnits) {
-      return tf.graph.util.convertUnitsToHumanReadable(
+      return tf.debug.util.convertUnitsToHumanReadable(
           value / units[unitIndex + 1].numUnits, units, unitIndex + 1);
     }
     // toPrecision() has the tendency to return a number in scientific

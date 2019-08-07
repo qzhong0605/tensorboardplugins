@@ -107,7 +107,7 @@ limitations under the License.
            * Node to represent with an icon. Optional, but if specified, its
            * properties override those defined in the type, vertical, const and
            * summary properties.
-           * This property is a tf.graph.Node.
+           * This property is a tf.convert.Node.
            */
           node: {
             type: Object,
@@ -118,7 +118,7 @@ limitations under the License.
            * Render node information associated with this node. Optional. If
            * specified, this is only used when computing the fill of the icon
            * element.
-           * This property is a tf.graph.render.RenderNodeInfo.
+           * This property is a tf.convert.render.RenderNodeInfo.
            */
           renderInfo: {
             type: Object,
@@ -199,7 +199,7 @@ limitations under the License.
             inputTemplateIndex, inputFill) {
           if (inputNode && inputRenderInfo &&
               inputColorBy && inputTemplateIndex) {
-            var ns = tf.graph.scene.node;
+            var ns = tf.convert.scene.node;
             var colorBy = ns.ColorBy[inputColorBy.toUpperCase()];
             return ns.getFillForNode(inputTemplateIndex, colorBy,
                 inputRenderInfo, false);
@@ -213,9 +213,9 @@ limitations under the License.
          */
         _getFill: function(inputComputedFill, inputNodeType) {
           return inputComputedFill || ({
-            OP: tf.graph.render.OpNodeColors.DEFAULT_FILL,
-            META: tf.graph.render.MetanodeColors.DEFAULT_FILL,
-            SERIES: tf.graph.render.SeriesNodeColors.DEFAULT_FILL
+            OP: tf.convert.render.OpNodeColors.DEFAULT_FILL,
+            META: tf.convert.render.MetanodeColors.DEFAULT_FILL,
+            SERIES: tf.convert.render.SeriesNodeColors.DEFAULT_FILL
           })[inputNodeType];
         },
 
@@ -225,11 +225,11 @@ limitations under the License.
          */
         _getStroke: function(inputComputedFill, inputNodeType) {
           return inputComputedFill ?
-            tf.graph.scene.node.getStrokeForFill(inputComputedFill) :
+            tf.convert.scene.node.getStrokeForFill(inputComputedFill) :
             ({
-              OP: tf.graph.render.OpNodeColors.DEFAULT_STROKE,
-              META: tf.graph.render.MetanodeColors.DEFAULT_STROKE,
-              SERIES: tf.graph.render.SeriesNodeColors.DEFAULT_STROKE
+              OP: tf.convert.render.OpNodeColors.DEFAULT_STROKE,
+              META: tf.convert.render.MetanodeColors.DEFAULT_STROKE,
+              SERIES: tf.convert.render.SeriesNodeColors.DEFAULT_STROKE
             })[inputNodeType];
         },
 
@@ -239,7 +239,7 @@ limitations under the License.
          */
         _isType: function(inputNode, inputType, targetType) {
           if (inputNode) {
-            return tf.graph.NodeType[inputNode.type] === targetType;
+            return tf.convert.NodeType[inputNode.type] === targetType;
           }
           return inputType === targetType;
         },

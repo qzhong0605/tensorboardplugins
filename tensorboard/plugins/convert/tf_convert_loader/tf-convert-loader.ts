@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.loader {
+namespace tf.convert.loader {
 
 Polymer({
   is: 'tf-convert-loader',
@@ -29,7 +29,7 @@ Polymer({
     selectedFile: Object,
     compatibilityProvider: {
       type: Object,
-      value: () => new tf.graph.op.TpuCompatibilityProvider(),
+      value: () => new tf.convert.op.TpuCompatibilityProvider(),
     },
     /**
      * If this optional object is provided, graph logic will override
@@ -89,12 +89,12 @@ Polymer({
     } = this;
     // Reset the progress bar to 0.
     this.progress = {value: 0, msg: ''};
-    const tracker = tf.graph.util.getTracker(this);
+    const tracker = tf.convert.util.getTracker(this);
     const hierarchyParams = Object.assign(
         {},
-        tf.graph.hierarchy.DefaultHierarchyParams,
+        tf.convert.hierarchy.DefaultHierarchyParams,
         overridingHierarchyParams);
-    tf.graph.loader.fetchAndConstructHierarchicalGraph(
+    tf.convert.loader.fetchAndConstructHierarchicalGraph(
       tracker,
       path,
       pbTxtFile,
@@ -124,4 +124,4 @@ Polymer({
   },
 });
 
-}  // namespace tf.graph.loader
+}  // namespace tf.convert.loader

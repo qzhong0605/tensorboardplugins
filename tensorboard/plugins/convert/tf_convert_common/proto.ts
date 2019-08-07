@@ -26,7 +26,7 @@ limitations under the License.
  * certain value and a repeated field that has only 1 occurence, resulting in
  * subtle bugs.
  */
-module tf.graph.proto {
+module tf.convert.proto {
   /**
    * TensorFlow node definition as defined in the graph.proto file.
    */

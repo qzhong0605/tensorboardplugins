@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.controls {
+namespace tf.debug.controls {
 
   interface DeviceNameExclude {
     regex: RegExp,
@@ -44,7 +44,7 @@ namespace tf.graph.controls {
   export interface Selection {
     run: string,
     tag: string | null,
-    type: tf.graph.SelectionType,
+    type: tf.debug.SelectionType,
   }
   
   export interface DeviceForStats {
@@ -186,7 +186,7 @@ namespace tf.graph.controls {
       deviceId: String,
       // Public API.
       /**
-       * @type {?tf.graph.proto.StepStats}
+       * @type {?tf.debug.proto.StepStats}
        */
       stats: {
         value: null,
@@ -195,7 +195,7 @@ namespace tf.graph.controls {
       },
       
       /**
-       * @type {!tf.graph.controls.ColorBy}
+       * @type {!tf.debug.controls.ColorBy}
        */
       colorBy: {
         type: String,
@@ -235,11 +235,11 @@ namespace tf.graph.controls {
         observer: '_selectedTagIndexChanged',
       },
       /**
-       * @type {tf.graph.SelectionType}
+       * @type {tf.debug.SelectionType}
        */
       _selectedGraphType: {
         type: String,
-        value: tf.graph.SelectionType.OP_GRAPH,
+        value: tf.debug.SelectionType.OP_GRAPH,
       },
     },
   
@@ -505,7 +505,7 @@ namespace tf.graph.controls {
     },
   
     _computeSelection: function(datasets: Dataset, _selectedRunIndex: number,
-        _selectedTagIndex: number, _selectedGraphType: tf.graph.SelectionType) {
+        _selectedTagIndex: number, _selectedGraphType: tf.debug.SelectionType) {
       if (!datasets[_selectedRunIndex] ||
           !datasets[_selectedRunIndex].tags[_selectedTagIndex]) {
         return null;
@@ -530,7 +530,7 @@ namespace tf.graph.controls {
         this._selectedGraphType = this._getDefaultSelectionType();
     },
   
-    _getDefaultSelectionType(): tf.graph.SelectionType {
+    _getDefaultSelectionType(): tf.debug.SelectionType {
       const {
         datasets,
         _selectedRunIndex: run,
@@ -540,18 +540,18 @@ namespace tf.graph.controls {
           !datasets[run] ||
           !datasets[run].tags[tag] ||
           datasets[run].tags[tag].opGraph) {
-        return tf.graph.SelectionType.OP_GRAPH;
+        return tf.debug.SelectionType.OP_GRAPH;
       }
       if (datasets[run].tags[tag].profile) {
-        return tf.graph.SelectionType.PROFILE;
+        return tf.debug.SelectionType.PROFILE;
       }
       if (datasets[run].tags[tag].conceptualGraph) {
-        return tf.graph.SelectionType.CONCEPTUAL_GRAPH;
+        return tf.debug.SelectionType.CONCEPTUAL_GRAPH;
       }
-      return tf.graph.SelectionType.OP_GRAPH;
+      return tf.debug.SelectionType.OP_GRAPH;
     },
   
   });
   
-  }  // namespace tf.graph.controls
+  }  // namespace tf.debug.controls
   

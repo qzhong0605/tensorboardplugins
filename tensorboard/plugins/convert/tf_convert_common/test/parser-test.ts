@@ -18,7 +18,7 @@ describe('parser', () => {
 
   describe('parsing GraphDef pbtxt', () => {
     it('parses a simple pbtxt', () => {
-      const pbtxt = tf.graph.test.util.stringToArrayBuffer(`node {
+      const pbtxt = tf.convert.test.util.stringToArrayBuffer(`node {
         name: "Q"
         op: "Input"
       }
@@ -32,7 +32,7 @@ describe('parser', () => {
         input: "Q"
         input: "W"
       }`);
-      return tf.graph.parser.parseGraphPbTxt(pbtxt).then(graph => {
+      return tf.convert.parser.parseGraphPbTxt(pbtxt).then(graph => {
         let nodes = graph.node;
         assert.isTrue(nodes != null && nodes.length === 3);
 
@@ -50,7 +50,7 @@ describe('parser', () => {
     });
 
     it('parses function def library', () => {
-      const pbtxt = tf.graph.test.util.stringToArrayBuffer(`library {
+      const pbtxt = tf.convert.test.util.stringToArrayBuffer(`library {
         function {
           signature {
             name: "foo"
@@ -101,7 +101,7 @@ describe('parser', () => {
           }
         }
       }`);
-      return tf.graph.parser.parseGraphPbTxt(pbtxt).then(graph => {
+      return tf.convert.parser.parseGraphPbTxt(pbtxt).then(graph => {
         expect(graph).to.have.property('library')
             .that.has.property('function')
             .that.is.an('array')
@@ -140,12 +140,12 @@ describe('parser', () => {
 
       // Then it becomes unpredictable.
       it('parses upto an empty node', () => {
-        const pbtxt = tf.graph.test.util.stringToArrayBuffer(`node {
+        const pbtxt = tf.convert.test.util.stringToArrayBuffer(`node {
           name: "Q"
           op: "Input"
         }
         node {}`);
-        return tf.graph.parser.parseGraphPbTxt(pbtxt).then(graph => {
+        return tf.convert.parser.parseGraphPbTxt(pbtxt).then(graph => {
           const nodes = graph.node;
           assert.isArray(nodes);
           assert.lengthOf(nodes, 1);
@@ -156,12 +156,12 @@ describe('parser', () => {
       });
 
       it('fails to parse a node when an empty node appears before', () => {
-        const pbtxt = tf.graph.test.util.stringToArrayBuffer(`node {}
+        const pbtxt = tf.convert.test.util.stringToArrayBuffer(`node {}
         node {
           name: "Q"
           op: "Input"
         }`);
-        return tf.graph.parser.parseGraphPbTxt(pbtxt)
+        return tf.convert.parser.parseGraphPbTxt(pbtxt)
             .then(
               () => assert.fail('Should NOT resolve'),
               () => {
@@ -170,22 +170,22 @@ describe('parser', () => {
       });
 
       it('parses pbtxt without newlines as errorneously empty', () => {
-        const pbtxt = tf.graph.test.util.stringToArrayBuffer(
+        const pbtxt = tf.convert.test.util.stringToArrayBuffer(
             `node { name: "Q" op: "Input" } node { name: "A" op: "Input" }`);
-        return tf.graph.parser.parseGraphPbTxt(pbtxt).then((graph) => {
+        return tf.convert.parser.parseGraphPbTxt(pbtxt).then((graph) => {
           assert.notProperty(graph, 'node');
         });
       });
 
 
       it('parses malformed pbtxt upto the correct declaration', () => {
-        const pbtxt = tf.graph.test.util.stringToArrayBuffer(`node {
+        const pbtxt = tf.convert.test.util.stringToArrayBuffer(`node {
           name: "Q"
           op: "Input"
         }
         node { name: "W" op: "Input" }
         node { name: "X" op: "MatMul" input: "Q" input: "W" }`);
-        return tf.graph.parser.parseGraphPbTxt(pbtxt).then(graph => {
+        return tf.convert.parser.parseGraphPbTxt(pbtxt).then(graph => {
           const nodes = graph.node;
           assert.isArray(nodes);
           assert.lengthOf(nodes, 1);
@@ -196,7 +196,7 @@ describe('parser', () => {
       });
 
       it('cannot parse when pbtxt is malformed', () => {
-        const pbtxt = tf.graph.test.util.stringToArrayBuffer(`node {
+        const pbtxt = tf.convert.test.util.stringToArrayBuffer(`node {
           name: "Q"
           op: "Input
         }
@@ -206,7 +206,7 @@ describe('parser', () => {
           name: A"
           op: "Input"
         }`);
-        return tf.graph.parser.parseGraphPbTxt(pbtxt)
+        return tf.convert.parser.parseGraphPbTxt(pbtxt)
             .then(
               () => assert.fail('Should NOT resolve'),
               () => {
@@ -217,7 +217,7 @@ describe('parser', () => {
   });
 
   it('parses stats pbtxt', () => {
-    let statsPbtxt = tf.graph.test.util.stringToArrayBuffer(`step_stats {
+    let statsPbtxt = tf.convert.test.util.stringToArrayBuffer(`step_stats {
       dev_stats {
         device: "cpu"
         node_stats {
@@ -232,7 +232,7 @@ describe('parser', () => {
         }
       }
     }`);
-    return tf.graph.parser.parseStatsPbTxt(statsPbtxt).then(stepStats => {
+    return tf.convert.parser.parseStatsPbTxt(statsPbtxt).then(stepStats => {
       assert.equal(stepStats.dev_stats.length, 1);
       assert.equal(stepStats.dev_stats[0].device, 'cpu');
       assert.equal(stepStats.dev_stats[0].node_stats.length, 2);

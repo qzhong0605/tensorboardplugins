@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-module tf.graph.op {
+module tf.debug.op {
   export interface CompatibilityProvider {
     opValid: (opNode: OpNode) => boolean;
   }
@@ -450,4 +450,4 @@ module tf.graph.op {
       });
     });
   }
-}  // close module tf.graph.op
+}  // close module tf.debug.op

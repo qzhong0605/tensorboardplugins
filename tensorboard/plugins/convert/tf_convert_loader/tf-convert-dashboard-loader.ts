@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.loader {
+namespace tf.convert.loader {
 
 interface GraphRunTag {
   run: string;
@@ -43,11 +43,11 @@ Polymer({
     selectedFile: Object,
     compatibilityProvider: {
       type: Object,
-      value: () => new tf.graph.op.TpuCompatibilityProvider(),
+      value: () => new tf.convert.op.TpuCompatibilityProvider(),
     },
     hierarchyParams: {
       type: Object,
-      value: () => tf.graph.hierarchy.DefaultHierarchyParams,
+      value: () => tf.convert.hierarchy.DefaultHierarchyParams,
     },
     outGraphHierarchy: {
       type: Object,
@@ -81,19 +81,19 @@ Polymer({
       this._load(this.selection);
     });
   },
-  _load: function(selection: tf.graph.controls.Selection): Promise<void> {
+  _load: function(selection: tf.convert.controls.Selection): Promise<void> {
     const {run, tag, type: selectionType} = selection;
 
     switch (selectionType) {
-      case tf.graph.SelectionType.OP_GRAPH:
-      case tf.graph.SelectionType.CONCEPTUAL_GRAPH: {
+      case tf.convert.SelectionType.OP_GRAPH:
+      case tf.convert.SelectionType.CONCEPTUAL_GRAPH: {
         // Clear stats about the previous graph.
         this._setOutStats(null);
         const params = new URLSearchParams();
         params.set('run', run);
         params.set(
             'conceptual',
-            String(selectionType === tf.graph.SelectionType.CONCEPTUAL_GRAPH));
+            String(selectionType === tf.convert.SelectionType.CONCEPTUAL_GRAPH));
         if (tag) params.set('tag', tag);
         const graphPath =
             tf_backend.getRouter().pluginRoute('convert', '/graph', params);
@@ -101,7 +101,7 @@ Polymer({
           this._graphRunTag = {run, tag};
         })
       }
-      case tf.graph.SelectionType.PROFILE: {
+      case tf.convert.SelectionType.PROFILE: {
         const {tags} = this.datasets.find(({name}) => name === run);
         const tagMeta = tags.find(t => t.tag === tag);
         // In case current tag misses opGraph but has profile information,
@@ -119,7 +119,7 @@ Polymer({
             this._load({
               run,
               tag: requiredOpGraphTag,
-              type: tf.graph.SelectionType.OP_GRAPH,
+              type: tf.convert.SelectionType.OP_GRAPH,
             }) : Promise.resolve();
         const params = new URLSearchParams();
         params.set('tag', tag);
@@ -139,8 +139,8 @@ Polymer({
       value: 0,
       msg: '',
     });
-    var tracker = tf.graph.util.getTracker(this);
-    tf.graph.parser.fetchAndParseMetadata(path, tracker)
+    var tracker = tf.convert.util.getTracker(this);
+    tf.convert.parser.fetchAndParseMetadata(path, tracker)
         .then((stats) => {
           this._setOutStats(stats);
         });
@@ -152,8 +152,8 @@ Polymer({
       value: 0,
       msg: '',
     });
-    const tracker = tf.graph.util.getTracker(this);
-    return tf.graph.loader.fetchAndConstructHierarchicalGraph(
+    const tracker = tf.convert.util.getTracker(this);
+    return tf.convert.loader.fetchAndConstructHierarchicalGraph(
       tracker,
       path,
       pbTxtFile,
@@ -182,4 +182,4 @@ Polymer({
   },
 });
 
-}  // namespace tf.graph.loader
+}  // namespace tf.convert.loader

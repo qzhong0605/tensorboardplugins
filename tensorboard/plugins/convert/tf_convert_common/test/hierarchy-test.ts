@@ -16,7 +16,7 @@ const {expect} = chai;
 
 describe('hierarchy', () => {
   beforeEach(function() {
-    const pbtxt = tf.graph.test.util.stringToArrayBuffer(`
+    const pbtxt = tf.convert.test.util.stringToArrayBuffer(`
       node {
         name: "Q"
         op: "VariableV2"
@@ -111,13 +111,13 @@ describe('hierarchy', () => {
         input: "Q"
         input: "W"
       }`);
-    const buildParams: tf.graph.BuildParams = {
+    const buildParams: tf.convert.BuildParams = {
       enableEmbedding: true,
       inEmbeddingTypes: ['Const'],
       outEmbeddingTypes: ['^[a-zA-Z]+Summary$'],
       refEdges: {}
     };
-    this.dummyTracker = tf.graph.util.getTracker({
+    this.dummyTracker = tf.convert.util.getTracker({
       set: () => {},
       progress: 0,
     });
@@ -128,13 +128,13 @@ describe('hierarchy', () => {
       rankDirection: '',
       useGeneralizedSeriesPatterns: false,
     };
-    return tf.graph.parser.parseGraphPbTxt(pbtxt)
-        .then(nodes => tf.graph.build(nodes, buildParams, this.dummyTracker))
-        .then((graph: tf.graph.SlimGraph) => this.slimGraph = graph)
+    return tf.convert.parser.parseGraphPbTxt(pbtxt)
+        .then(nodes => tf.convert.build(nodes, buildParams, this.dummyTracker))
+        .then((graph: tf.convert.SlimGraph) => this.slimGraph = graph)
   });
 
   it('builds hierarchy with metagraph', function() {
-    return tf.graph.hierarchy
+    return tf.convert.hierarchy
         .build(this.slimGraph, this.options, this.dummyTracker)
         .then(hierarchy => {
           if (!hierarchy) throw new Error('Expected hierarchy to be built')

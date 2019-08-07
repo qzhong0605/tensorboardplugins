@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.controls {
+namespace tf.convert.controls {
 
 interface DeviceNameExclude {
   regex: RegExp,
@@ -44,7 +44,7 @@ const DEVICE_STATS_DEFAULT_OFF: StatsDefaultOff[] = [];
 export interface Selection {
   run: string,
   tag: string | null,
-  type: tf.graph.SelectionType,
+  type: tf.convert.SelectionType,
 }
 
 export interface DeviceForStats {
@@ -134,7 +134,7 @@ Polymer({
     desType: String,
     // Public API.
     /**
-     * @type {?tf.graph.proto.StepStats}
+     * @type {?tf.convert.proto.StepStats}
      */
     stats: {
       value: null,
@@ -143,7 +143,7 @@ Polymer({
     },
     
     /**
-     * @type {!tf.graph.controls.ColorBy}
+     * @type {!tf.convert.controls.ColorBy}
      */
     colorBy: {
       type: String,
@@ -162,7 +162,7 @@ Polymer({
       value: () => [],
     },
     /**
-     * @type {tf.graph.render.RenderGraphInfo}
+     * @type {tf.convert.render.RenderGraphInfo}
      */
     renderHierarchy: {
       type: Object,
@@ -189,11 +189,11 @@ Polymer({
       observer: '_selectedTagIndexChanged',
     },
     /**
-     * @type {tf.graph.SelectionType}
+     * @type {tf.convert.SelectionType}
      */
     _selectedGraphType: {
       type: String,
-      value: tf.graph.SelectionType.OP_GRAPH,
+      value: tf.convert.SelectionType.OP_GRAPH,
     },
     selectedNode: {
       type: String,
@@ -242,7 +242,7 @@ Polymer({
     // console.info('right')
   },
   _isGradientColoring: function(
-      stats: tf.graph.proto.StepStats, colorBy: ColorBy): boolean {
+      stats: tf.convert.proto.StepStats, colorBy: ColorBy): boolean {
     return GRADIENT_COMPATIBLE_COLOR_BY.has(colorBy) && stats != null;
   },
 
@@ -254,7 +254,7 @@ Polymer({
   },
 
   _computeSelection: function(datasets: Dataset, _selectedRunIndex: number,
-      _selectedTagIndex: number, _selectedGraphType: tf.graph.SelectionType) {
+      _selectedTagIndex: number, _selectedGraphType: tf.convert.SelectionType) {
     if (!datasets[_selectedRunIndex] ||
         !datasets[_selectedRunIndex].tags[_selectedTagIndex]) {
       return null;
@@ -279,7 +279,7 @@ Polymer({
       this._selectedGraphType = this._getDefaultSelectionType();
   },
 
-  _getDefaultSelectionType(): tf.graph.SelectionType {
+  _getDefaultSelectionType(): tf.convert.SelectionType {
     const {
       datasets,
       _selectedRunIndex: run,
@@ -289,15 +289,15 @@ Polymer({
         !datasets[run] ||
         !datasets[run].tags[tag] ||
         datasets[run].tags[tag].opGraph) {
-      return tf.graph.SelectionType.OP_GRAPH;
+      return tf.convert.SelectionType.OP_GRAPH;
     }
     if (datasets[run].tags[tag].profile) {
-      return tf.graph.SelectionType.PROFILE;
+      return tf.convert.SelectionType.PROFILE;
     }
     if (datasets[run].tags[tag].conceptualGraph) {
-      return tf.graph.SelectionType.CONCEPTUAL_GRAPH;
+      return tf.convert.SelectionType.CONCEPTUAL_GRAPH;
     }
-    return tf.graph.SelectionType.OP_GRAPH;
+    return tf.convert.SelectionType.OP_GRAPH;
   },
 
   showSuccess: function(){
@@ -309,4 +309,4 @@ Polymer({
   },
 });
 
-}  // namespace tf.graph.controls
+}  // namespace tf.convert.controls

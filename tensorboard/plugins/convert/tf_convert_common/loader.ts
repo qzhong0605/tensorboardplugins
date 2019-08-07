@@ -12,14 +12,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-module tf.graph.loader {
+module tf.convert.loader {
   export type GraphAndHierarchy = {
     graph: SlimGraph,
     graphHierarchy: hierarchy.Hierarchy;
   };
 
   export function fetchAndConstructHierarchicalGraph(
-      tracker: tf.graph.util.Tracker,
+      tracker: tf.convert.util.Tracker,
       remotePath: string|null,
       pbTxtFile: Blob|null,
       compatibilityProvider: op.CompatibilityProvider =
@@ -66,4 +66,4 @@ module tf.graph.loader {
       });
   }
 
-}  // module tf.graph.loader
+}  // module tf.convert.loader

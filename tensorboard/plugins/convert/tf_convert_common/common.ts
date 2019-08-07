@@ -31,7 +31,7 @@ module tf {
 } // close module tf
 
 
-namespace tf.graph {
+namespace tf.convert {
   // Note that tf-convert-control depends on the value of the enum.
   // Polymer does not let one use JS variable as a prop.
   export enum SelectionType {
@@ -39,4 +39,4 @@ namespace tf.graph {
     CONCEPTUAL_GRAPH = 'conceptual_graph',
     PROFILE = 'profile',
   };
-}  // namespace tf.graph
+}  // namespace tf.convert

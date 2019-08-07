@@ -266,7 +266,7 @@ Polymer({
     _compatibilityProvider: Object,
     _hierarchyParams: {
       type: Object,
-      value: () => tf.graph.hierarchy.DefaultHierarchyParams,
+      value: () => tf.convert.hierarchy.DefaultHierarchyParams,
     },
   },
   listeners: {
@@ -380,7 +380,7 @@ Polymer({
       return;
     }
 
-    this.set('_compatibilityProvider', new tf.graph.op.TpuCompatibilityProvider());
+    this.set('_compatibilityProvider', new tf.convert.op.TpuCompatibilityProvider());
 
     // Set this to true so we only initialize once.
     this._initialized = true;

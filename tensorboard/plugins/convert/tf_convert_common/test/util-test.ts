@@ -19,28 +19,28 @@ describe('util', () => {
   it('remove common prefix', () => {
 
     // Empty array.
-    let result = tf.graph.util.removeCommonPrefix([]);
+    let result = tf.convert.util.removeCommonPrefix([]);
     assert.deepEqual(result, []);
 
     // No common prefix.
-    result = tf.graph.util.removeCommonPrefix(['a', 'b', 'c']);
+    result = tf.convert.util.removeCommonPrefix(['a', 'b', 'c']);
     assert.deepEqual(result, ['a', 'b', 'c']);
 
     // One of the elements is empty string.
-    result = tf.graph.util.removeCommonPrefix(['a/b', '', 'a/c']);
+    result = tf.convert.util.removeCommonPrefix(['a/b', '', 'a/c']);
     assert.deepEqual(result, ['a/b', '', 'a/c']);
 
     // Only one string.
-    result = tf.graph.util.removeCommonPrefix(['a/b/c']);
+    result = tf.convert.util.removeCommonPrefix(['a/b/c']);
     assert.deepEqual(result, ['a/b/c']);
 
     // `q/w/` is the common prefix. Expect `q/w/` to be removed.
-    result = tf.graph.util.removeCommonPrefix(['q/w/a', 'q/w/b', 'q/w/c/f']);
+    result = tf.convert.util.removeCommonPrefix(['q/w/a', 'q/w/b', 'q/w/c/f']);
     assert.deepEqual(result, ['a', 'b', 'c/f']);
 
     // `q/w/` is the common prefix and also an element. Expect nothing to be
     // removed since the common prefix is also an element in the array.
-    result = tf.graph.util.removeCommonPrefix(['q/w/', 'q/w/b', 'q/w/c/f']);
+    result = tf.convert.util.removeCommonPrefix(['q/w/', 'q/w/b', 'q/w/c/f']);
     assert.deepEqual(result, ['q/w/', 'q/w/b', 'q/w/c/f']);
   });
 });

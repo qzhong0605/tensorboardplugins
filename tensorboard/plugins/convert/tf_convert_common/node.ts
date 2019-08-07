@@ -12,8 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-module tf.graph.scene.node {
-  import RenderNodeInfo = tf.graph.render.RenderNodeInfo;
+module tf.convert.scene.node {
+  import RenderNodeInfo = tf.convert.render.RenderNodeInfo;
   /**
    * Select or Create a 'g.nodes' group to a given sceneGroup
    * and builds a number of 'g.node' groups inside the group.
@@ -330,9 +330,9 @@ function getContainingSeries(node: Node) {
  * node.
  */
 export function getGroupSettingLabel(node: Node) {
-  return tf.graph.getGroupSeriesNodeButtonString(
-    getContainingSeries(node) !== null ? tf.graph.SeriesGroupingType.GROUP :
-     tf.graph.SeriesGroupingType.UNGROUP);
+  return tf.convert.getGroupSeriesNodeButtonString(
+    getContainingSeries(node) !== null ? tf.convert.SeriesGroupingType.GROUP :
+     tf.convert.SeriesGroupingType.UNGROUP);
 }
 
 /**
@@ -614,7 +614,7 @@ export enum ColorBy {STRUCTURE, DEVICE, XLA_CLUSTER, COMPUTE_TIME, MEMORY,
 
 function getGradient(
     id: string, colors: Array<{color: string, proportion: number}>) {
-  let escapedId = tf.graph.util.escapeQuerySelector(id);
+  let escapedId = tf.convert.util.escapeQuerySelector(id);
   let gradientDefs = d3.select('svg#svg defs #linearGradients');
   let linearGradient = gradientDefs.select('linearGradient#' + escapedId);
   // If the linear gradient is not there yet, create it.
@@ -763,7 +763,7 @@ export function getStrokeForFill(fill: string) {
  *
  * @param renderGraphInfo Information on the rendered state of the graph.
  */
-export function traceInputs(renderGraphInfo: tf.graph.render.RenderGraphInfo) {
+export function traceInputs(renderGraphInfo: tf.convert.render.RenderGraphInfo) {
   // Reset all styling.
   d3.selectAll('.input-highlight').classed('input-highlight', false);
   d3.selectAll('.non-input').classed('non-input', false);
@@ -833,20 +833,20 @@ export function traceInputs(renderGraphInfo: tf.graph.render.RenderGraphInfo) {
  * @returns {Array} An array of OpNodeImpl instances.
  */
 export function _getAllContainedOpNodes(
-    nodeName: string, renderGraphInfo: tf.graph.render.RenderGraphInfo) {
+    nodeName: string, renderGraphInfo: tf.convert.render.RenderGraphInfo) {
   let opNodes = [];
 
   // Get current node.
-  let node = renderGraphInfo.getNodeByName(nodeName) as tf.graph.GroupNode |
-      tf.graph.OpNode;
+  let node = renderGraphInfo.getNodeByName(nodeName) as tf.convert.GroupNode |
+      tf.convert.OpNode;
 
   // If node is already OpNode then return the node plus its input embeddings.
-  if (node instanceof tf.graph.OpNodeImpl) {
+  if (node instanceof tf.convert.OpNodeImpl) {
     return [node].concat(node.inEmbeddings);
   }
 
   // Otherwise, make recursive call for each node contained by the GroupNode.
-  let childNodeNames = (node as tf.graph.GroupNode).metagraph.nodes();
+  let childNodeNames = (node as tf.convert.GroupNode).metagraph.nodes();
   _.each(childNodeNames, function(childNodeName) {
     opNodes =
         opNodes.concat(_getAllContainedOpNodes(childNodeName, renderGraphInfo));
@@ -868,7 +868,7 @@ interface VisibleParent {
 }
 
 export function traceAllInputsOfOpNode(
-    renderGraphInfo: tf.graph.render.RenderGraphInfo, startNode: OpNode,
+    renderGraphInfo: tf.convert.render.RenderGraphInfo, startNode: OpNode,
     allTracedNodes: Object) {
   // To prevent infinite loops due to cyclical relationships and improving
   // performance by tracing OpNode which is input to 2+ nodes only once.
@@ -896,7 +896,7 @@ export function traceAllInputsOfOpNode(
     }
     // Ensure node is resolved to OpNode if name collision with Metanode exists.
     if (resolvedNode instanceof MetanodeImpl) {
-      let resolvedNodeName = tf.graph.getStrictName(resolvedNode.name);
+      let resolvedNodeName = tf.convert.getStrictName(resolvedNode.name);
       resolvedNode = renderGraphInfo.getNodeByName(resolvedNodeName) as OpNode;
     }
 
@@ -924,7 +924,7 @@ export function traceAllInputsOfOpNode(
   };
 
   let currentNode = currentVisibleParent as Node;
-  for (let index = 1; currentNode.name !== tf.graph.ROOT_NAME; index++) {
+  for (let index = 1; currentNode.name !== tf.convert.ROOT_NAME; index++) {
     currentNode = currentNode.parentNode;
     startNodeParents[currentNode.name] = {
       traced: false,
@@ -1072,7 +1072,7 @@ function _markParentsOfNodes(visibleNodes: {[nodeName: string]: Node}) {
     // Mark all parents of the node as input-parents.
     let currentNode = nodeInstance;
 
-    while (currentNode.name !== tf.graph.ROOT_NAME) {
+    while (currentNode.name !== tf.convert.ROOT_NAME) {
       const renderedElementSelection =
           d3.select(`.node[data-name="${currentNode.name}"]`);
       // Only mark the element as a parent node to an input if it is not
@@ -1100,8 +1100,8 @@ function _markParentsOfNodes(visibleNodes: {[nodeName: string]: Node}) {
  * @returns Node
  */
 export function getVisibleParent(
-    renderGraphInfo: tf.graph.render.RenderGraphInfo,
-    currentNode: tf.graph.Node) {
+    renderGraphInfo: tf.convert.render.RenderGraphInfo,
+    currentNode: tf.convert.Node) {
   let found = false;
   let currentParent = currentNode;
 
@@ -1119,7 +1119,7 @@ export function getVisibleParent(
       // or the parent is an OpNode in which case currentNode is an embedded
       // node which has another OpNode as parent.
       if (renderNode &&
-          (renderNode.expanded || currentParent instanceof graph.OpNodeImpl)) {
+          (renderNode.expanded || currentParent instanceof convert.OpNodeImpl)) {
         found = true;
       }
     }

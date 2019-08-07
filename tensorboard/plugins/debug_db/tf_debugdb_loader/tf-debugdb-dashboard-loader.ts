@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-namespace tf.graph.loader {
+namespace tf.debug.loader {
 
 interface GraphRunTag {
   run: string;
@@ -44,11 +44,11 @@ Polymer({
     },
     compatibilityProvider: {
       type: Object,
-      value: () => new tf.graph.op.TpuCompatibilityProvider(),
+      value: () => new tf.debug.op.TpuCompatibilityProvider(),
     },
     hierarchyParams: {
       type: Object,
-      value: () => tf.graph.hierarchy.DefaultHierarchyParams,
+      value: () => tf.debug.hierarchy.DefaultHierarchyParams,
     },
     outGraphHierarchy: {
       type: Object,
@@ -116,8 +116,8 @@ Polymer({
     value: 0,
     msg: '',
   });
-  const tracker = tf.graph.util.getTracker(this);
-  return tf.graph.loader.fetchAndConstructHierarchicalGraph(
+  const tracker = tf.debug.util.getTracker(this);
+  return tf.debug.loader.fetchAndConstructHierarchicalGraph(
     tracker,
     path,
     pbTxtFile,
@@ -130,4 +130,4 @@ Polymer({
 },
 });
 
-}  // namespace tf.graph.loader
+}  // namespace tf.debug.loader

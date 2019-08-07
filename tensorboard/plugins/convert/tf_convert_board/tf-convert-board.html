@@ -191,7 +191,7 @@ Polymer({
       type: Array,
       notify: true,
     },
-    // A mapping between node name to the tf.graph.scene.HealthPill to render.
+    // A mapping between node name to the tf.convert.scene.HealthPill to render.
     nodeNamesToHealthPills: Object,
     // Whether the user can request health pills for individual steps from the server. This can be
     // slow compared the default of showing sampled health pills.
@@ -231,7 +231,7 @@ Polymer({
     // An optional function that computes the label for an edge. Should
     // implement the EdgeLabelFunction signature.
     edgeLabelFunction: Object,
-    // An optional callback that implements the tf.graph.edge.EdgeSelectionCallback signature. If
+    // An optional callback that implements the tf.convert.edge.EdgeSelectionCallback signature. If
     // provided, edges are selectable, and this callback is run when an edge is selected.
     handleEdgeSelected: Object,
   },
@@ -258,7 +258,7 @@ Polymer({
   _updateNodeInclude: function(nodeName) {
     var node = this.graphHierarchy.node(nodeName);
     this.set("_selectedNodeInclude",
-      node ? node.include : tf.graph.InclusionType.UNSPECIFIED);
+      node ? node.include : tf.convert.InclusionType.UNSPECIFIED);
   },
   _nodeToggleExtract: function() {
     this._updateNodeInclude(this.selectedNode);

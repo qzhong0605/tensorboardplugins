@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-module tf.graph.scene.edge {
+module tf.convert.scene.edge {
 
 /** Delimiter between dimensions when showing sizes of tensors. */
 const TENSOR_SHAPE_DELIM = '×';
@@ -197,7 +197,7 @@ function getPathSegmentIndexAtLength(
     points: render.Point[],
     length: number,
     lineFunc: (points: render.Point[]) => string): number {
-  const path = document.createElementNS(tf.graph.scene.SVG_NAMESPACE, 'path');
+  const path = document.createElementNS(tf.convert.scene.SVG_NAMESPACE, 'path');
   for (let i = 1; i < points.length; i++) {
     path.setAttribute("d", lineFunc(points.slice(0, i)));
     if (path.getTotalLength() > length) {

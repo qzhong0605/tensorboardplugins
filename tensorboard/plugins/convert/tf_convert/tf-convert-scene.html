@@ -684,7 +684,7 @@ Polymer({
       type: String,
       observer: '_selectedNodeChanged'
     },
-    // An optional callback that implements the tf.graph.edge.EdgeSelectionCallback signature. If
+    // An optional callback that implements the tf.convert.edge.EdgeSelectionCallback signature. If
     // provided, edges are selectable, and this callback is run when an edge is selected.
     handleEdgeSelected: Object,
     /** Keeps track of if the graph has been zoomed/panned since loading */
@@ -719,7 +719,7 @@ Polymer({
     /**
      * Scale mapping from template name to a number between 0 and N-1
      * where N is the number of different template names. Used by
-     * tf.graph.scene.node when computing node color by structure.
+     * tf.convert.scene.node when computing node color by structure.
      * This property is a d3.scale.ordinal object.
      */
     templateIndex: Function,
@@ -785,7 +785,7 @@ Polymer({
     // An array of ContextMenuItem objects. Items that appear in the context
     // menu for a node.
     nodeContextMenuItems: Array,
-    // A mapping between node name to the tf.graph.scene.HealthPill to render.
+    // A mapping between node name to the tf.convert.scene.HealthPill to render.
     nodeNamesToHealthPills: Object,
     // The step of health pills to show throughout the graph.
     healthPillStepIndex: Number,
@@ -813,7 +813,7 @@ Polymer({
    * @param nodeName {string} The name of the node to pan to.
    */
   panToNode(nodeName) {
-    const zoomed = tf.graph.scene.panToNode(
+    const zoomed = tf.convert.scene.panToNode(
         nodeName, this.$.svg, this.$.root, this._zoom);
     if (zoomed) {
       this._zoomed = true;
@@ -838,21 +838,21 @@ Polymer({
   /** Main method for building the scene */
   _build: function(renderHierarchy) {
     this.templateIndex = renderHierarchy.hierarchy.getTemplateIndex();
-    tf.graph.util.time('tf-convert-scene (layout):', function() {
+    tf.convert.util.time('tf-convert-scene (layout):', function() {
       // layout the scene for this meta / series node
-      tf.graph.layout.layoutScene(renderHierarchy.root, this);
+      tf.convert.layout.layoutScene(renderHierarchy.root, this);
     }.bind(this));
 
-    tf.graph.util.time('tf-convert-scene (build scene):', function() {
-      tf.graph.scene.buildGroup(d3.select(this.$.root), renderHierarchy.root, this);
-      tf.graph.scene.addGraphClickListener(this.$.svg, this);
-      // tf.graph.scene.node.traceInputs(renderHierarchy);
+    tf.convert.util.time('tf-convert-scene (build scene):', function() {
+      tf.convert.scene.buildGroup(d3.select(this.$.root), renderHierarchy.root, this);
+      tf.convert.scene.addGraphClickListener(this.$.svg, this);
+      // tf.convert.scene.node.traceInputs(renderHierarchy);
     }.bind(this));
     // Update the minimap again when the graph is done animating.
     setTimeout(function() {
       this._updateHealthPills(this.nodeNamesToHealthPills, this.healthPillStepIndex);
       this.minimap.update();
-    }.bind(this), tf.graph.layout.PARAMS.animation.duration);
+    }.bind(this), tf.convert.layout.PARAMS.animation.duration);
   },
   ready: function() {
     this._zoom = d3.zoom()
@@ -904,8 +904,8 @@ Polymer({
     }.bind(this));
     // Initialize the minimap.
     this.minimap = this.$.minimap.init(this.$.svg, this.$.root, this._zoom,
-        tf.graph.layout.PARAMS.minimap.size,
-        tf.graph.layout.PARAMS.subscene.meta.labelHeight);
+        tf.convert.layout.PARAMS.minimap.size,
+        tf.convert.layout.PARAMS.subscene.meta.labelHeight);
   },
   attached: function() {
     this.set('_isAttached', true);
@@ -926,7 +926,7 @@ Polymer({
     }
 
     // Fit to screen after the graph is done animating.
-    setTimeout(this.fit.bind(this), tf.graph.layout.PARAMS.animation.duration);
+    setTimeout(this.fit.bind(this), tf.convert.layout.PARAMS.animation.duration);
   },
   _updateLabels: function(showLabels) {
     // var mainGraphTitleElement = this.getElementsByClassName('title')[0];
@@ -935,15 +935,15 @@ Polymer({
     // var auxTitleStyle = auxTitleElement.style;
     // var functionLibraryTitleStyle =
     //     this.getElementsByClassName('functionLibraryTitle')[0].style;
-    // var core = d3.select("." + tf.graph.scene.Class.Scene.GROUP + ">." +
-    //   tf.graph.scene.Class.Scene.CORE).node();
+    // var core = d3.select("." + tf.convert.scene.Class.Scene.GROUP + ">." +
+    //   tf.convert.scene.Class.Scene.CORE).node();
     // // Only show labels if the graph is fully loaded.
     // if (showLabels && core && this.progress && this.progress.value === 100) {
     //   var aux =
-    //     d3.select("." + tf.graph.scene.Class.Scene.GROUP + ">." +
-    //       tf.graph.scene.Class.Scene.INEXTRACT).node() ||
-    //     d3.select("." + tf.graph.scene.Class.Scene.GROUP + ">." +
-    //       tf.graph.scene.Class.Scene.OUTEXTRACT).node();
+    //     d3.select("." + tf.convert.scene.Class.Scene.GROUP + ">." +
+    //       tf.convert.scene.Class.Scene.INEXTRACT).node() ||
+    //     d3.select("." + tf.convert.scene.Class.Scene.GROUP + ">." +
+    //       tf.convert.scene.Class.Scene.OUTEXTRACT).node();
     //   var coreX = core.getCTM().e;
     //   var auxX = aux ? aux.getCTM().e : null;
     //   titleStyle.display = 'inline';
@@ -962,8 +962,8 @@ Polymer({
     //   }
 
     //   let functionLibrary = d3.select(
-    //       "." + tf.graph.scene.Class.Scene.GROUP + ">." +
-    //           tf.graph.scene.Class.Scene.FUNCTION_LIBRARY).node();
+    //       "." + tf.convert.scene.Class.Scene.GROUP + ">." +
+    //           tf.convert.scene.Class.Scene.FUNCTION_LIBRARY).node();
     //   let functionLibraryX =
     //       functionLibrary ? functionLibrary.getCTM().e : null;
     //   if (functionLibraryX !== null && functionLibraryX !== auxX) {
@@ -1001,7 +1001,7 @@ Polymer({
   },
   fit: function() {
     this._hasRenderHierarchyBeenFitOnce = true;
-    tf.graph.scene.fit(this.$.svg, this.$.root, this._zoom, function() {
+    tf.convert.scene.fit(this.$.svg, this.$.root, this._zoom, function() {
       this._zoomed = false;
     }.bind(this));
   },
@@ -1038,7 +1038,7 @@ Polymer({
     return this._edgeGroupIndex[e];
   },
   _updateHealthPills: function(nodeNamesToHealthPills, healthPillStepIndex) {
-    tf.graph.scene.addHealthPills(
+    tf.convert.scene.addHealthPills(
         this.$.svg, nodeNamesToHealthPills, healthPillStepIndex);
   },
   /**
@@ -1049,28 +1049,28 @@ Polymer({
     var node = this.getNode(n);
     var nodeGroup = this.getNodeGroup(n);
     if (nodeGroup) {
-      tf.graph.scene.node.stylize(nodeGroup, node, this);
+      tf.convert.scene.node.stylize(nodeGroup, node, this);
     }
 
-    if (node.node.type === tf.graph.NodeType.META &&
+    if (node.node.type === tf.convert.NodeType.META &&
         node.node.associatedFunction &&
         !node.isLibraryFunction) {
       // The node is that of a function call. Also link the node within the
       // function library. This clarifies to the user that the library function
       // is being used.
-      var libraryFunctionNodeName = tf.graph.FUNCTION_LIBRARY_NODE_PREFIX +
+      var libraryFunctionNodeName = tf.convert.FUNCTION_LIBRARY_NODE_PREFIX +
           node.node.associatedFunction;
       var functionGroup = d3.select(
-          '.' + tf.graph.scene.Class.Scene.GROUP + '>.' +
-          tf.graph.scene.Class.Scene.FUNCTION_LIBRARY + ' g[data-name="' +
+          '.' + tf.convert.scene.Class.Scene.GROUP + '>.' +
+          tf.convert.scene.Class.Scene.FUNCTION_LIBRARY + ' g[data-name="' +
           libraryFunctionNodeName + '"]');
-      tf.graph.scene.node.stylize(functionGroup, node, this);
+      tf.convert.scene.node.stylize(functionGroup, node, this);
     }
 
     var annotationGroupIndex = this.getAnnotationGroupsIndex(n);
     _.each(annotationGroupIndex, (aGroup, hostName) => {
-      tf.graph.scene.node.stylize(aGroup, node, this,
-          tf.graph.scene.Class.Annotation.NODE);
+      tf.convert.scene.node.stylize(aGroup, node, this,
+          tf.convert.scene.Class.Annotation.NODE);
     });
   },
 
@@ -1090,7 +1090,7 @@ Polymer({
       this._updateNodeState(oldSelectedNode);
     }
 
-    // tf.graph.scene.node.traceInputs(this.renderHierarchy);
+    // tf.convert.scene.node.traceInputs(this.renderHierarchy);
 
     if (!selectedNode) {
       return;
@@ -1103,7 +1103,7 @@ Polymer({
     var nodeParents = [];
     // Create list of all metanode parents of the selected node.
     while (node.parentNode != null
-        && node.parentNode.name != tf.graph.ROOT_NAME) {
+        && node.parentNode.name != tf.convert.ROOT_NAME) {
       node = node.parentNode;
       nodeParents.push(node.name);
     }
@@ -1134,7 +1134,7 @@ Polymer({
     // Otherwise, the pan will be computed from incorrect measurements.
     setTimeout(() => {
       // this.panToNode(selectedNode);
-    }, tf.graph.layout.PARAMS.animation.duration);
+    }, tf.convert.layout.PARAMS.animation.duration);
   },
   _highlightedNodeChanged: function(highlightedNode, oldHighlightedNode) {
     if (highlightedNode === oldHighlightedNode) {
