@@ -63,23 +63,27 @@ logger = logging.getLogger(__name__)
 # ordering of tabs in TensorBoard's GUI.
 _PLUGINS = [
     core_plugin.CorePluginLoader(),
+    # build model
+    graphedit_plugin.GraphEditPlugin,
+    convert_plugin.ConvertPlugin,
+    # show information for graph
+    debugdb_plugin.DebugDBPlugin,
+    inference_plugin.InferencePlugin,
+    interactive_inference_plugin_loader.InteractiveInferencePluginLoader(),
+    debugger_plugin_loader.DebuggerPluginLoader(),
+    # profile graph
+    profile_plugin_loader.ProfilePluginLoader(),
+    mesh_plugin.MeshPlugin,
+    # display statistics for graph
     scalars_plugin.ScalarsPlugin,
     custom_scalars_plugin.CustomScalarsPlugin,
     images_plugin.ImagesPlugin,
     audio_plugin.AudioPlugin,
-    debugger_plugin_loader.DebuggerPluginLoader(),
-    graphedit_plugin.GraphEditPlugin,
-    debugdb_plugin.DebugDBPlugin,
-    convert_plugin.ConvertPlugin,
-    inference_plugin.InferencePlugin,
     histograms_plugin.HistogramsPlugin,
     text_plugin.TextPlugin,
     pr_curves_plugin.PrCurvesPlugin,
-    profile_plugin_loader.ProfilePluginLoader(),
     beholder_plugin_loader.BeholderPluginLoader(),
-    interactive_inference_plugin_loader.InteractiveInferencePluginLoader(),
     hparams_plugin_loader.HParamsPluginLoader(),
-    mesh_plugin.MeshPlugin,
 ]
 
 def get_plugins():
