@@ -420,6 +420,7 @@ namespace tf.debug.controls {
               mthis.attachList = attachList;
               mthis.attachMap[network_identification] = respond;
               (<HTMLInputElement>document.getElementById('network_identification')).value = ''
+              mthis.selectedIdentification = attachList.length-1;
             })
           }
         });
@@ -428,6 +429,7 @@ namespace tf.debug.controls {
     _selectedIdentificationChanged: function(){
       document.getElementById('attachInfo').style.display = '';
       var selectedIdentification = this.attachList[this.selectedIdentification];
+      this.attachParam = selectedIdentification;
       var attachInfo = this.attachMap[selectedIdentification];
       (<HTMLInputElement>document.getElementById('model_type')).value = attachInfo.model_type;
       var machineList = [];

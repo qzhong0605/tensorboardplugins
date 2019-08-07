@@ -112,8 +112,8 @@ Polymer({
     path: (string|null), pbTxtFile?: Blob): Promise<void> {
   // Reset the progress bar to 0.
   this.set('progress', {
-    value: 0,
-    msg: '',
+    value: 100,
+    msg: "Namespace hierarchy: Finding similar subgraphs",
   });
   const tracker = tf.debug.util.getTracker(this);
   return tf.debug.loader.fetchAndConstructHierarchicalGraph(
