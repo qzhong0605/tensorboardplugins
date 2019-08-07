@@ -59,16 +59,17 @@ by default. The user can select a different run from a dropdown menu.
           <!-- <paper-icon-button noink icon="close" on-click='closePage'></paper-icon-button> -->
       </paper-tab>
     </paper-tabs>
-    <tf-debugdb-dashboard-loader id="loader"
-          selection="[[_selection]]"
-          attach-param="{{attachParam}}"
-          out-graph-hierarchy="{{_graphHierarchy}}"
-          out-graph="{{_graph}}"
-          out-stats="{{_stats}}"
-          progress="{{_progress}}"
-          hierarchy-params="[[_hierarchyParams]]"
-          compatibility-provider="[[_compatibilityProvider]]"
-    ></tf-debugdb-dashboard-loader>
+    <div id="graphboardcanvas">
+      <tf-debugdb-dashboard-loader id="loader"
+            selection="[[_selection]]"
+            attach-param="{{attachParam}}"
+            out-graph-hierarchy="{{_graphHierarchy}}"
+            out-graph="{{_graph}}"
+            out-stats="{{_stats}}"
+            progress="{{_progress}}"
+            hierarchy-params="[[_hierarchyParams]]"
+            compatibility-provider="[[_compatibilityProvider]]"
+      ></tf-debugdb-dashboard-loader>
       <tf-debugdb-board id="graphboard"
           color-by="[[_colorBy]]"
           color-by-params="{{_colorByParams}}"
@@ -81,6 +82,7 @@ by default. The user can select a different run from a dropdown menu.
           stats="[[_stats]]"
           style="display: none"
       ></tf-debugdb-board>
+    </div>
   </div>
 </tf-dashboard-layout>
 
@@ -105,6 +107,13 @@ by default. The user can select a different run from a dropdown menu.
 .center {
   position: relative;
   height: 100%;
+}
+
+#graphboardcanvas {
+  position:absolute;
+  top: 48px;
+  bottom: 0px;
+  width: 100%;
 }
 
 paper-dialog {

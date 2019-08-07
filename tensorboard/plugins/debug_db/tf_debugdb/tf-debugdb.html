@@ -31,11 +31,17 @@ limitations under the License.
 <style>
 .container {
   width: 100%;
-  height: 100%;
+  height: 80%;
   background: white;
   box-shadow: 0 1px 5px rgba(0,0,0,0.2);
 }
-
+.tensor {
+  margin-top: 2px;
+  width: 100%;
+  height: 20%;
+  background: white;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
 .vertical {
   width:100%;
   height:100%;
@@ -87,24 +93,37 @@ paper-button.cancel-bt{
   font-weight: 900;
   font-size: 18px;
 }
+
+.resizer {
+  height: 8px;
+  width: 100%;
+  cursor: pointer;
+}
 </style>
-<div class="container">
-  <div class="vertical">
-    <template is="dom-if" if="[[title]]">
-      <h2>[[title]]</h2>
-    </template>
-    <tf-debugdb-scene id="scene" class="auto"
-          render-hierarchy="[[renderHierarchy]]"
-          highlighted-node="[[_getVisible(highlightedNode)]]"
-          selected-node="{{selectedNode}}"
-          selected-edge="{{selectedEdge}}"
-          color-by="[[colorBy]]"
-          progress="[[progress]]"
-          node-context-menu-items="[[nodeContextMenuItems]]"
-          node-names-to-health-pills="[[nodeNamesToHealthPills]]"
-          health-pill-step-index="{{healthPillStepIndex}}"
-          handle-edge-selected="[[handleEdgeSelected]]"
-    ></tf-debugdb-scene>
+<div class="vertical">
+  <div class="container" id="container">
+    <div class="vertical">
+      <template is="dom-if" if="[[title]]">
+        <h2>[[title]]</h2>
+      </template>
+      <tf-debugdb-scene id="scene" class="auto"
+            render-hierarchy="[[renderHierarchy]]"
+            highlighted-node="[[_getVisible(highlightedNode)]]"
+            selected-node="{{selectedNode}}"
+            selected-edge="{{selectedEdge}}"
+            color-by="[[colorBy]]"
+            progress="[[progress]]"
+            node-context-menu-items="[[nodeContextMenuItems]]"
+            node-names-to-health-pills="[[nodeNamesToHealthPills]]"
+            health-pill-step-index="{{healthPillStepIndex}}"
+            handle-edge-selected="[[handleEdgeSelected]]"
+      ></tf-debugdb-scene>
+    </div>
+  </div>
+  <div class="resizer" id="resizer">
+  </div>
+  <div class="tensor" id="tensor">
+
   </div>
 </div>
 
@@ -270,6 +289,21 @@ Polymer({
     '_selectedNodeChanged(selectedNode)',
     '_selectedEdgeChanged(selectedEdge)',
   ],
+  ready(){
+    const resizer = d3.select(this.$.resizer).classed("dragging", true);
+    var starty
+    resizer.call(d3.drag()
+      .on('start',function(){
+        starty = d3.event.y
+      })
+      .on('end',function(){
+        var endy = d3.event.y
+        document.getElementById('container').style.height = document.getElementById('container').clientHeight + endy-starty + 'px'
+        document.getElementById('tensor').style.height = document.getElementById('container').clientHeight - endy+starty + 'px'
+      })
+
+    )
+  },
   /**
    * Pans to a node. Assumes that the node exists.
    * @param nodeName {string} The name of the node to pan to.
