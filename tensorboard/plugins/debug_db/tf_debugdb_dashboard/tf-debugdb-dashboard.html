@@ -46,18 +46,11 @@ by default. The user can select a different run from a dropdown menu.
   <tf-debugdb-controls
         id="controls"
         class="sidebar"
-        devices-for-stats="{{_devicesForStats}}"
         color-by-params="[[_colorByParams]]"
         stats="[[_stats]]"
         color-by="{{_colorBy}}"
-        datasets="[[_datasets]]"
-        render-hierarchy="[[_renderHierarchy]]"
         selection="{{_selection}}"
         attach-param="{{attachParam}}"
-        selected-file="{{_selectedFile}}"
-        selected-node="{{_selectedNode}}"
-        health-pills-feature-enabled="[[_debuggerDataEnabled]]"
-        health-pills-toggled-on="{{healthPillsToggledOn}}"
   ></tf-debugdb-controls>
   <div class="center">
     <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
@@ -67,10 +60,8 @@ by default. The user can select a different run from a dropdown menu.
       </paper-tab>
     </paper-tabs>
     <tf-debugdb-dashboard-loader id="loader"
-          datasets="[[_datasets]]"
           selection="[[_selection]]"
           attach-param="{{attachParam}}"
-          selected-file="[[_selectedFile]]"
           out-graph-hierarchy="{{_graphHierarchy}}"
           out-graph="{{_graph}}"
           out-stats="{{_stats}}"
@@ -79,7 +70,6 @@ by default. The user can select a different run from a dropdown menu.
           compatibility-provider="[[_compatibilityProvider]]"
     ></tf-debugdb-dashboard-loader>
       <tf-debugdb-board id="graphboard"
-          devices-for-stats="[[_devicesForStats]]"
           color-by="[[_colorBy]]"
           color-by-params="{{_colorByParams}}"
           graph-hierarchy="[[_graphHierarchy]]"

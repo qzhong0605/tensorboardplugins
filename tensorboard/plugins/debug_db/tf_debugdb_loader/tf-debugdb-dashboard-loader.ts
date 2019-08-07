@@ -23,7 +23,6 @@ Polymer({
   is: 'tf-debugdb-dashboard-loader',
 
   properties: {
-    datasets: Array,
     /**
      * @type {{value: number, msg: string}}
      *
