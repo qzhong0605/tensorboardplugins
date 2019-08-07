@@ -251,10 +251,10 @@ function addInteraction(selection, d: render.RenderNodeInfo,
             (<Event>d3.event).stopPropagation();
             sceneElement.fire('node-select', {name: d.node.name});
           })
-      .on('contextmenu', (d, i) => {
-        sceneElement.fire('node-select', {name: d.node.name});
-        contextMenuFunction.call(d, i);
-      });
+      // .on('contextmenu', (d, i) => {
+      //   sceneElement.fire('node-select', {name: d.node.name});
+      //   contextMenuFunction.call(d, i);
+      // });
 };
 
 /**

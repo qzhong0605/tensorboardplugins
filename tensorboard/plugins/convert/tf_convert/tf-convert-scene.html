@@ -652,7 +652,7 @@ limitations under the License.
   <rect fill="white" width="10000" height="10000"></rect>
   <g id="root"></g>
 </svg>
-<tf-convert-minimap id="minimap"></tf-convert-minimap>
+<tf-convert-minimap id="minimap" class="minimap" style="display: none"></tf-convert-minimap>
 </template>
 <script>
 Polymer({
@@ -851,6 +851,12 @@ Polymer({
     // Update the minimap again when the graph is done animating.
     setTimeout(function() {
       this._updateHealthPills(this.nodeNamesToHealthPills, this.healthPillStepIndex);
+      if(this.label == 'SOURCE'){
+        d3.select('.minimap').style('display', '');
+      }
+      if(this.label == 'DESTINATION'){
+        d3.selectAll('.minimap').style('display', '');
+      }
       this.minimap.update();
     }.bind(this), tf.convert.layout.PARAMS.animation.duration);
   },
