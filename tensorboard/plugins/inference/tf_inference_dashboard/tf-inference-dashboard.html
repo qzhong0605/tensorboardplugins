@@ -35,6 +35,7 @@ limitations under the License.
 <link rel="import" href="tf-inference-loader.html">
 <link rel="import" href="tf-inference-info.html">
 <link rel="import" href="animation.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
 
 <!--
 tf-image-dashboard displays a dashboard that loads images from a
@@ -127,14 +128,80 @@ TensorFlow run.
   </div>
 </div>
       <div class="center" id="center">
-        <div class="center-content" id="channelimage">
-          <template is="dom-if" if="[[!_isDone]]">
-            <div id="progress-bar">
-              <div id="progress-msg">demo</div>
-                <paper-progress value="40"></paper-progress>
-              </div>
-          </template>
-          <template is="dom-if" if="[[_isDone]]">
+        <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
+          <paper-tab>MAIN</paper-tab>
+          <paper-tab>INFO</paper-tab>
+        </paper-tabs>
+        <div id="page0">
+          <div class="center-content" id="channelimage">
+            <template is="dom-if" if="[[!_isDone]]">
+              <div id="progress-bar">
+                <div id="progress-msg">demo</div>
+                  <paper-progress value="40"></paper-progress>
+                </div>
+            </template>
+            <template is="dom-if" if="[[_isDone]]">
+              <template is="dom-if" if="[[_dataNotFound]]">
+                <div class="no-data-warning">
+                  <h3>No image data was found.</h3>
+                  <p>Probable causes:</p>
+                  <ul>
+                    <li>You haven’t written any image data to your event files.
+                    <li>TensorBoard can’t find your event files.
+                  </ul>
+                  <p>
+                  If you’re new to using TensorBoard, and want to find out how
+                  to add data and set up your event files, check out the
+                  <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md">README</a>
+                  and perhaps the <a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard tutorial</a>.
+                  <p>
+                  If you think TensorBoard is configured properly, please see
+                  <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md#my-tensorboard-isnt-showing-any-data-whats-wrong">the section of the README devoted to missing data problems</a>
+                  and consider filing an issue on GitHub.
+                </div>
+              </template>
+              <template is="dom-if" if="[[!_dataNotFound]]">
+                <tf-tag-filterer tag-filter="{{_tagFilter}}"></tf-tag-filterer>
+                <template is="dom-repeat" items="[[_categories]]" as="category">
+                  <tf-category-pane category="[[category]]" opened="[[_shouldOpen(index)]]">
+                    <tf-paginated-view
+                      items="[[category.items]]"
+                      pages="{{category._pages}}"
+                    >
+                      <template is="dom-repeat" items="[[category._pages]]" as="page">
+                        <template is="dom-if" if="[[page.active]]">
+                          <div class="layout horizontal wrap" id="_channelimgs">
+                            <template is="dom-repeat" items="[[page.items]]">
+                              <tf-inference-loader
+                                id="channelloader"
+                                isActive="[[_isRevealed]]"
+                                run="[[item.run]]"
+                                tag="[[item.tag]]"
+                                sample="[[item.sample]]"
+                                categoryname="[[category.name]]"
+                                of-samples="[[item.ofSamples]]"
+                                tag-metadata="[[_tagMetadata(_runToTagInfo, item.run, item.tag)]]"
+                                request-manager="[[_requestManager]]"
+                                actual-size="[[_actualSize]]"
+                                brightness-adjustment="[[_brightnessAdjustment]]"
+                                contrast-percentage="[[_contrastPercentage]]"
+                                on-tap="_revealInfo"
+                              ></tf-inference-loader>
+                            </template>
+                          </div>
+                        </template>
+                      </template>
+                    </tf-paginated-view>
+                  </tf-category-pane>
+                </template>
+              </template>
+            </template>
+          </div>
+          
+          <!-- <div class="resizer" id="resizer">
+            <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
+          </div> -->
+          <div class="center-content" id = "channelinfo">
             <template is="dom-if" if="[[_dataNotFound]]">
               <div class="no-data-warning">
                 <h3>No image data was found.</h3>
@@ -155,84 +222,24 @@ TensorFlow run.
               </div>
             </template>
             <template is="dom-if" if="[[!_dataNotFound]]">
-              <tf-tag-filterer tag-filter="{{_tagFilter}}"></tf-tag-filterer>
-              <template is="dom-repeat" items="[[_categories]]" as="category">
-                <tf-category-pane category="[[category]]" opened="[[_shouldOpen(index)]]">
-                  <tf-paginated-view
-                    items="[[category.items]]"
-                    pages="{{category._pages}}"
-                  >
-                    <template is="dom-repeat" items="[[category._pages]]" as="page">
-                      <template is="dom-if" if="[[page.active]]">
-                        <div class="layout horizontal wrap" id="_channelimgs">
-                          <template is="dom-repeat" items="[[page.items]]">
-                            <tf-inference-loader
-                              id="channelloader"
-                              isActive="[[_isRevealed]]"
-                              run="[[item.run]]"
-                              tag="[[item.tag]]"
-                              sample="[[item.sample]]"
-                              categoryname="[[category.name]]"
-                              of-samples="[[item.ofSamples]]"
-                              tag-metadata="[[_tagMetadata(_runToTagInfo, item.run, item.tag)]]"
-                              request-manager="[[_requestManager]]"
-                              actual-size="[[_actualSize]]"
-                              brightness-adjustment="[[_brightnessAdjustment]]"
-                              contrast-percentage="[[_contrastPercentage]]"
-                              on-tap="_revealInfo"
-                            ></tf-inference-loader>
-                          </template>
-                        </div>
-                      </template>
-                    </template>
-                  </tf-paginated-view>
-                </tf-category-pane>
-              </template>
+            <div class="info" id="info">
+              <div class="info-content" id="infoImg">
+                <tf-inference-info
+                  on-tap="_hideInfo"
+                  categoryname="[[_categoryname]]"
+                ></tf-inference-info> 
+              </div>
+              <div class="resizerinfo" id="resizerinfo" style="display: table;">
+                <iron-icon icon="av:pause" class="resizeinfo-icon"></iron-icon>
+              </div>  
+              <div class="info-content" id="infoDistribution">
+                <google-chart-dist
+                  data="[[_data]]">
+                </google-chart-dist>
+              </div>      
+            </div>   
             </template>
-          </template>
-        </div>
-        
-        <!-- <div class="resizer" id="resizer">
-          <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
-        </div> -->
-        <div class="center-content" id = "channelinfo">
-          <template is="dom-if" if="[[_dataNotFound]]">
-            <div class="no-data-warning">
-              <h3>No image data was found.</h3>
-              <p>Probable causes:</p>
-              <ul>
-                <li>You haven’t written any image data to your event files.
-                <li>TensorBoard can’t find your event files.
-              </ul>
-              <p>
-              If you’re new to using TensorBoard, and want to find out how
-              to add data and set up your event files, check out the
-              <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md">README</a>
-              and perhaps the <a href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard tutorial</a>.
-              <p>
-              If you think TensorBoard is configured properly, please see
-              <a href="https://github.com/tensorflow/tensorboard/blob/master/README.md#my-tensorboard-isnt-showing-any-data-whats-wrong">the section of the README devoted to missing data problems</a>
-              and consider filing an issue on GitHub.
-            </div>
-          </template>
-          <template is="dom-if" if="[[!_dataNotFound]]">
-          <div class="info" id="info">
-            <div class="info-content" id="infoImg">
-              <tf-inference-info
-                on-tap="_hideInfo"
-                categoryname="[[_categoryname]]"
-              ></tf-inference-info> 
-            </div>
-            <div class="resizerinfo" id="resizerinfo" style="display: table;">
-              <iron-icon icon="av:pause" class="resizeinfo-icon"></iron-icon>
-            </div>        
-            <div class="info-content" id="infoDistribution">
-              <google-chart-dist
-                data="[[_data]]">
-              </google-chart-dist>
-            </div>      
-          </div>   
-          </template>
+          </div>
         </div>
       </div>
     </tf-dashboard-layout>
@@ -275,8 +282,6 @@ TensorFlow run.
       }
       #center {
         position: relative;
-        display: flex;
-        float:right;
       }
       #info {
         position: relative;
@@ -416,6 +421,11 @@ TensorFlow run.
     Polymer({
       is: 'tf-inference-dashboard',
       properties: {
+        _selectedPage:{
+          type: Number,
+          value: 0,
+          observer: '_changePage'
+        },
         _selectedModel: {
           type: Number,
           value: 0,
@@ -579,8 +589,10 @@ TensorFlow run.
         const loader = this.$.channelloader
         if(!this._isRevealed){
           this._isRevealed = true;
-          img.style('width', 30 + '%');
-          info.style('width', 70 + '%');
+          img.style('width', 100 + '%');
+          img.style('height', 50 + '%');
+          info.style('width', 100 + '%');
+          info.style('height', 50 + '%');
           infoImg.style('height', 30 + '%');
           infoDistribution.style('height', 70 + '%');
           info.style('display', "block");
@@ -716,6 +728,16 @@ TensorFlow run.
           this.set('_dataNotFound',true);
           this.set('_isDone',false);
           alert("start!")
+        }
+      },
+      _changePage: function(){
+        if(document.getElementById('page0')){
+          if(this._selectedPage == 0){
+            document.getElementById('page0').style.display = ''
+          }
+          if(this._selectedPage == 1){
+            document.getElementById('page0').style.display = 'none'
+          }
         }
       }
 });
