@@ -129,10 +129,10 @@ TensorFlow run.
 </div>
       <div class="center" id="center">
         <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
-          <paper-tab>MAIN</paper-tab>
-          <paper-tab>INFO</paper-tab>
+          <paper-tab>sessions view</paper-tab>
+          <paper-tab>feature view</paper-tab>
         </paper-tabs>
-        <div id="page0">
+        <div id="page0" style="display: none">
           <div class="center-content" id="channelimage">
             <template is="dom-if" if="[[!_isDone]]">
               <div id="progress-bar">
@@ -241,10 +241,45 @@ TensorFlow run.
             </template>
           </div>
         </div>
+<!-- TODO: -->
+        <div id="page1">
+          <!-- model, session, show data, batch size, input size, accuracy  -->
+            <div class="flex-horizontal" style="margin-bottom: 10px;">
+              <div class="table-title">show data</div>
+              <div class="table-title">model</div>
+              <div class="table-title">session</div>
+              <div class="table-title">batch size</div>
+              <div class="table-title">input size</div>
+              <div class="table-title">accuracy</div>
+            </div>
+          <template is="dom-repeat" items="{{records}}">
+            <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
+              <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
+              <div class="table-content" id="model">model</div>
+              <div class="table-content" id="session">session</div>
+              <div class="table-content" id="batchsize">batch size</div>
+              <div class="table-content" id="inputsize">input size</div>
+              <div class="table-content" id="accuracy">accuracy</div>
+            </div>
+          </template>
+        </div>
       </div>
     </tf-dashboard-layout>
     <style include="dashboard-style"></style>
     <style>
+      .checkbox {
+        margin-top: 0px;
+        margin-left: 45px;
+        margin-right: 55px;
+      }
+      .table-content {
+        width: 120px;
+        margin-left: 20px;
+      }
+      .table-title {
+        width: 120px;
+        margin-left: 20px;
+      }
       .separator {
         margin-top: 30px;
       }
@@ -421,6 +456,13 @@ TensorFlow run.
     Polymer({
       is: 'tf-inference-dashboard',
       properties: {
+        postDivElement: {
+          type: String
+        },
+        records:{
+          type: Array,
+          value: [{id:1},{id:2}],
+        },
         _selectedPage:{
           type: Number,
           value: 0,
@@ -733,12 +775,24 @@ TensorFlow run.
       _changePage: function(){
         if(document.getElementById('page0')){
           if(this._selectedPage == 0){
-            document.getElementById('page0').style.display = ''
+            document.getElementById('page0').style.display = 'none'
+            document.getElementById('page1').style.display = ''
           }
           if(this._selectedPage == 1){
-            document.getElementById('page0').style.display = 'none'
+            document.getElementById('page0').style.display = ''
+            document.getElementById('page1').style.display = 'none'
           }
         }
+      },
+      selectRecord: function(e){
+        var divelement = e.path[2]
+        if(this.postDivElement!=undefined){
+          if(this.postDivElement != divelement.id){
+            document.getElementById(this.postDivElement).getElementsByClassName('checkbox')[0].checked = false
+          }
+        }
+
+        this.postDivElement = divelement.id
       }
 });
 </script>
