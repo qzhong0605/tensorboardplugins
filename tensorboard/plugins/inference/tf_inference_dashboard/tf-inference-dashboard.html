@@ -255,11 +255,11 @@ TensorFlow run.
           <template is="dom-repeat" items="{{records}}">
             <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
               <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
-              <div class="table-content" id="model">model</div>
-              <div class="table-content" id="session">session</div>
-              <div class="table-content" id="batchsize">batch size</div>
-              <div class="table-content" id="inputsize">input size</div>
-              <div class="table-content" id="accuracy">accuracy</div>
+              <div class="table-content" id="model">[[item.model]]</div>
+              <div class="table-content" id="session">[[item.session]]</div>
+              <div class="table-content" id="batchsize">[[item.batch_size]]</div>
+              <div class="table-content" id="inputsize">[[item.input_size]]</div>
+              <div class="table-content" id="accuracy">[[item.accuracy]]</div>
             </div>
           </template>
         </div>
@@ -461,7 +461,9 @@ TensorFlow run.
         },
         records:{
           type: Array,
-          value: [{id:1},{id:2}],
+          value: [{id:1,model:'onnx',session:'1',batch_size:'1024',input_size:'1024',accuracy:'0.1'},
+          {id:2,model:'onnx',session:'2',batch_size:'1024',input_size:'1024',accuracy:'0.1'},
+          {id:3,model:'onnx',session:'3',batch_size:'1024',input_size:'1024',accuracy:'0.1'}],
         },
         _selectedPage:{
           type: Number,
