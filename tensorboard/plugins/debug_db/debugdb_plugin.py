@@ -346,9 +346,9 @@ class DebugDBPlugin(base_plugin.TBPlugin):
     respond = json.dumps({
     'machineList':
       {'model_type':'model','list':
-        [{'m':'cpu','id':1,'batch_size':12,'memory_size':8},
-        {'m':'cpu','id':2,'batch_size':12,'memory_size':8},
-        {'m':'gpu','id':1,'batch_size':12,'memory_size':8}]},
+        [{'m':'cpu','id':1,'batch_size':1,'memory_size':8},
+        {'m':'cpu','id':2,'batch_size':2,'memory_size':8},
+        {'m':'gpu','id':1,'batch_size':3,'memory_size':8}]},
     'identification':'ok'})
 
     return http_util.Respond(request, respond, 'application/json')

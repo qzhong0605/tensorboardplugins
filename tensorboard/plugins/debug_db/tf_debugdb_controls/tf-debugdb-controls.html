@@ -208,15 +208,15 @@ paper-button.cancel-bt{
     <paper-input id="network_identification" label="Network Identification" value=""></paper-input>
     <paper-button raised noink id="attach" class="full" on-click="attach">ATTACH</paper-button>
     <br>
-    <paper-dropdown-menu label="Attach List" no-animations noink horizontal-align="left" class="attach-list">
+    <!-- <paper-dropdown-menu label="Attach List" no-animations noink horizontal-align="left" class="attach-list">
       <paper-menu class="dropdown-content" selected="{{selectedIdentification}}">
         <template is="dom-repeat" items="{{attachList}}">
             <paper-item>[[item]]</paper-item>
         </template>
       </paper-menu>
-    </paper-dropdown-menu>
+    </paper-dropdown-menu> -->
     <div id="attachInfo" style="display: none">
-      <paper-input disabled class="path" label="Model Type" id="model_type"></paper-input>
+      <!-- <paper-input disabled class="path" label="Model Type" id="model_type"></paper-input> -->
       
       <div class="container flex">
         <div>
@@ -241,9 +241,10 @@ paper-button.cancel-bt{
 
       <paper-input disabled class="path" label="Batch Size" id="batch_size"></paper-input>
       <paper-input disabled class="path" label="Memory Size" id="memory_size"></paper-input>
+    
+      <paper-button raised noink id="stop" class="half" on-click="attachStop" style="float: left">STOP</paper-button>
+      <paper-button raised noink id="continue" class="half" onclick="attachContinue.open()" style="float: right">CONTINUE</paper-button>
     </div>
-    <paper-button raised noink id="stop" class="half" on-click="attachStop" style="float: left">STOP</paper-button>
-    <paper-button raised noink id="continue" class="half" onclick="attachContinue.open()" style="float: right">CONTINUE</paper-button>
   </div>
 
   <paper-dialog id="newContinue">

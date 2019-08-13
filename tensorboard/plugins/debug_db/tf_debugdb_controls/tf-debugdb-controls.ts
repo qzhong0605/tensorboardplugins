@@ -139,7 +139,7 @@ namespace tf.debug.controls {
         value: [],
       },
       selectedIdentification:{
-        type: Number,
+        type: String,
         observer:'_selectedIdentificationChanged',
       },
       attachList:{
@@ -375,7 +375,7 @@ namespace tf.debug.controls {
               attachList.push(respond.identification)
               mthis.attachList = attachList;
               mthis.attachMap[respond.identification] = respond.machineList;
-              
+
               (<HTMLInputElement>document.getElementById('fileType')).value = '';
               (<HTMLInputElement>document.getElementById('srcPath')).value = '';
               (<HTMLInputElement>document.getElementById('predictNet')).value = '';
@@ -443,7 +443,7 @@ namespace tf.debug.controls {
               mthis.attachList = attachList;
               mthis.attachMap[network_identification] = respond.attach;
               (<HTMLInputElement>document.getElementById('network_identification')).value = ''
-              mthis.selectedIdentification = attachList.length-1;
+              // mthis.selectedIdentification = attachList.length-1;
               mthis.addIdentification = respond.session
             })
           }
@@ -452,10 +452,10 @@ namespace tf.debug.controls {
     },
     _selectedIdentificationChanged: function(){
       document.getElementById('attachInfo').style.display = '';
-      var selectedIdentification = this.attachList[this.selectedIdentification];
-      // this.attachParam = selectedIdentification;
-      var attachInfo = this.attachMap[selectedIdentification];
-      (<HTMLInputElement>document.getElementById('model_type')).value = attachInfo.model_type;
+      // var selectedIdentification = this.attachList[this.selectedIdentification];
+      this.attachParam = this.selectedIdentification;
+      var attachInfo = this.attachMap[this.selectedIdentification];
+      // (<HTMLInputElement>document.getElementById('model_type')).value = attachInfo.model_type;
       var machineList = [];
       attachInfo.list.forEach(item => {
         if(machineList.indexOf(item.m)==-1){
@@ -467,7 +467,8 @@ namespace tf.debug.controls {
     },
     attachStop: function(){
       const params = new URLSearchParams();
-      params.set('identification',this.attachList[this.selectedIdentification]);
+      // params.set('identification',this.attachList[this.selectedIdentification]);
+      params.set('identification',this.selectedIdentification);
       new Promise(() => {
         fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attachstop', params)).then((res) => {
           // Fetch does not reject for 400+.
@@ -484,7 +485,8 @@ namespace tf.debug.controls {
       const params = new URLSearchParams();
       var iteration_number = (<HTMLInputElement>document.getElementById('iteration_number_2')).value;
       params.set('iteration_number', iteration_number);
-      params.set('identification',this.attachList[this.selectedIdentification]);
+      // params.set('identification',this.attachList[this.selectedIdentification]);
+      params.set('identification',this.selectedIdentification);
       new Promise(() => {
         fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attachcontinue', params)).then((res) => {
           // Fetch does not reject for 400+.
@@ -498,8 +500,9 @@ namespace tf.debug.controls {
     },
     _selectedMachineChanged: function(){
       var machine = this.selectedMachineList[this.selectedMachine]
-      var selectedIdentification = this.attachList[this.selectedIdentification];
-      var attachInfo = this.attachMap[selectedIdentification];
+      // var selectedIdentification = this.attachList[this.selectedIdentification];
+      // var attachInfo = this.attachMap[selectedIdentification];
+      var attachInfo = this.attachMap[this.selectedIdentification];
       var idList = [];
       attachInfo.list.forEach(item => {
         if(item.m == machine){
@@ -512,8 +515,9 @@ namespace tf.debug.controls {
     _selectedIdChanged: function(){
       var id = this.idList[this.selectedId]
       var machine = this.selectedMachineList[this.selectedMachine]
-      var selectedIdentification = this.attachList[this.selectedIdentification];
-      var attachInfo = this.attachMap[selectedIdentification];
+      // var selectedIdentification = this.attachList[this.selectedIdentification];
+      // var attachInfo = this.attachMap[selectedIdentification];;
+      var attachInfo = this.attachMap[this.selectedIdentification];
       
       attachInfo.list.forEach(item => {
         if(item.m == machine && item.id == id){

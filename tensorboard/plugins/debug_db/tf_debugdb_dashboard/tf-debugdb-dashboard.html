@@ -52,6 +52,7 @@ by default. The user can select a different run from a dropdown menu.
         selection="{{_selection}}"
         attach-param="{{attachParam}}"
         add-identification="{{addIdentification}}"
+        selected-identification="{{selectedIdentification}}"
   ></tf-debugdb-controls>
   <div class="center">
     <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
@@ -233,6 +234,10 @@ Polymer({
       type: Object,
       value: () => tf.debug.hierarchy.DefaultHierarchyParams,
     },
+    selectedIdentification: {
+      type: String,
+      observer: '_identificationChanged',
+    }
   },
   listeners: {},
   observers: [],
@@ -274,13 +279,20 @@ Polymer({
     if(this.postDivElement!=undefined){
       if(this.postDivElement != divelement.id){
         document.getElementById(this.postDivElement).getElementsByClassName('checkbox')[0].checked = false
+      }else{
+        document.getElementById(this.postDivElement).getElementsByClassName('checkbox')[0].checked = true
+        // document.getElementById('attachInfo').style.display = 'none';
+        // document.getElementById('graphboardcanvas').style.display = 'none';
       }
     }
 
     this.postDivElement = divelement.id
-    console.info(divelement.id)
-  }
-  
+    this.selectedIdentification = divelement.id
+  },
+  _identificationChanged: function(){
+    document.getElementById('graphboardcanvas').style.display = '';
+    this._selectedPage = 1
+  },
 });
 
 </script>
