@@ -121,6 +121,15 @@ tf_web_library(
 )
 
 tf_web_library(
+    name = "katexjs",
+    srcs = [
+        "katexjs.html",
+    ],
+    path = "/tf-imports",
+    visibility = ["//visibility:public"],
+)
+
+tf_web_library(
     name = "plottable",
     srcs = [
         "plottable.d.ts",
