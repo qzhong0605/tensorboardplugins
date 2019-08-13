@@ -343,9 +343,15 @@ class DebugDBPlugin(base_plugin.TBPlugin):
     total_iteration = request.args.get('total_iteration')
     device_type = request.args.get('device_type')
     machine_list = json.loads(request.args.get('machine_list'))
+    respond = json.dumps({
+    'machineList':
+      {'model_type':'model','list':
+        [{'m':'cpu','id':1,'batch_size':12,'memory_size':8},
+        {'m':'cpu','id':2,'batch_size':12,'memory_size':8},
+        {'m':'gpu','id':1,'batch_size':12,'memory_size':8}]},
+    'identification':'ok'})
 
-
-    return http_util.Respond(request, 'ok', 'text/plain')
+    return http_util.Respond(request, respond, 'application/json')
 
   @wrappers.Request.application
   def new_stop(self, request):
@@ -361,10 +367,19 @@ class DebugDBPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def attach(self, request):
     network_identification = request.args.get('network_identification')
-    logger.warn(network_identification)
-    respond = json.dumps({'model_type':'model','list':[{'m':'cpu','id':1,'batch_size':12,'memory_size':8},
-    {'m':'cpu','id':2,'batch_size':12,'memory_size':8},
-    {'m':'gpu','id':1,'batch_size':12,'memory_size':8}]})
+    respond = json.dumps({
+    'attach':
+      {'model_type':'model','list':
+        [{'m':'cpu','id':1,'batch_size':12,'memory_size':8},
+        {'m':'cpu','id':2,'batch_size':12,'memory_size':8},
+        {'m':'gpu','id':1,'batch_size':12,'memory_size':8}]},
+    'session':
+      {'identification':network_identification,
+      'model_type':'onnx',
+      'iteration':'100',
+      'memory_size':'1024',
+      'learning_rate':'0.1',
+      'optimization_method':'best'}})
     return http_util.Respond(request, respond, 'application/json')
 
   @wrappers.Request.application

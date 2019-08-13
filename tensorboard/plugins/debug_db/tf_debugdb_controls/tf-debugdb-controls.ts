@@ -118,6 +118,10 @@ namespace tf.debug.controls {
   Polymer({
     is: 'tf-debugdb-controls',
     properties: {
+      addIdentification: {
+        type: Object,
+        notify: true,
+      },
       selectedMachine:{
         type: Number,
         observer:'_selectedMachineChanged',
@@ -289,6 +293,12 @@ namespace tf.debug.controls {
       document.getElementById('machineList').appendChild(item)
     },
     newStart: function(){
+      var mthis = this
+      var attachList = []
+      this.attachList.forEach(element => {
+        attachList.push(element);
+      });
+      var addIdentification = {}
       var loadparams = {}
       const params = new URLSearchParams();
       var model_type = this._srcTypes[this._srcMode];
@@ -324,7 +334,7 @@ namespace tf.debug.controls {
           loadparams['file_type'] = file_type
         }
       }
-      this.selection = loadparams
+      // this.selection = loadparams
 
       var batchSize = (<HTMLInputElement>document.getElementById('batchSize')).value;
       var memorySize = (<HTMLInputElement>document.getElementById('memorySize')).value;
@@ -352,18 +362,31 @@ namespace tf.debug.controls {
         fetch(tf_backend.getRouter().pluginRoute('debugdb', '/newstart', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
-            res.text().then(function(msg){
-              // (<HTMLInputElement>document.getElementById('fileType')).value = '';
-              // (<HTMLInputElement>document.getElementById('srcPath')).value = '';
-              // (<HTMLInputElement>document.getElementById('predictNet')).value = '';
-              // (<HTMLInputElement>document.getElementById('initNet')).value = '';
-              // (<HTMLInputElement>document.getElementById('batchSize')).value = '';
-              // (<HTMLInputElement>document.getElementById('memorySize')).value = '';
-              // (<HTMLInputElement>document.getElementById('optimizationMethod')).value = '';
-              // (<HTMLInputElement>document.getElementById('learningRate')).value = '';
-              // (<HTMLInputElement>document.getElementById('totalIteration')).value = '';
-              // (<HTMLInputElement>document.getElementById('inputTensorSize')).value = '';
-              // document.getElementById('machineList').innerHTML = ""
+            res.json().then(function(respond){
+              addIdentification = {
+                identification: respond.identification,
+                model_type: model_type,
+                iteration: totalIteration,
+                memory_size: memorySize,
+                learning_rate: learningRate,
+                optimization_method: optimizationMethod,
+              }
+              mthis.addIdentification = addIdentification;
+              attachList.push(respond.identification)
+              mthis.attachList = attachList;
+              mthis.attachMap[respond.identification] = respond.machineList;
+              
+              (<HTMLInputElement>document.getElementById('fileType')).value = '';
+              (<HTMLInputElement>document.getElementById('srcPath')).value = '';
+              (<HTMLInputElement>document.getElementById('predictNet')).value = '';
+              (<HTMLInputElement>document.getElementById('initNet')).value = '';
+              (<HTMLInputElement>document.getElementById('batchSize')).value = '';
+              (<HTMLInputElement>document.getElementById('memorySize')).value = '';
+              (<HTMLInputElement>document.getElementById('optimizationMethod')).value = '';
+              (<HTMLInputElement>document.getElementById('learningRate')).value = '';
+              (<HTMLInputElement>document.getElementById('totalIteration')).value = '';
+              (<HTMLInputElement>document.getElementById('inputTensorSize')).value = '';
+              document.getElementById('machineList').innerHTML = ""
             })
           }
         });
@@ -408,7 +431,7 @@ namespace tf.debug.controls {
         attachList.push(element);
       });
       var network_identification = (<HTMLInputElement>document.getElementById('network_identification')).value;
-      this.attachParam = network_identification;
+      // this.attachParam = network_identification;
       const params = new URLSearchParams();
       params.set('network_identification',network_identification);
       new Promise(() => {
@@ -418,9 +441,10 @@ namespace tf.debug.controls {
             res.json().then(function(respond){
               attachList.push(network_identification);
               mthis.attachList = attachList;
-              mthis.attachMap[network_identification] = respond;
+              mthis.attachMap[network_identification] = respond.attach;
               (<HTMLInputElement>document.getElementById('network_identification')).value = ''
               mthis.selectedIdentification = attachList.length-1;
+              mthis.addIdentification = respond.session
             })
           }
         });
@@ -429,7 +453,7 @@ namespace tf.debug.controls {
     _selectedIdentificationChanged: function(){
       document.getElementById('attachInfo').style.display = '';
       var selectedIdentification = this.attachList[this.selectedIdentification];
-      this.attachParam = selectedIdentification;
+      // this.attachParam = selectedIdentification;
       var attachInfo = this.attachMap[selectedIdentification];
       (<HTMLInputElement>document.getElementById('model_type')).value = attachInfo.model_type;
       var machineList = [];

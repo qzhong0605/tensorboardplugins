@@ -51,15 +51,15 @@ by default. The user can select a different run from a dropdown menu.
         color-by="{{_colorBy}}"
         selection="{{_selection}}"
         attach-param="{{attachParam}}"
+        add-identification="{{addIdentification}}"
   ></tf-debugdb-controls>
   <div class="center">
     <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
-      <paper-tab>MAIN</paper-tab>
-      <paper-tab>INFO
-          <!-- <paper-icon-button noink icon="close" on-click='closePage'></paper-icon-button> -->
-      </paper-tab>
+      <paper-tab>Session View</paper-tab>
+      <paper-tab>Main</paper-tab>
+      <paper-tab>Info</paper-tab>
     </paper-tabs>
-    <div id="graphboardcanvas">
+    <div id="graphboardcanvas" style="display: none">
       <tf-debugdb-dashboard-loader id="loader"
             selection="[[_selection]]"
             attach-param="{{attachParam}}"
@@ -83,6 +83,31 @@ by default. The user can select a different run from a dropdown menu.
           style="display: none"
       ></tf-debugdb-board>
     </div>
+    <div id="sessionview">
+      <div class="flex-horizontal" style="margin-bottom: 10px;">
+        <div class="table-title" style="width: 50px;">show</div>
+        <div class="table-title" style="width: 120px;">identification</div>
+        <div class="table-title" style="width: 120px;">model type</div>
+        <div class="table-title" style="width: 120px;">iteration</div>
+        <div class="table-title" style="width: 120px;">memory size</div>
+        <div class="table-title" style="width: 120px;">learning rate</div>
+        <div class="table-title" style="width: 120px;">optimization method</div>
+      </div>
+      <template is="dom-repeat" items="{{records}}">
+        <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.identification]]">
+          <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
+          <div class="table-title" id="model" style="width: 120px;">[[item.identification]]</div>
+          <div class="table-title" id="model" style="width: 120px;">[[item.model_type]]</div>
+          <div class="table-title" id="session" style="width: 120px;">[[item.iteration]]</div>
+          <div class="table-title" id="batchsize" style="width: 120px;">[[item.memory_size]]</div>
+          <div class="table-title" id="inputsize" style="width: 120px;">[[item.learning_rate]]</div>
+          <div class="table-title" id="accuracy" style="width: 120px;">[[item.optimization_method]]</div>
+        </div>
+      </template>
+    </div>
+    <div id="infoview">
+
+    </div>
   </div>
 </tf-dashboard-layout>
 
@@ -97,6 +122,22 @@ by default. The user can select a different run from a dropdown menu.
 
 :host /deep/ {
   font-family: 'Roboto', sans-serif;
+}
+
+.table-title {
+  margin-left: 20px;
+  white-space:nowrap;
+  overflow-x:auto;
+}
+
+.checkbox {
+  margin-top: 0px;
+  margin-left: 30px;
+  margin-right: 15px;
+}
+
+.flex-horizontal {
+  @apply --layout-horizontal;
 }
 
 .sidebar {
@@ -114,6 +155,7 @@ by default. The user can select a different run from a dropdown menu.
   top: 48px;
   bottom: 0px;
   width: 100%;
+  height: 100%;
 }
 
 paper-dialog {
@@ -133,6 +175,18 @@ paper-icon-button {
   width: 20px;
   height: 20px;
 }
+
+#sessionview {
+  background-color: white;
+  height: 100%;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+#infoview {
+  background-color: white;
+  height: 100%;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
 </style>
 </template>
 </dom-module>
@@ -141,6 +195,17 @@ paper-icon-button {
 Polymer({
   is: 'tf-debugdb-dashboard',
   properties: {
+    postDivElement: {
+      type: String
+    },
+    addIdentification: {
+      type: Object,
+      observer:'_addIdentification'
+    },
+    records: {
+      type: Array,
+      value: [],
+    },
     _attachList:{
       type:Array,
       value:[]
@@ -174,9 +239,18 @@ Polymer({
   _changePage: function(){
     if(document.getElementById('graphboard')){
       if(this._selectedPage == 0){
-        document.getElementById('graphboard').style.display = ''
+        document.getElementById('sessionview').style.display = ''
+        document.getElementById('infoview').style.display = 'none'
+        document.getElementById('graphboard').style.display = 'none'
       }
       if(this._selectedPage == 1){
+        document.getElementById('sessionview').style.display = 'none'
+        document.getElementById('infoview').style.display = 'none'
+        document.getElementById('graphboard').style.display = ''
+      }
+      if(this._selectedPage == 2){
+        document.getElementById('sessionview').style.display = 'none'
+        document.getElementById('infoview').style.display = ''
         document.getElementById('graphboard').style.display = 'none'
       }
     }
@@ -187,6 +261,25 @@ Polymer({
   detached: function() {
     this.set('_isAttached', false);
   },
+  _addIdentification: function(){
+    var records = []
+    this.records.forEach(record => {
+      records.push(record)
+    })
+    records.push(this.addIdentification)
+    this.records = records
+  },
+  selectRecord: function(e){
+    var divelement = e.path[2]
+    if(this.postDivElement!=undefined){
+      if(this.postDivElement != divelement.id){
+        document.getElementById(this.postDivElement).getElementsByClassName('checkbox')[0].checked = false
+      }
+    }
+
+    this.postDivElement = divelement.id
+    console.info(divelement.id)
+  }
   
 });
 
