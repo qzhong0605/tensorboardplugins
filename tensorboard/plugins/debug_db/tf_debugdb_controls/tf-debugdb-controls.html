@@ -41,9 +41,10 @@ paper-input {
 }
 
 paper-button.half{
+  /* width: 29%; */
   width: 45%;
   background-color: #f57c00 !important;
-  font: 900 !important;
+  /* font-size: 12px; */
   color: white !important;
   margin-top: 10px;
 }
@@ -112,6 +113,15 @@ paper-button.cancel-bt{
   margin-bottom: 10px;
   margin-top: 5px;
 }
+
+.hr{
+  background-color: rgba(0, 0, 0, .12);
+  height: 1px;
+  border: none;
+  margin-top: 30px;
+  margin-left: -20px;
+  margin-right: -20px;
+}
 </style>
 <custom-style>
     <style is="custom-style">
@@ -145,112 +155,98 @@ paper-button.cancel-bt{
     <paper-toggle-button noink class="title" checked="{{loadType}}">[[loadTypeText]]</paper-toggle-button>
   </div>
 
-    <div id="newPage">
-      <div>
-          <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
-            <paper-menu class="dropdown-content" selected="{{_srcMode}}">
-              <template is="dom-repeat" items="{{_srcTypes}}">
-                  <paper-item>[[item]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
-        <div id="elsefile">
-          <paper-input class="path" label="File Type" id="fileType"></paper-input>
-        </div>
-        <div id="torch" style="display: none">
-            <paper-input class="path" label="Input Tensor Size" id="inputTensorSize"></paper-input>
-          </div>
-        <div id="elsepath">
-          <paper-input class="path" label="Source Path" id="srcPath"></paper-input>
-        </div>
-        <div id="c2" style="display: none">
-          <paper-input class="path" label="Predict Net" id="predictNet"></paper-input>
-          <paper-input class="path" label="Init Net" id="initNet"></paper-input>
-        </div>
+  <div id="newPage">
+    <div>
+        <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
+          <paper-menu class="dropdown-content" selected="{{_srcMode}}">
+            <template is="dom-repeat" items="{{_srcTypes}}">
+                <paper-item>[[item]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+      <div id="elsefile">
+        <paper-input class="path" label="File Type" id="fileType"></paper-input>
       </div>
-    
-      <paper-input class="path" label="Batch Size" id="batchSize"></paper-input>
-      <paper-input class="path" label="Memory Size" id="memorySize"></paper-input>
-      <paper-input class="path" label="Optimization Method" id="optimizationMethod"></paper-input>
-      <paper-input class="path" label="Learning Rate" id="learningRate"></paper-input>
-      <paper-input class="path" label="Total Iteration" id="totalIteration"></paper-input>
-
-      <paper-dropdown-menu label="Device Type" no-animations noink horizontal-align="left" class="device_type">
-        <paper-menu class="dropdown-content" selected="{{selctedDeviceType}}">
-          <template is="dom-repeat" items="{{_deviceTypes}}">
-              <paper-item>[[item]]</paper-item>
-          </template>
-        </paper-menu>
-      </paper-dropdown-menu>
-      <div class="machineList" id="machineList"></div>
-      <div class="container flex">
-        <div>
-          <paper-icon-button icon="add" on-click="addMachine" style="margin-left: -10px;"></paper-icon-button>
+      <div id="torch" style="display: none">
+          <paper-input class="path" label="Input Tensor Size" id="inputTensorSize"></paper-input>
         </div>
-        <div class="list-label">Add new Machine</div>
+      <div id="elsepath">
+        <paper-input class="path" label="Source Path" id="srcPath"></paper-input>
       </div>
-
-      <!-- <div class="container flex">
-        <div><paper-icon-button icon='remove' on-tap='removeMachine' style='margin-left: -10px;margin-top: 20px;'></paper-icon-button></div>
-        <div><paper-input class='half-input' id='machine' label='Machine' value=''></paper-input></div>
-        <div><paper-input class='half-input' id='device_id' label='Device Id' value=''></paper-input></div>
-      </div> -->
-      <paper-button raised noink id="start" class="half" on-click="newStart" style="float: left">START</paper-button>
-      <template is="dom-if" if="{{!newIsStop}}">
-          <paper-button raised noink id="stop" class="half" on-click="newStop" style="float: right">STOP</paper-button>
-      </template>
-      <template is="dom-if" if="{{newIsStop}}">
-        <paper-button raised noink id="continue" class="half" onclick="newContinue.open()" style="float: right">CONTINUE</paper-button>
-      </template>
+      <div id="c2" style="display: none">
+        <paper-input class="path" label="Predict Net" id="predictNet"></paper-input>
+        <paper-input class="path" label="Init Net" id="initNet"></paper-input>
+      </div>
     </div>
+  
+    <paper-input class="path" label="Batch Size" id="batchSize"></paper-input>
+    <paper-input class="path" label="Memory Size" id="memorySize"></paper-input>
+    <paper-input class="path" label="Optimization Method" id="optimizationMethod"></paper-input>
+    <paper-input class="path" label="Learning Rate" id="learningRate"></paper-input>
+    <paper-input class="path" label="Total Iteration" id="totalIteration"></paper-input>
+
+    <paper-dropdown-menu label="Device Type" no-animations noink horizontal-align="left" class="device_type">
+      <paper-menu class="dropdown-content" selected="{{selctedDeviceType}}">
+        <template is="dom-repeat" items="{{_deviceTypes}}">
+            <paper-item>[[item]]</paper-item>
+        </template>
+      </paper-menu>
+    </paper-dropdown-menu>
+    <div class="machineList" id="machineList"></div>
+    <div class="container flex">
+      <div>
+        <paper-icon-button icon="add" on-click="addMachine" style="margin-left: -10px;"></paper-icon-button>
+      </div>
+      <div class="list-label">Add new Machine</div>
+    </div>
+    <paper-button raised noink id="start" class="full" on-click="newStart">NEW</paper-button>
+    <br>
+  </div>
 
   <div id="attachPage" style="display: none">
     <paper-input id="network_identification" label="Network Identification" value=""></paper-input>
     <paper-button raised noink id="attach" class="full" on-click="attach">ATTACH</paper-button>
     <br>
-    <!-- <paper-dropdown-menu label="Attach List" no-animations noink horizontal-align="left" class="attach-list">
-      <paper-menu class="dropdown-content" selected="{{selectedIdentification}}">
-        <template is="dom-repeat" items="{{attachList}}">
-            <paper-item>[[item]]</paper-item>
-        </template>
-      </paper-menu>
-    </paper-dropdown-menu> -->
-    <div id="attachInfo" style="display: none">
-      <!-- <paper-input disabled class="path" label="Model Type" id="model_type"></paper-input> -->
-      
-      <div class="container flex">
-        <div>
-          <paper-dropdown-menu label="Machine List" no-animations noink horizontal-align="left" class="machine-list">
-            <paper-menu class="dropdown-content" selected="{{selectedMachine}}">
-              <template is="dom-repeat" items="{{selectedMachineList}}">
-                  <paper-item>[[item]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
-        </div>
-        <div>
-          <paper-dropdown-menu label="Device Id List" no-animations noink horizontal-align="left" class="id-list">
-            <paper-menu class="dropdown-content" selected="{{selectedId}}">
-              <template is="dom-repeat" items="{{idList}}">
-                  <paper-item>[[item]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
-        </div>
+  </div>
+  <div id="attachInfo" style="display: none">
+    <hr class="hr">
+    <div>[[selectedIdentification]]</div>
+    <div class="container flex">
+      <div>
+        <paper-dropdown-menu label="Machine List" no-animations noink horizontal-align="left" class="machine-list">
+          <paper-menu class="dropdown-content" selected="{{selectedMachine}}">
+            <template is="dom-repeat" items="{{selectedMachineList}}">
+                <paper-item>[[item]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
       </div>
-
-      <paper-input disabled class="path" label="Batch Size" id="batch_size"></paper-input>
-      <paper-input disabled class="path" label="Memory Size" id="memory_size"></paper-input>
-    
-      <paper-button raised noink id="stop" class="half" on-click="attachStop" style="float: left">STOP</paper-button>
-      <paper-button raised noink id="continue" class="half" onclick="attachContinue.open()" style="float: right">CONTINUE</paper-button>
+      <div>
+        <paper-dropdown-menu label="Device Id List" no-animations noink horizontal-align="left" class="id-list">
+          <paper-menu class="dropdown-content" selected="{{selectedId}}">
+            <template is="dom-repeat" items="{{idList}}">
+                <paper-item>[[item]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+      </div>
     </div>
+
+    <paper-input disabled class="path" label="Batch Size" id="batch_size"></paper-input>
+    <paper-input disabled class="path" label="Memory Size" id="memory_size"></paper-input>
+    
+    <!-- <paper-button raised noink id="start" class="half" on-click="" style="float: left">START</paper-button> -->
+    <paper-button raised noink id="stop" class="half" on-click="stop" style="float: left">STOP</paper-button>
+    <paper-button raised noink id="continue" class="half" onclick="Continue.open()" style="float: right">CONTINUE</paper-button>
+
+    <!-- <paper-button raised noink id="stop" class="half" on-click="attachStop" style="float: left">STOP</paper-button>
+    <paper-button raised noink id="continue" class="half" onclick="attachContinue.open()" style="float: right">CONTINUE</paper-button> -->
   </div>
 
-  <paper-dialog id="newContinue">
+  <paper-dialog id="Continue">
     <paper-input label="Iteration Number" value="" id="iteration_number" style="width: 80%;"></paper-input>
     <paper-button  noink class="cancel-bt" id="cancel-bt" dialog-dismiss>CANCEL</paper-button>
-    <paper-button  noink class="ok-bt" on-click="newContinue">OK</paper-button>
+    <paper-button  noink class="ok-bt" on-click="Continue">OK</paper-button>
   </paper-dialog>
 
   <paper-dialog id="attachContinue">

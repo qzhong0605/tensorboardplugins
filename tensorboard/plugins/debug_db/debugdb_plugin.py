@@ -73,11 +73,9 @@ class DebugDBPlugin(base_plugin.TBPlugin):
         '/run_metadata': self.run_metadata_route,
         '/debug': self.debug,
         '/newstart': self.new_start,
-        '/newstop': self.new_stop,
-        '/newcontinue': self.new_continue,
         '/attach': self.attach,
-        '/attachstop': self.attach_stop,
-        '/attachcontinue': self.attach_continue,
+        '/stop': self.stop,
+        '/continue': self.attach_continue,
         '/newload': self.parse_from_model,
         '/attachload': self.attach_load,
     }
@@ -354,17 +352,6 @@ class DebugDBPlugin(base_plugin.TBPlugin):
     return http_util.Respond(request, respond, 'application/json')
 
   @wrappers.Request.application
-  def new_stop(self, request):
-    logger.warn('stop')
-    return http_util.Respond(request, 'ok', 'text/plain')
-
-  @wrappers.Request.application
-  def new_continue(self, request):
-    iteration_number = request.args.get('iteration_number')
-    logger.warn(iteration_number)
-    return http_util.Respond(request, 'ok', 'text/plain')
-
-  @wrappers.Request.application
   def attach(self, request):
     network_identification = request.args.get('network_identification')
     respond = json.dumps({
@@ -383,7 +370,7 @@ class DebugDBPlugin(base_plugin.TBPlugin):
     return http_util.Respond(request, respond, 'application/json')
 
   @wrappers.Request.application
-  def attach_stop(self, request):
+  def stop(self, request):
     identification = request.args.get('identification')
     logger.warn(identification)
     return http_util.Respond(request, 'ok', 'text/plain')

@@ -171,10 +171,6 @@ namespace tf.debug.controls {
       selctedDeviceType:{
         type: Number,
       },
-      newIsStop:{
-        type: Boolean,
-        value: false,
-      },
       loadType: {
         type: Boolean,
         value: true,
@@ -391,38 +387,6 @@ namespace tf.debug.controls {
           }
         });
       });
-
-    },
-    newStop: function(){
-      this.newIsStop = true
-      const params = new URLSearchParams();
-      new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/newstop', params)).then((res) => {
-          // Fetch does not reject for 400+.
-          if(res.ok){
-            res.text().then(function(msg){
-              
-            })
-          }
-        });
-      });
-    },
-    newContinue: function(){
-      this.newIsStop = false
-      document.getElementById('cancel-bt').click()
-      const params = new URLSearchParams();
-      var iteration_number = (<HTMLInputElement>document.getElementById('iteration_number')).value;
-      params.set('iteration_number', iteration_number);
-      new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/newcontinue', params)).then((res) => {
-          // Fetch does not reject for 400+.
-          if(res.ok){
-            res.text().then(function(msg){
-              
-            })
-          }
-        });
-      });
     },
     attach: function(){
       var mthis= this
@@ -465,12 +429,12 @@ namespace tf.debug.controls {
       this.selectedMachineList = machineList;
       this._selectedMachineChanged()
     },
-    attachStop: function(){
+    stop: function(){
       const params = new URLSearchParams();
       // params.set('identification',this.attachList[this.selectedIdentification]);
       params.set('identification',this.selectedIdentification);
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attachstop', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/stop', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
@@ -480,15 +444,15 @@ namespace tf.debug.controls {
         });
       });
     },
-    attachContinue: function(){
+    Continue: function(){
       document.getElementById('cancel-bt').click()
       const params = new URLSearchParams();
-      var iteration_number = (<HTMLInputElement>document.getElementById('iteration_number_2')).value;
+      var iteration_number = (<HTMLInputElement>document.getElementById('iteration_number')).value;
       params.set('iteration_number', iteration_number);
       // params.set('identification',this.attachList[this.selectedIdentification]);
       params.set('identification',this.selectedIdentification);
       new Promise(() => {
-        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/attachcontinue', params)).then((res) => {
+        fetch(tf_backend.getRouter().pluginRoute('debugdb', '/continue', params)).then((res) => {
           // Fetch does not reject for 400+.
           if(res.ok){
             res.text().then(function(msg){
