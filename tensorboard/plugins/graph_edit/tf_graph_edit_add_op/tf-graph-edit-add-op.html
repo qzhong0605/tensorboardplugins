@@ -7,9 +7,8 @@
 <link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../tf-imports/katexjs.html">
 
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js"></script> -->
 
 <dom-module id="tf-graph-edit-add-op">
 <template>
@@ -236,6 +235,8 @@ Polymer({
         if(res.ok){
           res.text().then(function(respond){
             document.getElementById('intro').innerHTML = respond
+            // var html = katex.renderToString("\\displaystyle{\\sum_{i=4}^{10}}");
+            // document.getElementById('intro').innerHTML = html
           })
         }
       });

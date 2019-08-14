@@ -14,6 +14,7 @@ tf_web_library(
         "//tensorboard/plugins/graph_edit/tf_graph_edit_common",
         "//tensorboard/components/tf_imports:polymer",
         "//tensorboard/components/tf_imports:d3",
+        "//tensorboard/components/tf_imports:katexjs",
         "@org_polymer_paper_progress",
         "@org_polymer_paper_input",
         "@org_polymer_paper_dropdown_menu",
