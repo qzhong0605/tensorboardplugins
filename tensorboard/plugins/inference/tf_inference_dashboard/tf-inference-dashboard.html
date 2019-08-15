@@ -129,8 +129,8 @@ TensorFlow run.
 </div>
       <div class="center" id="center">
         <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
-          <paper-tab>sessions view</paper-tab>
-          <paper-tab>feature view</paper-tab>
+          <paper-tab>Sessions View</paper-tab>
+          <paper-tab>Feature View</paper-tab>
         </paper-tabs>
         <div id="page0" style="display: none">
           <div class="center-content" id="channelimage">
@@ -245,12 +245,12 @@ TensorFlow run.
         <div id="page1">
           <!-- model, session, show data, batch size, input size, accuracy  -->
             <div class="flex-horizontal" style="margin-bottom: 10px;">
-              <div class="table-title">show data</div>
+              <div class="table-title" style="margin-left: 20px;">show data</div>
               <div class="table-title">model</div>
               <div class="table-title">session</div>
               <div class="table-title">batch size</div>
               <div class="table-title">input size</div>
-              <div class="table-title">accuracy</div>
+              <div class="table-title" style="border-right: 0px solid;">accuracy</div>
             </div>
           <template is="dom-repeat" items="{{records}}">
             <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
@@ -261,12 +261,33 @@ TensorFlow run.
               <div class="table-content" id="inputsize">[[item.input_size]]</div>
               <div class="table-content" id="accuracy">[[item.accuracy]]</div>
             </div>
+            <hr class="hr">
           </template>
         </div>
       </div>
     </tf-dashboard-layout>
     <style include="dashboard-style"></style>
     <style>
+      paper-tabs[no-bar] paper-tab.iron-selected {
+        color: #f57c00;
+      }
+      paper-tabs{
+        align-items: center;
+        height: 48px;
+        font-size: 14px;
+        font-weight: 500;
+        overflow: hidden;
+      }
+      .hr {
+        width: 725px;
+        margin-left: 20px;
+        background-color: #bbbbbb;
+        height: 1px;
+        border: none
+      }
+      #page1 {
+        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+      }
       .checkbox {
         margin-top: 0px;
         margin-left: 45px;
@@ -274,11 +295,17 @@ TensorFlow run.
       }
       .table-content {
         width: 120px;
-        margin-left: 20px;
+        margin-left: 1px;
+        white-space:nowrap;
+        overflow-x:auto;
       }
       .table-title {
         width: 120px;
-        margin-left: 20px;
+        height: 30px;
+        border-bottom: 1px solid #bbbbbb;
+        border-right: 1px solid #bbbbbb;
+        white-space:nowrap;
+        overflow-x:auto;
       }
       .separator {
         margin-top: 30px;
