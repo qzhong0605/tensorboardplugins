@@ -152,33 +152,33 @@ Polymer({
         "Split","ChannelShuﬄe","Dropout","LRN","Sigmoid"
     ]
 
-    this.opAttributes = [
-      ['kernel','stride','pad','dilation','group','order'],
-      ['is_test','momentum','epsilon','order','num_batches'],
-      ['n'],
-      [],
-      ['axis','axis_w'],
-      ['kernel','stride','pad','dilation','order','global_pooling'],
-      ['kernel','stride','pad','dilation','order','global_pooling'],
-      ['shape'],
-      ['axis_a','axis_b','trans_a','trans_b'],
-      ['axis','order'],
-      ['mode','value','pads'],
-      ['order'],
-      [],
-      ['mode'],
-      ['axes'],
-      ['axis','k'],
-      ['axes'],
-      [],
-      [],
-      ['axis'],
-      ['axis','split'],
-      ['group','order'],
-      ['radio','is_test'],
-      ['size','alpha','beta','bias'],
-      [],
-    ]
+    this.opAttributes = {
+      'Conv':['kernel','stride','pad','dilation','group','order'],
+      'BatchNormalization':['is_test','momentum','epsilon','order','num_batches'],
+      'ReluN':['n'],
+      'Relu':[],
+      'FC':['axis','axis_w'],
+      'MaxPooling':['kernel','stride','pad','dilation','order','global_pooling'],
+      'AveragePooling':['kernel','stride','pad','dilation','order','global_pooling'],
+      'Reshape':['shape'],
+      'MatMul':['axis_a','axis_b','trans_a','trans_b'],
+      'Concat':['axis','order'],
+      'Pad':['mode','value','pads'],
+      'PRelu':['order'],
+      'RowMul':[],
+      'Resize':['mode'],
+      'Squeeze':['axes'],
+      'TopK':['axis','k'],
+      'Transpose':['axes'],
+      'Sub':[],
+      'Sum':[],
+      'Softmax':['axis'],
+      'Split':['axis','split'],
+      'ChannelShuﬄe':['group','order'],
+      'Dropout':['radio','is_test'],
+      'LRN':['size','alpha','beta','bias'],
+      'Sigmoid':[],
+    }
     this.op = 'Conv'
     this.subOpTypes = ['Conv']
     this._selectedOp = 0
@@ -243,14 +243,14 @@ Polymer({
     });
   },
   _getAttributes: function(_selectedOp) {
-    if(this.opAttributes[_selectedOp]==undefined){
+    if(this.opAttributes[this.subOpTypes[_selectedOp]]==undefined){
       return []
     }
     this.nodeName = ""
     this._selectedOpAttributes.forEach(d => {
       document.getElementById(d).value = ""
     });
-    return this.opAttributes[_selectedOp]
+    return this.opAttributes[this.subOpTypes[_selectedOp]]
   },
   newOpNode: function() {
     var attrList = []
