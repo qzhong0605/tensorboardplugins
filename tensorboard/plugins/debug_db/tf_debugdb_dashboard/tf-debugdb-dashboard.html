@@ -92,18 +92,19 @@ by default. The user can select a different run from a dropdown menu.
         <div class="table-title" style="width: 120px;">iteration</div>
         <div class="table-title" style="width: 120px;">memory size</div>
         <div class="table-title" style="width: 120px;">learning rate</div>
-        <div class="table-title" style="width: 120px;">optimization method</div>
+        <div class="table-title" style="width: 180px;border-right: 0px solid;">optimization method</div>
       </div>
       <template is="dom-repeat" items="{{records}}">
         <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.identification]]">
           <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
-          <div class="table-title" id="model" style="width: 120px;">[[item.identification]]</div>
-          <div class="table-title" id="model" style="width: 120px;">[[item.model_type]]</div>
-          <div class="table-title" id="session" style="width: 120px;">[[item.iteration]]</div>
-          <div class="table-title" id="batchsize" style="width: 120px;">[[item.memory_size]]</div>
-          <div class="table-title" id="inputsize" style="width: 120px;">[[item.learning_rate]]</div>
-          <div class="table-title" id="accuracy" style="width: 120px;">[[item.optimization_method]]</div>
+          <div class="table-content" id="model" style="width: 120px;">[[item.identification]]</div>
+          <div class="table-content" id="model" style="width: 120px;">[[item.model_type]]</div>
+          <div class="table-content" id="session" style="width: 120px;">[[item.iteration]]</div>
+          <div class="table-content" id="batchsize" style="width: 120px;">[[item.memory_size]]</div>
+          <div class="table-content" id="inputsize" style="width: 120px;">[[item.learning_rate]]</div>
+          <div class="table-content" id="accuracy" style="width: 180px;">[[item.optimization_method]]</div>
         </div>
+        <hr class="hr">
       </template>
     </div>
     <div id="infoview">
@@ -125,16 +126,32 @@ by default. The user can select a different run from a dropdown menu.
   font-family: 'Roboto', sans-serif;
 }
 
+.hr {
+  width: 836px;
+  margin-left: 0px;
+  background-color: #bbbbbb;
+  height: 1px;
+  border: none
+}
+
 .table-title {
-  margin-left: 20px;
+  height: 30px;
+  border-bottom: 1px solid #bbbbbb;
+  border-right: 1px solid #bbbbbb;
+  text-align: center;
+}
+
+.table-content {
+  margin-left: 1px;
   white-space:nowrap;
   overflow-x:auto;
+  text-align: center;
 }
 
 .checkbox {
   margin-top: 0px;
-  margin-left: 30px;
-  margin-right: 15px;
+  margin-left: 15px;
+  margin-right: 0px;
 }
 
 .flex-horizontal {
@@ -175,13 +192,11 @@ paper-icon-button {
 
 #sessionview {
   background-color: white;
-  height: 100%;
   box-shadow: 0 1px 5px rgba(0,0,0,0.2);
 }
 
 #infoview {
   background-color: white;
-  height: 100%;
   box-shadow: 0 1px 5px rgba(0,0,0,0.2);
 }
 </style>
