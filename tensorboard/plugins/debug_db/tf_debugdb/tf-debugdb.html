@@ -120,8 +120,7 @@ paper-button.cancel-bt{
       ></tf-debugdb-scene>
     </div>
   </div>
-  <div class="resizer" id="resizer">
-  </div>
+  <div class="resizer" id="resizer"></div>
   <div class="tensor" id="tensor">
 
   </div>
@@ -298,8 +297,9 @@ Polymer({
       })
       .on('end',function(){
         var endy = d3.event.y
+        console.info(starty, endy)
         document.getElementById('container').style.height = document.getElementById('container').clientHeight + endy-starty + 'px'
-        document.getElementById('tensor').style.height = document.getElementById('container').clientHeight - endy+starty + 'px'
+        document.getElementById('tensor').style.height = document.getElementById('tensor').clientHeight - endy+starty + 'px'
       })
 
     )

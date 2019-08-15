@@ -245,7 +245,22 @@ namespace tf.debug.controls {
   
     listeners: {},
   
-    ready: function(){},
+    ready: function(){
+      const resizer = d3.select(this.$.hr)
+      var starty
+      resizer.call(d3.drag()
+        .on('start',function(){
+          starty = d3.event.y
+        })
+        .on('end',function(){
+          var endy = d3.event.y
+          console.info(starty, endy)
+          document.getElementById('side-top').style.height = document.getElementById('side-top').clientHeight + endy-starty + 'px'
+          document.getElementById('side-bottom').style.height = document.getElementById('side-bottom').clientHeight - endy+starty + 'px'
+        })
+
+      )
+    },
     _modeChanged: function(){
       if(document.getElementById('c2')){
         if(this._srcMode == 2){//c2
