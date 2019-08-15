@@ -130,8 +130,14 @@ Polymer({
     },
     srcPath: String,
     desPath: String,
-    srcType: Number,
-    desType: Number,
+    srcType: {
+      type: Number,
+      observer:'_srcTypeChanged'
+    },
+    desType: {
+      type: Number,
+      observer:'_desTypeChanged'
+    },
     _modelTypes:{
       type: Array,
       value: ['onnx', 'caffe', 'caffe2', 'torch', 'tf'],
@@ -184,6 +190,24 @@ Polymer({
   listeners: {},
 
   ready: function(){},
+  _srcTypeChanged: function(){
+    if(this.srcType == 2){
+      document.getElementById('srcnotc2').style.display = 'none'
+      document.getElementById('srcisc2').style.display = ''
+    }else{
+      document.getElementById('srcnotc2').style.display = ''
+      document.getElementById('srcisc2').style.display = 'none'
+    }
+  },
+  _desTypeChanged: function(){
+    if(this.desType == 2){
+      document.getElementById('desnotc2').style.display = 'none'
+      document.getElementById('desisc2').style.display = ''
+    }else{
+      document.getElementById('desnotc2').style.display = ''
+      document.getElementById('desisc2').style.display = 'none'
+    }
+  },
   dragLeft(){
     var left = document.getElementsByClassName('source-graphboard') as HTMLCollectionOf<HTMLElement>;
     var right = document.getElementsByClassName('target-graphboard') as HTMLCollectionOf<HTMLElement>;
@@ -207,19 +231,41 @@ Polymer({
   },
 
   transformModel: function(){
-    var data = {
-      'destination_path': this.desType,
-      'destination_type': this._modelTypes[this.desType],
+    var destination_type = this._modelTypes[this.desType]
+    var data = {}
+    if(destination_type == 'caffe2'){
+      data = {
+        'predict_net': (<HTMLInputElement>document.getElementById('predict_net_des')).value,
+        'init_net': (<HTMLInputElement>document.getElementById('init_net_des')).value,
+        'destination_type': destination_type,
+      }
+    }else{
+      data = {
+        'destination_path': this.desType,
+        'destination_type': destination_type,
+      }
     }
+
     this.targetParams = data
-    console.info(this.targetParams)
   },
 
   loadModel: function(){
-    var data = {
-      'source_path': this.srcPath,
-      'source_type': this._modelTypes[this.srcType],
+    var source_type = this._modelTypes[this.srcType]
+    var data = {}
+    if(source_type == 'caffe2'){
+      data = {
+        'predict_net': (<HTMLInputElement>document.getElementById('predict_net')).value,
+        'init_net': (<HTMLInputElement>document.getElementById('init_net')).value,
+        'source_type': source_type,
+      }
     }
+    else{
+      data = {
+        'source_path': this.srcPath,
+        'source_type': source_type,
+      }
+    }
+    
     this.selection = data
   },
 

@@ -105,8 +105,13 @@ paper-dropdown-menu {
         </template>
       </paper-menu>
     </paper-dropdown-menu>
-
-    <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input>
+    <div id="srcnotc2" style="display: none">
+      <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input>
+    </div>
+    <div id="srcisc2" style="display: none">
+      <paper-input class="" label="Predict Net" id="predict_net"></paper-input>
+      <paper-input class="" label="Init Net" id="init_net"></paper-input>
+    </div>
 
     <paper-button raised noink class="full-width-bt" on-click="loadModel">LOAD</paper-button>
 
@@ -118,8 +123,13 @@ paper-dropdown-menu {
         </template>
       </paper-menu>
     </paper-dropdown-menu>
-
-    <paper-input class="" label="Storage Path " value="{{desPath}}"></paper-input>
+    <div id="desnotc2" style="display: none">
+      <paper-input class="" label="Storage Path " value="{{desPath}}"></paper-input>
+    </div>
+    <div id="desisc2" style="display: none">
+      <paper-input class="" label="Predict Net" id="predict_net_des"></paper-input>
+      <paper-input class="" label="Init Net" id="init_net_des"></paper-input>
+    </div>
 
     <paper-button raised noink class="full-width-bt" on-click="transformModel">CONVERT</paper-button>
 

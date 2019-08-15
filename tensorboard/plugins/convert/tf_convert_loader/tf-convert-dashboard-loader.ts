@@ -84,9 +84,15 @@ Polymer({
   observers: [],
   _load: function(): Promise<void> {
     const params = new URLSearchParams();
-    params.set('source_path', this.selection.source_path);
-    params.set('source_type', this.selection.source_type);
-    
+    if(this.selection.source_type == 'caffe2'){
+      params.set('source_type', this.selection.source_type);
+      params.set('predict_net', this.selection.predict_net);
+      params.set('init_net', this.selection.init_net);
+    }
+    else{
+      params.set('source_path', this.selection.source_path);
+      params.set('source_type', this.selection.source_type);
+    }
     const graphPath =
         tf_backend.getRouter().pluginRoute('convert', '/load', params);
     return this._fetchAndConstructHierarchicalGraph(graphPath).then(() => {
@@ -95,9 +101,15 @@ Polymer({
   },
   _tranform: function(): Promise<void> {
     const params = new URLSearchParams();
-    params.set('destination_path', this.targetParams.destination_path);
-    params.set('destination_type', this.targetParams.destination_type);
-    
+    if(this.targetParams.destination_type == 'caffe2'){
+      params.set('destination_type', this.targetParams.destination_type);
+      params.set('predict_net', this.targetParams.predict_net);
+      params.set('init_net', this.targetParams.init_net);
+    }
+    else{
+      params.set('destination_path', this.targetParams.destination_path);
+      params.set('destination_type', this.targetParams.destination_type);
+    }
     const graphPath =
         tf_backend.getRouter().pluginRoute('convert', '/convert', params);
     return this._fetchAndConstructHierarchicalGraphTransform(graphPath).then(() => {

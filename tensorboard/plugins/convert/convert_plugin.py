@@ -78,9 +78,14 @@ class ConvertPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def load_model(self, request):
     source_type = request.args.get('source_type')
-    source_path = request.args.get('source_path')
-    logger.warn(source_path)
-    logger.warn(source_type)
+    if source_type=='caffe2':
+      predict_net = request.args.get('predict_net')
+      init_net = request.args.get('init_net')
+      logger.warn(init_net)
+      logger.warn(predict_net)
+    else:
+      source_path = request.args.get('source_path')
+      logger.warn(source_path)
     self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
     self._tb_graph.ConvertNet()
     graph = self._tb_graph._tb_graph
@@ -89,9 +94,15 @@ class ConvertPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def convert_model(self, request):
     destination_type = request.args.get('destination_type')
-    destination_path = request.args.get('destination_path')
-    logger.warn(destination_type)
-    logger.warn(destination_path)
+    if destination_type=='caffe2':
+      predict_net = request.args.get('predict_net')
+      init_net = request.args.get('init_net')
+      logger.warn(init_net)
+      logger.warn(predict_net)
+    else:
+      destination_path = request.args.get('destination_path')
+      logger.warn(destination_path)
+    
     self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
     self._tb_graph.ConvertNet()
     graph = self._tb_graph._tb_graph
