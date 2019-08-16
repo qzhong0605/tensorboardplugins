@@ -64,6 +64,9 @@ class ConvertPlugin(base_plugin.TBPlugin):
   definition.
 
   Here, there two different network IR, including Tensorboard IR and ONNX IR.
+
+  For model transformation among different frameworks, they are pretrained models
+  and stored as protobuf-format file.
   """
 
   plugin_name = _PLUGIN_PREFIX_ROUTE
@@ -75,7 +78,8 @@ class ConvertPlugin(base_plugin.TBPlugin):
       context: A base_plugin.TBContext instance.
     """
     self._multiplexer = context.multiplexer
-    self._tb_graph = None
+    self._src_tb_graph = None
+    self._dst_tb_graph = None
 
   def get_plugin_apps(self):
     return {
@@ -87,19 +91,37 @@ class ConvertPlugin(base_plugin.TBPlugin):
 
   @wrappers.Request.application
   def load_model(self, request):
-    source_type = request.args.get('source_type')
-    if source_type=='caffe2':
-      predict_net = request.args.get('predict_net')
-      init_net = request.args.get('init_net')
-      if not os.path.exists(predict_net) and not os.path.exists(init_net)
-      logger.warn(init_net)
-      logger.warn(predict_net)
+    """ It used to parse model file and convert it to tensorboard IR
+    """
+    model_type = request.args.get("source_type")
+    if model_type == "torch":
+      input_tensor_size = request.args.get("input_tensor_size")
+      model_file = request.args.get('model_file')
+      if not os.path.exists(model_file):
+        # send a response to frontend and report file not existing
+        pass
+      pass
+    elif model_type == "caffe2":
+      predict_net = request.args.get("predict_net")
+      init_net = request.args.get("init_net")
+      if not (os.path.exists(predict_net) and os.path.exists(init_net)):
+        # send a response to frontend and report that model file doesnot exist
+        pass
+        self._src_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+    elif model_type == "caffe":
+      model_file = request.args.get('source_path')
+      self._src_tb_graph = caffe_util.CaffeGraph(model_file, "pb")
+    elif model_type == "onnx":
+      model_file = request.args.get('source_path')
+      self._src_tb_graph = onnx_util.OnnxGraph(model_file, "pb")
+    elif model_type == "tf":
+      model_file = request.args.get('source_path')
+      pass
     else:
-      source_path = request.args.get('source_path')
-      logger.warn(source_path)
-    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
-    self._tb_graph.ConvertNet()
-    graph = self._tb_graph._tb_graph
+      # send a response to frontend and report model type error
+      pass
+    self._src_tb_graph.ConvertNet()
+    graph = self._src_tb_graph.GetTBGraph()
     return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   @wrappers.Request.application
