@@ -416,28 +416,28 @@ paper-dropdown-menu.save-model {
         </div>
       <iron-icon icon="file-upload" class="button-icon"></iron-icon>
     </paper-button>
-      <paper-button class="icon-button" onclick="dialog.open()" alt="save">
-        <iron-icon icon="save" class="button-icon"></iron-icon>
-      </paper-button>
-      <paper-dialog id="dialog">
-        <div class="container flex-horizontal">
-          <div>
-            <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left" class="save-model">
-                <paper-menu class="dropdown-content" selected="{{_selectedMode}}">
-                  <template is="dom-repeat" items="{{saveTypes}}">
-                      <paper-item>[[item]]</paper-item>
-                  </template>
-              </paper-menu>
-            </paper-dropdown-menu>
-          </div>
-          <div>
-            <paper-input class="path" label="Destination Path" value="{{path}}"></paper-input>
-          </div>
+    <paper-button class="icon-button" onclick="Dialog.open()" alt="save">
+      <iron-icon icon="save" class="button-icon"></iron-icon>
+    </paper-button>
+    <paper-dialog id="Dialog">
+      <div class="container flex-horizontal">
+        <div>
+          <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left" class="save-model">
+              <paper-menu class="dropdown-content" selected="{{_selectedMode}}">
+                <template is="dom-repeat" items="{{saveTypes}}">
+                    <paper-item>[[item]]</paper-item>
+                </template>
+            </paper-menu>
+          </paper-dropdown-menu>
         </div>
-        <paper-button  noink class="cancel-bt" id="cancel-bt" dialog-dismiss>Cancel</paper-button>
-        <paper-button  noink class="save-bt" on-click="saveModel">SAVE</paper-button>
-      </paper-dialog>
-    </div>
+        <div>
+          <paper-input class="path" label="Destination Path" value="{{path}}"></paper-input>
+        </div>
+      </div>
+      <paper-button  noink class="cancel-bt" id="cancel-bt" dialog-dismiss>Cancel</paper-button>
+      <paper-button  noink class="save-bt" on-click="saveModel">SAVE</paper-button>
+    </paper-dialog>
+  </div>
   <!-- TODO: -->
   <div class="edge" style="margin-top: 10px">
     <paper-toggle-button noink class="title" checked="{{edgeMode}}">[[editModel]]</paper-toggle-button>
