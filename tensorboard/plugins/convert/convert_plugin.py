@@ -21,6 +21,10 @@ from __future__ import print_function
 import json
 import six
 import os
+import onnx
+import caffe2.python.onnx.frontend as c2_onnx
+from caffe2.python.onnx.backend import Caffe2Backend as c2
+
 from werkzeug import wrappers
 
 from tensorboard.backend import http_util
@@ -122,7 +126,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
       pass
     self._src_tb_graph.ConvertNet()
     graph = self._src_tb_graph.GetTBGraph()
-    return http_util.Respond(request,str(graph) ,'text/x-protobuf')
+    return http_util.Respond(request,str(graph), 'text/x-protobuf')
 
   @wrappers.Request.application
   def convert_model(self, request):
@@ -136,9 +140,36 @@ class ConvertPlugin(base_plugin.TBPlugin):
       destination_path = request.args.get('destination_path')
       logger.warn(destination_path)
 
-    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
-    self._tb_graph.ConvertNet()
-    graph = self._tb_graph._tb_graph
+    if destination_type == 'onnx':
+      data_type = onnx.TensorProto.FLOAT
+      # data_shape = (1, 3, 299, 299) if model is inceptionv3/4
+      data_shape = (1, 3, 224, 224)
+      value_info = {
+        'data': (data_type, data_shape)
+      }
+
+      if self._src_tb_graph.predict_net.name == '':
+        self._src_tb_graph.predict_net.name = 'modelName'
+
+      onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph.predict_net,
+                                                    init_net=self._src_tb_graph.init_net,
+                                                    value_info=value_info)
+      with open(destination_path, 'wb') as f:
+        f.write(onnx_model.SerializeToString())
+
+      self._des_tb_graph = onnx_util.OnnxGraph(destination_path, "pb")
+
+    elif destination_type == 'caffe2':
+
+      init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(self._src_tb_graph._onnx_model)
+      with open(predict_net, 'wb') as f_pre:
+        f_pre.write(predict_net_model.SerializeToString())
+      with open(init_net, 'wb') as f_init:
+        f_init.write(init_net_model.SerializeToString())
+      self._des_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+
+    self._des_tb_graph.ConvertNet()
+    graph = self._des_tb_graph.GetTBGraph()
     return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   def is_active(self):
