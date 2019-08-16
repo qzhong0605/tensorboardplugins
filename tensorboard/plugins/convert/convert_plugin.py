@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""The TensorBoard Graphs plugin."""
+"""The TensorBoard Convert plugin."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import json
 import six
+import os
 from werkzeug import wrappers
 
 from tensorboard.backend import http_util
@@ -53,22 +54,35 @@ _PLUGIN_NAME_KERAS_MODEL = 'graph_keras_model'
 
 
 class ConvertPlugin(base_plugin.TBPlugin):
-  """Graphs Plugin for TensorBoard."""
+  """Convert Plugin for TensorBoard.
+
+  It's used to convert a source network definition into an another network definition
+
+  For tensorboard, it visualize different framework network through tensorboard graph
+  definition. However, in order to transform among different framework, the network
+  must be converted into ONNX IR and then is transformed into the target network
+  definition.
+
+  Here, there two different network IR, including Tensorboard IR and ONNX IR.
+
+  For model transformation among different frameworks, they are pretrained models
+  and stored as protobuf-format file.
+  """
 
   plugin_name = _PLUGIN_PREFIX_ROUTE
 
   def __init__(self, context):
-    """Instantiates GraphsPlugin via TensorBoard core.
+    """Instantiates ConvertPlugin via TensorBoard core.
 
     Args:
       context: A base_plugin.TBContext instance.
     """
     self._multiplexer = context.multiplexer
-    self._tb_graph = None
+    self._src_tb_graph = None
+    self._dst_tb_graph = None
 
   def get_plugin_apps(self):
     return {
-        '/graph': self.graph_route,
         '/info': self.info_route,
         '/run_metadata': self.run_metadata_route,
         '/load': self.load_model,
@@ -77,20 +91,39 @@ class ConvertPlugin(base_plugin.TBPlugin):
 
   @wrappers.Request.application
   def load_model(self, request):
-    source_type = request.args.get('source_type')
-    if source_type=='caffe2':
-      predict_net = request.args.get('predict_net')
-      init_net = request.args.get('init_net')
-      logger.warn(init_net)
-      logger.warn(predict_net)
+    """ It used to parse model file and convert it to tensorboard IR
+    """
+    model_type = request.args.get("source_type")
+    if model_type == "torch":
+      input_tensor_size = request.args.get("input_tensor_size")
+      model_file = request.args.get('model_file')
+      if not os.path.exists(model_file):
+        # send a response to frontend and report file not existing
+        pass
+      pass
+    elif model_type == "caffe2":
+      predict_net = request.args.get("predict_net")
+      init_net = request.args.get("init_net")
+      if not (os.path.exists(predict_net) and os.path.exists(init_net)):
+        # send a response to frontend and report that model file doesnot exist
+        pass
+        self._src_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+    elif model_type == "caffe":
+      model_file = request.args.get('source_path')
+      self._src_tb_graph = caffe_util.CaffeGraph(model_file, "pb")
+    elif model_type == "onnx":
+      model_file = request.args.get('source_path')
+      self._src_tb_graph = onnx_util.OnnxGraph(model_file, "pb")
+    elif model_type == "tf":
+      model_file = request.args.get('source_path')
+      pass
     else:
-      source_path = request.args.get('source_path')
-      logger.warn(source_path)
-    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
-    self._tb_graph.ConvertNet()
-    graph = self._tb_graph._tb_graph
+      # send a response to frontend and report model type error
+      pass
+    self._src_tb_graph.ConvertNet()
+    graph = self._src_tb_graph.GetTBGraph()
     return http_util.Respond(request,str(graph) ,'text/x-protobuf')
-  
+
   @wrappers.Request.application
   def convert_model(self, request):
     destination_type = request.args.get('destination_type')
@@ -102,7 +135,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
     else:
       destination_path = request.args.get('destination_path')
       logger.warn(destination_path)
-    
+
     self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
     self._tb_graph.ConvertNet()
     graph = self._tb_graph._tb_graph
@@ -238,41 +271,6 @@ class ConvertPlugin(base_plugin.TBPlugin):
   def info_route(self, request):
     info = self.info_impl()
     return http_util.Respond(request, info, 'application/json')
-
-  @wrappers.Request.application
-  def graph_route(self, request):
-    """Given a single run, return the graph definition in protobuf format."""
-    run = request.args.get('run')
-    tag = request.args.get('tag', '')
-    conceptual_arg = request.args.get('conceptual', False)
-    is_conceptual = True if conceptual_arg == 'true' else False
-
-    if run is None:
-      return http_util.Respond(
-          request, 'query parameter "run" is required', 'text/plain', 400)
-
-    limit_attr_size = request.args.get('limit_attr_size', None)
-    if limit_attr_size is not None:
-      try:
-        limit_attr_size = int(limit_attr_size)
-      except ValueError:
-        return http_util.Respond(
-            request, 'query parameter `limit_attr_size` must be an integer',
-            'text/plain', 400)
-
-    large_attrs_key = request.args.get('large_attrs_key', None)
-
-    try:
-      result = self.graph_impl(run, tag, is_conceptual, limit_attr_size, large_attrs_key)
-    except ValueError as e:
-      return http_util.Respond(request, e.message, 'text/plain', code=400)
-    else:
-      if result is not None:
-        (body, mime_type) = result  # pylint: disable=unpacking-non-sequence
-        return http_util.Respond(request, body, mime_type)
-      else:
-        return http_util.Respond(request, '404 Not Found', 'text/plain',
-                                 code=404)
 
   @wrappers.Request.application
   def run_metadata_route(self, request):
