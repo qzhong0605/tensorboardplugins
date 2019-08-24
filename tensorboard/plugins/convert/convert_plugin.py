@@ -22,8 +22,8 @@ import json
 import six
 import os
 import onnx
-import caffe2.python.onnx.frontend as c2_onnx
-from caffe2.python.onnx.backend import Caffe2Backend as c2
+# import caffe2.python.onnx.frontend as c2_onnx
+# from caffe2.python.onnx.backend import Caffe2Backend as c2
 
 from werkzeug import wrappers
 
@@ -151,9 +151,9 @@ class ConvertPlugin(base_plugin.TBPlugin):
       if self._src_tb_graph.predict_net.name == '':
         self._src_tb_graph.predict_net.name = 'modelName'
 
-      onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph.predict_net,
-                                                    init_net=self._src_tb_graph.init_net,
-                                                    value_info=value_info)
+      # onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph.predict_net,
+      #                                               init_net=self._src_tb_graph.init_net,
+      #                                               value_info=value_info)
       with open(destination_path, 'wb') as f:
         f.write(onnx_model.SerializeToString())
 
@@ -161,12 +161,12 @@ class ConvertPlugin(base_plugin.TBPlugin):
 
     elif destination_type == 'caffe2':
 
-      init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(self._src_tb_graph._onnx_model)
+      # init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(self._src_tb_graph._onnx_model)
       with open(predict_net, 'wb') as f_pre:
         f_pre.write(predict_net_model.SerializeToString())
       with open(init_net, 'wb') as f_init:
         f_init.write(init_net_model.SerializeToString())
-      self._des_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+      # self._des_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
 
     self._des_tb_graph.ConvertNet()
     graph = self._des_tb_graph.GetTBGraph()
