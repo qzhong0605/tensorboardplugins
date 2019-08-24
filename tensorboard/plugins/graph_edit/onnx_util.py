@@ -157,6 +157,16 @@ class OnnxGraph(tbgraph_base.TBGraph):
         # a map from the name to nodes
         self.tb_nodes = {}
 
+    def _MakeSSAName(self, name):
+        """ It's used to make a unique name through a ssa-based format for `name`
+        """
+        if name not in self._nodes_version:
+            self._nodes_version[name] = 0
+        else:
+            self._nodes_version[name] += 1
+        ret_name = "{}_{}".format(name, self._nodes_version[name])
+        return ret_name
+
     def convert_to_nodes(self, onnx_node):
         new_node = node_def_pb2.NodeDef()
         new_node.op = onnx_node.op_type
@@ -164,8 +174,11 @@ class OnnxGraph(tbgraph_base.TBGraph):
         for onnx_input in onnx_node.input:
             if onnx_input not in self._nodes_version:
                 in_node = node_def_pb2.NodeDef()
+                # These input tensors are filled by weights. So the op_type for
+                # them is set to `Const`
+                in_node.op = "Const"
                 self._nodes_version[onnx_input] = 0
-                in_node.name = '{}_{}'.format(onnx_input, 0)
+                in_node.name = '{}_{}'.format(onnx_input, self._nodes_version[onnx_input])
                 self.tb_nodes[in_node.name] = in_node
                 self._tb_graph.node.extend([in_node])
             new_node.input.append('{}_{}'.format(onnx_input, self._nodes_version[onnx_input]))
@@ -175,25 +188,32 @@ class OnnxGraph(tbgraph_base.TBGraph):
         else:
             self._nodes_version[onnx_node.output[0]] = 0
 
+        if len(onnx_node.output) == 0:
+            # For those nodes who don't have output, the node name is the
+            # operation type for current tensorboard ir node
+            new_node.name = onnx_node.op_type
+        else:
+            # For those nodes who have more than one outputs, the first output
+            # is as the node name. The other outputs are built as the sibling
+            # operation node for tensorboard ir
+            new_node.name = self._MakeSSAName(onnx_node.output[0])
+            # build sibling operation node for other outputs
+            for onnx_output in onnx_node.output[1:]:
+                out_node = node_def_pb2.NodeDef()
+                out_node.name = self._MakeSSAName(onnx_output)
+                out_node.op = "Sibling"
+                out_node.input.extend([new_node.name])
+                self.tb_nodes[out_node.name] = out_node
+                self._tb_graph.node.extend([out_node])
+
         # handle onnx node attribute
         for onnx_attr in onnx_node.attribute:
             attr_value = attr_value_pb2.AttrValue()
             _make_onnxattr_to_tbattr(onnx_attr, attr_value)
             new_node.attr[onnx_attr.name].CopyFrom(attr_value)
 
-        new_node.name = '{}_{}'.format(onnx_node.output[0], self._nodes_version[onnx_node.output[0]])
         self.tb_nodes[new_node.name] = new_node
         self._tb_graph.node.extend([new_node])
-
-        for onnx_output in onnx_node.output[1:]:
-            if onnx_output not in self._nodes_version:
-                self._nodes_version[onnx_output] = 0
-            else:
-                self._nodes_version[onnx_output] += 1
-            out_node = node_def_pb2.NodeDef()
-            out_node.name = '{}_{}'.format(onnx_output, self._nodes_version[onnx_output])
-            self.tb_nodes[out_node.name] = out_node
-            self._tb_graph.node.extend([out_node])
 
 
     def ConvertNet(self):
