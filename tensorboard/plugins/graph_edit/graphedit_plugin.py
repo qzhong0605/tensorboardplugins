@@ -95,10 +95,12 @@ class GraphEditPlugin(base_plugin.TBPlugin):
   def parse_from_model(self, request):
       """ It used to parse model file and convert it to tensorboard IR
       """
-      model_type = request.args.get("source_type")
-
+      model_type = request.args.get("model_type")
       if model_type == "torch":
           input_tensor_size = request.args.get("input_tensor_size")
+          print("input_tensor_size: ".format(input_tensor_size))
+          # for torch, the model file is a python script. The format for
+          # pytorch script is a module, which contains a forward method
           model_file = request.args.get('model_file')
           if not os.path.exists(model_file):
             # send a response to frontend and report file not existing

@@ -183,11 +183,6 @@ class OnnxGraph(tbgraph_base.TBGraph):
                 self._tb_graph.node.extend([in_node])
             new_node.input.append('{}_{}'.format(onnx_input, self._nodes_version[onnx_input]))
 
-        if onnx_node.output[0] in self._nodes_version:
-            self._nodes_version[onnx_node.output[0]] += 1
-        else:
-            self._nodes_version[onnx_node.output[0]] = 0
-
         if len(onnx_node.output) == 0:
             # For those nodes who don't have output, the node name is the
             # operation type for current tensorboard ir node
@@ -214,7 +209,6 @@ class OnnxGraph(tbgraph_base.TBGraph):
 
         self.tb_nodes[new_node.name] = new_node
         self._tb_graph.node.extend([new_node])
-
 
     def ConvertNet(self):
         onnx_graph = self._onnx_model.graph

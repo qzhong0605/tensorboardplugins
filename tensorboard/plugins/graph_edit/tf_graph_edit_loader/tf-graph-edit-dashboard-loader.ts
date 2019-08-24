@@ -120,7 +120,7 @@ Polymer({
     // Clear stats about the previous graph.
     this._setOutStats(null);
     const params = new URLSearchParams();
-    params.set('source_type', loadparams.modelType);
+    params.set('model_type', loadparams.modelType);
     if(loadparams.modelType == 'caffe2'){
       params.set('file_type', loadparams.fileType);
       params.set('predict_net',loadparams.predictNet)
