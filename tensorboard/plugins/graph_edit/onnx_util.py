@@ -175,8 +175,8 @@ class OnnxGraph(tbgraph_base.TBGraph):
             if onnx_input not in self._nodes_version:
                 in_node = node_def_pb2.NodeDef()
                 # These input tensors are filled by weights. So the op_type for
-                # them is set to `Const`
-                in_node.op = "Const"
+                # them is set to `Initialization`
+                in_node.op = "Initialization"
                 self._nodes_version[onnx_input] = 0
                 in_node.name = '{}_{}'.format(onnx_input, self._nodes_version[onnx_input])
                 self.tb_nodes[in_node.name] = in_node
@@ -191,7 +191,7 @@ class OnnxGraph(tbgraph_base.TBGraph):
         if len(onnx_node.output) == 0:
             # For those nodes who don't have output, the node name is the
             # operation type for current tensorboard ir node
-            new_node.name = onnx_node.op_type
+            new_node.name = self._MakeSSAName(onnx_node.op_type)
         else:
             # For those nodes who have more than one outputs, the first output
             # is as the node name. The other outputs are built as the sibling

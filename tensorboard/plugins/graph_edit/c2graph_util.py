@@ -12,10 +12,13 @@ from tensorboard.compat.proto import tensor_shape_pb2
 from tensorboard.compat.proto import tensor_pb2
 from tensorboard.compat.proto import types_pb2
 from tensorboard.compat.proto.caffe2 import caffe2_pb2
+from tensorboard.util import tb_logging
 
 from tensorboard.plugins.graph_edit import tbgraph_base
 
 from google.protobuf import text_format
+
+logger = tb_logging.get_logger()
 
 class C2Graph(tbgraph_base.TBGraph):
     """ In order to visualize the caffe2 model graph, it converts the caffe2
@@ -28,22 +31,25 @@ class C2Graph(tbgraph_base.TBGraph):
     In order to avoid the same tensor name and they are built from the different
     operators, we adopt the SSA form, which is used to differentiate different tensor
     """
-    def __init__(self, predict_net, predict_net_type="pb", init_net=None):
-        self.predict_net = caffe2_pb2.NetDef()
+    def __init__(self, predict_net, init_net, predict_net_type="pb"):
+        super(C2Graph, self).__init__()
+        self._predict_net = caffe2_pb2.NetDef()
         if predict_net_type == "pb":
             with open(predict_net, "rb") as predict_stream:
-                self.predict_net.ParseFromString(predict_stream.read())
+                self._predict_net.ParseFromString(predict_stream.read())
+            logger.info("parse caffe2 predict net {} with protobuf format".format(predict_net))
         elif predict_net_type == "txt":
             with open(predict_net, "r") as predict_stream:
-                text_format.Parse(predict_stream.read(), self.predict_net)
+                text_format.Parse(predict_stream.read(), self._predict_net)
+            logger.info("parse caffe2 predict net {} with text format".format(predict_net))
         else:
             raise NotImplementedError("The predict net type: {} doesn't support".format(predict_net_type))
 
-        self.init_net = None
-        if init_net is not None:
-            self.init_net = caffe2_pb2.NetDef()
-            with open(init_net, "rb") as init_stream:
-                self.init_net.ParseFromString(init_stream.read())
+        self._init_net = caffe2_pb2.NetDef()
+        with open(init_net, "rb") as init_stream:
+           self._init_net.ParseFromString(init_stream.read())
+           logger.info("load caffe2 init net {} with protobuf format".format(init_net))
+
         # a map from node key to node, where the node key is globaly unique
         self.nodes = {}
         # a map from caffe2 operator to output, which is a SSA-format
@@ -58,9 +64,9 @@ class C2Graph(tbgraph_base.TBGraph):
     def _build_nodes_shapetype(self):
         """ Build an inner node shape information given the weights information for network """
         # add shape information
-        if self.init_net is None:
+        if self._init_net is None:
             return
-        for init_op in self.init_net.op:
+        for init_op in self._init_net.op:
             for init_arg in init_op.arg:
                 if init_arg.name == "shape":
                     self.shapes[init_op.output[0]] = init_arg.ints
@@ -73,7 +79,6 @@ class C2Graph(tbgraph_base.TBGraph):
                         self.types[init_op.output[0]] = types_pb2.DT_STRING
                     else:
                         raise NotImplementedError("Not Supported Field: {}".format(init_arg))
-
 
     def _add_node_shapetype(self, node, shape_name):
         """ build an internal node shape map if given the weights information """
@@ -93,6 +98,15 @@ class C2Graph(tbgraph_base.TBGraph):
             attr_value.type = self.types[shape_name]
             node.attr['dtype'].CopyFrom(attr_value)
 
+    def _MakeSSAName(self, name):
+        """ It's used to make a unique name through a ssa-based format for `name`
+        """
+        if name not in self.blob_version:
+            self.blob_version[name] = 0
+        else:
+            self.blob_version[name] += 1
+        ret_name = "{}_{}".format(name, self.blob_version[name])
+        return ret_name
 
     def convert_to_nodes(self, c2_op):
         """ Convert a caffe2 OperatorDef into TB nodes
@@ -108,21 +122,34 @@ class C2Graph(tbgraph_base.TBGraph):
 
         for c2_input in c2_op.input:
             if c2_input not in self.blob_version:
+                # These inputs are weights or input data for current
+                # tensorboard node. Therefore, the `op` is set to
+                # `Initialization`
                 in_node = node_def_pb2.NodeDef()
                 self._add_node_shapetype(in_node, c2_input)
                 self.blob_version[c2_input] = 0
                 in_node.name = '{}_{}'.format(c2_input, self.blob_version[c2_input])
+                in_node.op = "Initialization"
                 self.nodes["{}_{}".format(c2_input, 0)] = in_node
                 self._tb_graph.node.extend([in_node])
             new_node.input.append('{}_{}'.format(c2_input, self.blob_version[c2_input]))
 
-        if c2_op.output[0] in self.blob_version:
-            # have a previous blob and increase current version
-            self.blob_version[c2_op.output[0]] += 1
+        if len(c2_op.output) == 0:
+            # There are no outputs for current C2 operator. Therefore, the node
+            # name is set to C2 operation type
+            new_node.name = self._MakeSSAName(c2_op.type)
         else:
-            # this is a first version
-            self.blob_version[c2_op.output[0]] = 0
-        new_node.name = '{}_{}'.format(c2_op.output[0], self.blob_version[c2_op.output[0]])
+            new_node.name = self._MakeSSAName(c2_op.output[0])
+            # If more than one output, we build `Sibling` tensorboard node for
+            # other outpouts
+            for c2_output in c2_op.output[1:]:
+                sibling_node = node_def_pb2.NodeDef()
+                sibling_node.op = 'Sibling'
+                sibling_node.name = self._MakeSSAName(c2_output)
+                sibling_node.input.extend([new_node.name])
+                self._add_node_shapetype(sibling_node, c2_output)
+                self.nodes[sibling_node.name] = sibling_node
+                self._tb_graph.node.extend([sibling_node])
 
         # add argument
         for c2_arg in c2_op.arg:
@@ -151,23 +178,8 @@ class C2Graph(tbgraph_base.TBGraph):
         self.nodes[new_node.name] = new_node
         self._tb_graph.node.extend([new_node])
 
-        for c2_output in c2_op.output[1:]:
-            if c2_output in self.blob_version:
-                # have a previous blob and update the version
-                self.blob_version[c2_output] += 1
-            else:
-                # this is the first blob
-                self.blob_version[c2_output] = 0
-            out_node = node_def_pb2.NodeDef()
-            out_node.input.append(new_node.name)
-            out_node.name = '{}_{}'.format(c2_output, self.blob_version[c2_output])
-            self._add_node_shapetype(out_node, c2_output)
-            self.nodes["{}_{}".format(c2_output, self.blob_version[c2_output])] = out_node
-            self._tb_graph.node.extend([out_node])
-
-
     def ConvertNet(self):
         """ Convert the full network of caffe2 into TB network """
         self._build_nodes_shapetype()
-        for c2_op in self.predict_net.op:
+        for c2_op in self._predict_net.op:
             self.convert_to_nodes(c2_op)

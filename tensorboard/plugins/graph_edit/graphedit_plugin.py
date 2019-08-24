@@ -111,7 +111,7 @@ class GraphEditPlugin(base_plugin.TBPlugin):
           if not (os.path.exists(predict_net) and os.path.exists(init_net)):
               # send a response to frontend and report that model file doesnot exist
               pass
-          self._tb_graph = c2graph_util.C2Graph(predict_net, file_type, init_net)
+          self._tb_graph = c2graph_util.C2Graph(predict_net, init_net, file_type)
       elif model_type == "caffe":
           file_type = request.args.get("file_type")
           model_file = request.args.get('model_file')
