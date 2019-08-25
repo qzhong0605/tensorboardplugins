@@ -490,6 +490,11 @@ export function buildShape(nodeGroup, d, nodeClass: string): d3.Selection<any, a
   switch (d.node.type) {
     case NodeType.OP:
       const opNode = d.node as OpNode;
+      if(d.node.op == 'Sibling'){
+        scene.selectOrCreateChild(shapeGroup, 'rect', Class.Node.COLOR_TARGET)
+          .attr('rx', d.radius).attr('ry', d.radius);
+        break;
+      }
       if (_.isNumber(opNode.functionInputIndex) ||
           _.isNumber(opNode.functionOutputIndex)) {
         // This is input or output arg for a TensorFlow function. Use a special
@@ -564,11 +569,18 @@ function position(nodeGroup, d: render.RenderNodeInfo) {
         scene.positionTriangle(
             shape, d.x, d.y, d.coreBox.width, d.coreBox.height);
       } else {
-        let shape = scene.selectChild(shapeGroup, 'ellipse');
-        scene.positionEllipse(
-            shape, cx, d.y, d.coreBox.width, d.coreBox.height);
+        if(d.node['op'] == 'Sibling'){
+          let shape = scene.selectChild(shapeGroup, 'rect');
+          scene.positionSquare(
+            shape, cx, d.y, d.coreBox.width, d.coreBox.width);
+          labelPosition(nodeGroup, cx, d.y+d.coreBox.height/2-d.coreBox.width/2, d.labelOffset);
+        }else{
+          let shape = scene.selectChild(shapeGroup, 'ellipse');
+          scene.positionEllipse(
+              shape, cx, d.y, d.coreBox.width, d.coreBox.height);
+          labelPosition(nodeGroup, cx, d.y, d.labelOffset);
+        }
       }
-      labelPosition(nodeGroup, cx, d.y, d.labelOffset);
       break;
     }
     case NodeType.META: {

@@ -600,6 +600,24 @@ export function positionEllipse(ellipse, cx: number, cy: number,
     .attr('ry', height / 2);
 };
 
+// TODO:
+/**
+ * Helper for setting position of a svg square
+ * @param square square to set position of.
+ * @param cx Center x.
+ * @param cy Center x.
+ * @param width Width to set.
+ * @param height Height to set.
+ */
+export function positionSquare(square, cx: number, cy: number,
+  width: number, height: number) {
+square.transition()
+  .attr('x', cx - width / 2)
+  .attr('y', cy - height / 2)
+  .attr('width', width)
+  .attr('height', height);
+};
+
 /**
  * @param {number} stat A stat for a health pill (such as mean or variance).
  * @param {boolean} shouldRoundOnesDigit Whether to round this number to the
