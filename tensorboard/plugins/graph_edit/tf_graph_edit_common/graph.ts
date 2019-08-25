@@ -55,6 +55,7 @@ const _XLA_CLUSTER_KEY = '_XlaCluster';
 export interface BaseEdge extends graphlib.EdgeObject {
   isControlDependency: boolean;
   isReferenceEdge: boolean;
+  isSiblingEdge: boolean;
   /** The index of the output tensor of the source node. */
   outputTensorKey: string;
 }
@@ -713,6 +714,11 @@ export interface Metaedge extends graphlib.EdgeObject {
   numControlEdges: number;
 
   /**
+   * Number of control dependency edges.
+   */
+  numSiblingEdges: number;
+
+  /**
    * Number of reference edges, which is an edge to an operation
    * that takes a reference to its input and changes its value.
    */
@@ -740,6 +746,7 @@ export class MetaedgeImpl implements Metaedge {
   inbound: boolean;
   numRegularEdges: number;
   numControlEdges: number;
+  numSiblingEdges: number;
   numRefEdges: number;
   totalSize: number;
 
@@ -750,6 +757,7 @@ export class MetaedgeImpl implements Metaedge {
     this.inbound = null;
     this.numRegularEdges = 0;
     this.numControlEdges = 0;
+    this.numSiblingEdges = 0;
     this.numRefEdges = 0;
     this.totalSize = 0;
   }
@@ -758,8 +766,13 @@ export class MetaedgeImpl implements Metaedge {
     this.baseEdgeList.push(edge);
     if (edge.isControlDependency) {
       this.numControlEdges += 1;
-    } else {
-      this.numRegularEdges += 1;
+    } 
+    else {
+      if(edge.isSiblingEdge){
+        this.numSiblingEdges += 1;
+      }else{
+        this.numRegularEdges += 1;
+      }
     }
     if (edge.isReferenceEdge) {
       this.numRefEdges += 1;
@@ -1011,12 +1024,15 @@ function addEdgeToGraph(
   // Check if this op type and input number corresponds to a
   // reference edge using the refEdges dictionary in the params.
   let isRefEdge = params.refEdges[outputNode.op + ' ' + index] === true;
+  let isSiblingEdge = outputNode.op === 'Sibling'
+  
   graph.edges.push({
     v: inputName,
     w: outputNode.name,
     outputTensorKey: input.outputTensorKey,
     isControlDependency: input.isControlDependency,
-    isReferenceEdge: isRefEdge
+    isReferenceEdge: isRefEdge,
+    isSiblingEdge: isSiblingEdge
   });
 }
 

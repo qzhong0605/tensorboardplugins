@@ -226,6 +226,7 @@ class HierarchyImpl implements Hierarchy {
                   isControlDependency: input.isControlDependency,
                   outputTensorKey: input.outputTensorKey,
                   isReferenceEdge: false,
+                  isSiblingEdge: false,
                   v: embeddedNode.name,
                   w: nodeName
                 },
@@ -265,6 +266,7 @@ class HierarchyImpl implements Hierarchy {
                   isControlDependency: input.isControlDependency,
                   outputTensorKey: input.outputTensorKey,
                   isReferenceEdge: false,
+                  isSiblingEdge: false,
                   v: nodeName,
                   w: embeddedNode.name
                 },

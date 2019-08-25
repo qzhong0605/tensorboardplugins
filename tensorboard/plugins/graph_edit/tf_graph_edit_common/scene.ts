@@ -43,6 +43,7 @@ module tf.graph.edit.scene {
       GROUP: 'edge',
       LINE: 'edgeline',
       REFERENCE_EDGE: 'referenceedge',
+      SIBLING_EDGE: 'siblingedge',
       REF_LINE: 'refline',
       SELECTABLE: 'selectableedge',
       SELECTED: 'selectededge',

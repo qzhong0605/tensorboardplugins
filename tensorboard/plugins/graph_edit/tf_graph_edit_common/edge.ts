@@ -311,6 +311,9 @@ export function appendEdge(edgeGroup, d: EdgeData,
   if (d.label && d.label.metaedge && d.label.metaedge.numRefEdges) {
     edgeClass += ' ' + Class.Edge.REFERENCE_EDGE;
   }
+  if (d.label && d.label.metaedge && d.label.metaedge.numSiblingEdges) {
+    edgeClass += ' ' + Class.Edge.SIBLING_EDGE;
+  }
   if (sceneElement.handleEdgeSelected) {
     // The user has opted to make edges selectable.
     edgeClass += ' ' + Class.Edge.SELECTABLE;
