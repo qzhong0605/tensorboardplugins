@@ -382,6 +382,7 @@ class GraphEditPlugin(base_plugin.TBPlugin):
       message = 'ok'
 
     if eidt_type == 'add_edge':
+      logger.warn(data['edge_type'])
       for i in range(0, len(graph.node)):
         if graph.node[i].name == data['w']:
           graph.node[i].input.append(data['v'])

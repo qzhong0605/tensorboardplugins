@@ -1,7 +1,6 @@
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../paper-menu/paper-menu.html">
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../iron-list/iron-list.html">
@@ -14,16 +13,9 @@
 <style>
   paper-input {
     --paper-input-container-focus-color: #f57c00;
-  }
-
-  paper-dropdown-menu.op-type {
-    width: 100%;
-    --paper-input-container-focus-color: gray;
-    --paper-input-container-input: {
-      font-size: large !important;
-      font-weight: 900 !important;
-    }
-
+    --paper-input-container-label: {
+      font-size: 14px;
+    };
   }
 
   .sub-list-group {
@@ -45,6 +37,12 @@
   }
 
   .op-type{
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .sub-title{
     font-size: 14px;
     font-weight: bold;
     margin-top: 10px;
@@ -63,14 +61,14 @@
   }
 </style>
   <div class="op-type" id="">[[opType]]</div>
-  <div class="node-name" id="">[[nodeName]]</div>
+  <div class="node-name" id="">Name: [[nodeName]]</div>
   <!-- <paper-input class="" label="Node Name" value="{{newName}}"></paper-input>  -->
   <div class="sub-list-group attributes">
       <template is="dom-repeat" items="{{_OpAttributes}}">
           <paper-input class="node-name" label="[[item.key]]" id="[[item.key]]" value="[[item.value]]"></paper-input> 
       </template>
   </div>
-  <div class="op-type" id="">inputs</div>
+  <div class="sub-title" id="">inputs</div>
   <div class="inputs">
     <template is="dom-repeat" items="{{_predecessors.regular}}">
       <div class="input">[[item.name]]</div>
@@ -78,7 +76,7 @@
   </div>
   <hr>
   <br>
-  <div class="op-type" id="">outputs</div>
+  <div class="sub-title" id="">outputs</div>
   <div class="outputs">
     <template is="dom-repeat" items="{{_successors.regular}}">
       <div class="input">[[item.name]]</div>
@@ -139,7 +137,7 @@ Polymer({
       return ""
     }
     if(node.op!=undefined){
-      return node.op
+      return "Op: "+node.op
     }
     return ""
   },

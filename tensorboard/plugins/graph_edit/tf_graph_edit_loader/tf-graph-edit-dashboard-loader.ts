@@ -216,7 +216,7 @@ Polymer({
     const params = new URLSearchParams();
     params.set('type', 'delete_edge');
     params.set('data', JSON.stringify({v:edge.v,w:edge.w}));
-   
+
     new Promise(() => {
       fetch(tf_backend.getRouter().pluginRoute('graphedit', '/edit', params)).then((res) => {
         // Fetch does not reject for 400+.
@@ -252,11 +252,11 @@ Polymer({
     this._ReConstructHierarchicalGraph()
   },
 
-  _addEdge: function(src,tar){
+  _addEdge: function(src,tar, edge_type){
     const params = new URLSearchParams();
     params.set('type', 'add_edge');
-    params.set('data', JSON.stringify({v:src, w:tar}));
-   
+    params.set('data', JSON.stringify({v:src, w:tar, 'edge_type':edge_type}));
+
     new Promise(() => {
       fetch(tf_backend.getRouter().pluginRoute('graphedit', '/edit', params)).then((res) => {
         // Fetch does not reject for 400+.
@@ -271,15 +271,21 @@ Polymer({
     var edge = {
       isControlDependency: false,
       isReferenceEdge: false,
+      isSiblingEdge: false,
       outputTensorKey: "0",
       v:src,
       w:tar,
     };
-
+    edge.isReferenceEdge = edge_type==='Reference Edge'
+    edge.isControlDependency = edge_type==='Control Dependency Edge'
+    edge.isSiblingEdge = edge_type==='Sibling Edge'
+    
     this.outGraph.edges.push(edge);
     var inputs = this.outGraph.nodes[tar].inputs;
     inputs.push({
-      isControlDependency: false,
+      isReferenceEdge: edge_type==='Reference Edge',
+      isControlDependency: edge_type==='Control Dependency Edge',
+      isSiblingEdge: edge_type==='Sibling Edge',
       name: src,
       outputTensorKey: '0',
     })

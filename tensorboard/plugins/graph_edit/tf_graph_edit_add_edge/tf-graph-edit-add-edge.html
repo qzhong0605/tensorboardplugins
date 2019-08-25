@@ -6,6 +6,7 @@
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 
 <link rel="import" href="../tf-imports/d3.html">
 
@@ -23,11 +24,23 @@
     color: white !important;
   }
 
+  paper-dropdown-menu.edge-type {
+    width: 100%;
+    margin-bottom: 10px;
+    --paper-input-container-focus-color: #f57c00;
+  }
 </style>
 
   <div class="control-holder">
     <paper-input label="source" value="{{src}}" on-focus='sourceFocus'></paper-input>
     <paper-input label="target" value="{{tar}}" on-focus='targetFocus'></paper-input>
+    <paper-dropdown-menu label="Edge Type" no-animations noink horizontal-align="left" class="edge-type">
+      <paper-menu class="dropdown-content" selected="{{_selctedEdgeType}}">
+        <template is="dom-repeat" items="{{_edgeTypes}}">
+            <paper-item>[[item]]</paper-item>
+        </template>
+      </paper-menu>
+    </paper-dropdown-menu>
     <paper-button raised noink class="full-wideh-bt" on-click="newEdge">CREATE</paper-button>
     <paper-button raised noink class="full-wideh-bt" on-click="deleteEdge">DELETE</paper-button>
   </div>
@@ -41,6 +54,14 @@
 Polymer({
   is: 'tf-graph-edit-add-edge',
   properties: {
+    _selctedEdgeType: {
+      type: Number,
+      value: 0
+    },
+    _edgeTypes: {
+      type: Array,
+      value: ["Dataflow Edge", "Control Dependency Edge", "Reference Edge" , "Sibling Edge"],
+    },
     src: String,
     tar: String,
     focus: Number,
@@ -72,7 +93,7 @@ Polymer({
   },
   newEdge: function() {
     var loader = document.querySelector('#loader');
-    loader._addEdge(this.src, this.tar);
+    loader._addEdge(this.src, this.tar, this._edgeTypes[this._selctedEdgeType]);
   },
   deleteEdge: function(){
     var loader = document.querySelector('#loader');

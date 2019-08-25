@@ -350,9 +350,11 @@ export function appendEdge(edgeGroup, d: EdgeData,
       d.label.startMarkerId = markerId;
     } else {
       // We have a dataflow edge.
-      const markerId = `dataflow-arrowhead-${arrowheadMap(strokeWidth)}`;
-      path.style('marker-end', `url(#${markerId})`);
-      d.label.endMarkerId = markerId;
+      if(d.label.metaedge.numRegularEdges){
+        const markerId = `dataflow-arrowhead-${arrowheadMap(strokeWidth)}`;
+        path.style('marker-end', `url(#${markerId})`);
+        d.label.endMarkerId = markerId;
+      }
     }
   }
 
