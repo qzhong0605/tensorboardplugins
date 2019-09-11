@@ -111,13 +111,13 @@ class ConvertPlugin(base_plugin.TBPlugin):
       if not (os.path.exists(predict_net) and os.path.exists(init_net)):
         # send a response to frontend and report that model file doesnot exist
         pass
-        self._src_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+      self._src_tb_graph = c2graph_util.C2Graph(predict_net, init_net, "pb")
     elif model_type == "caffe":
       model_file = request.args.get('source_path')
       self._src_tb_graph = caffe_util.CaffeGraph(model_file, "pb")
     elif model_type == "onnx":
       model_file = request.args.get('source_path')
-      self._src_tb_graph = onnx_util.OnnxGraph(model_file, "pb")
+      self._src_tb_graph = onnx_util.OnnxGraph(model_file, "onnx")
     elif model_type == "tf":
       model_file = request.args.get('source_path')
       pass
@@ -131,6 +131,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def convert_model(self, request):
     destination_type = request.args.get('destination_type')
+
     if destination_type=='caffe2':
       predict_net = request.args.get('predict_net')
       init_net = request.args.get('init_net')
@@ -148,16 +149,16 @@ class ConvertPlugin(base_plugin.TBPlugin):
         'data': (data_type, data_shape)
       }
 
-      if self._src_tb_graph.predict_net.name == '':
-        self._src_tb_graph.predict_net.name = 'modelName'
+      if self._src_tb_graph._predict_net.name == '':
+        self._src_tb_graph._predict_net.name = 'modelName'
 
-      onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph.predict_net,
-                                                    init_net=self._src_tb_graph.init_net,
+      onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph._predict_net,
+                                                    init_net=self._src_tb_graph._init_net,
                                                     value_info=value_info)
       with open(destination_path, 'wb') as f:
         f.write(onnx_model.SerializeToString())
 
-      self._des_tb_graph = onnx_util.OnnxGraph(destination_path, "pb")
+      self._dst_tb_graph = onnx_util.OnnxGraph(destination_path, "onnx")
 
     elif destination_type == 'caffe2':
 
@@ -166,10 +167,11 @@ class ConvertPlugin(base_plugin.TBPlugin):
         f_pre.write(predict_net_model.SerializeToString())
       with open(init_net, 'wb') as f_init:
         f_init.write(init_net_model.SerializeToString())
-      self._des_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+      self._dst_tb_graph = c2graph_util.C2Graph(predict_net, init_net, "pb")
 
-    self._des_tb_graph.ConvertNet()
-    graph = self._des_tb_graph.GetTBGraph()
+    print(self._dst_tb_graph)
+    self._dst_tb_graph.ConvertNet()
+    graph = self._dst_tb_graph.GetTBGraph()
     return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   def is_active(self):
