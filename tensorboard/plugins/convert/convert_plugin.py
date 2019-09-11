@@ -169,7 +169,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
         f_init.write(init_net_model.SerializeToString())
       self._dst_tb_graph = c2graph_util.C2Graph(predict_net, init_net, "pb")
 
-    print(self._dst_tb_graph)
+    logger.warn('Converting completed.')
     self._dst_tb_graph.ConvertNet()
     graph = self._dst_tb_graph.GetTBGraph()
     return http_util.Respond(request,str(graph) ,'text/x-protobuf')

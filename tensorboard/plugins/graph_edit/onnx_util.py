@@ -12,7 +12,6 @@ And the network for TensorBoard is on the file `tensorboard/compat/proto/graph.p
 
 The node on the TensorBoard network is a SSA format
 """
-from onnx import ModelProto
 from tensorboard.compat.proto import graph_pb2
 from tensorboard.compat.proto import node_def_pb2
 from tensorboard.compat.proto import attr_value_pb2
@@ -147,7 +146,7 @@ class OnnxGraph(tbgraph_base.TBGraph):
     def __init__(self, onnx_model, onnx_type="pb"):
         """ onnx_type is the file type for onnx model, currently including pb """
         super(OnnxGraph,self).__init__()
-        self._onnx_model = ModelProto()
+        self._onnx_model = onnx_pb2.ModelProto()
         if onnx_type == "onnx":
             with open(onnx_model, "rb") as onnx_stream:
                 self._onnx_model.ParseFromString(onnx_stream.read())
