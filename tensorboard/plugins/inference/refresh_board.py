@@ -27,6 +27,18 @@ def pred_writer(log_dir):
   writer.close()
   sess.close()
 
+def fea_writer(log_dir,tensor,name):
+  init_x = tf.placeholder(tf.float32,[None,28,28,1])
+  x = tf.reshape(init_x, [-1, 784])
+  sess = tf.Session()
+  writer = tf.summary.FileWriter(log_dir)
+  for i in range(len(tensor)):
+    summary_op = tf.summary.image(name[i], tensor[i], max_outputs=3)
+    summary = sess.run(summary_op)
+    writer.add_summary(summary)
+  writer.close()
+  sess.close()
+'''
 def fea_writer(log_dir,image1,image2,image3,image4):
   init_x = tf.placeholder(tf.float32,[None,28,28,1])
   x = tf.reshape(init_x, [-1, 784])
@@ -49,7 +61,7 @@ def fea_writer(log_dir,image1,image2,image3,image4):
   writer.add_summary(summary)
   writer.close()
   sess.close()
-
+'''
 
 def pred_refresh(log_dir):
   if tf.gfile.Exists(log_dir):

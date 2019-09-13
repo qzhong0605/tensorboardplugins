@@ -29,9 +29,10 @@ class Network(object):
 
     predict = tf.equal(tf.argmax(self.label,1),tf.argmax(self.y,1))
     self.accuracy = tf.reduce_mean(tf.cast(predict,tf.float32))
-  
+   
     self.variable_names = [v.name for v in tf.trainable_variables()]
 
+    self.n = self.hl.h_conv1.name
   def weight_init(self,shape):
     weights = tf.truncated_normal(shape, stddev=0.1,dtype=tf.float32)
     return tf.Variable(weights)
@@ -59,13 +60,13 @@ class HiddenLayers(object):
   def __init__(self, x, fch_nodes, drop_prob):
     self.w_conv1 = self.weight_init([5, 5, 1, 16])                            
     self.b_conv1 = self.biases_init([16])
-    self.h_conv1 = tf.nn.relu(self.conv2d(x, self.w_conv1) + self.b_conv1)  
-    self.h_pool1 = self.max_pool_2x2(self.h_conv1)
+    self.h_conv1 = self.conv_layer((self.conv2d(x, self.w_conv1) + self.b_conv1),"conv1")
+    self.h_pool1 = self.max_pool_2x2(self.h_conv1,"pool1")
 
     self.w_conv2 = self.weight_init([5, 5, 16, 32])                             
     self.b_conv2 = self.biases_init([32])
-    self.h_conv2 = tf.nn.relu(self.conv2d(self.h_pool1, self.w_conv2) + self.b_conv2)    
-    self.h_pool2 = self.max_pool_2x2(self.h_conv2)
+    self.h_conv2 = self.conv_layer((self.conv2d(self.h_pool1, self.w_conv2) + self.b_conv2),"conv2")
+    self.h_pool2 = self.max_pool_2x2(self.h_conv2,"pool2")
 
     self.h_fpool2 = tf.reshape(self.h_pool2, [-1, 7*7*32])
     self.w_fc1 = self.xavier_init(7*7*32, fch_nodes)
@@ -78,6 +79,10 @@ class HiddenLayers(object):
     conv_transpose = tf.transpose(conv, [0, 3, 1, 2])
     return conv_transpose
 
+  def conv_layer(self,bottom,name):
+    with tf.variable_scope(name):
+      return tf.nn.relu(bottom)
+      
   def weight_init(self,shape):
     weights = tf.truncated_normal(shape, stddev=0.1,dtype=tf.float32)
     return tf.Variable(weights)
@@ -98,26 +103,10 @@ class HiddenLayers(object):
   def conv2d(self,x, w):
     return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1], padding='SAME')
 
-  def max_pool_2x2(self,x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+  def max_pool_2x2(self,x,name):
+    with tf.variable_scope(name):
+      return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
   def predict(self):
     return self.h_fc1_drop
 
-  def hidden_layers(self,x,fch_nodes):
-    w_conv1 = self.weight_init([5, 5, 1, 16])                            
-    b_conv1 = self.biases_init([16])
-    h_conv1 = tf.nn.relu(self.conv2d(x, w_conv1) + b_conv1)    
-    h_pool1 = self.max_pool_2x2(h_conv1)
-
-    w_conv2 = self.weight_init([5, 5, 16, 32])                             
-    b_conv2 = self.biases_init([32])
-    h_conv2 = tf.nn.relu(self.conv2d(h_pool1, w_conv2) + b_conv2)    
-    h_pool2 = self.max_pool_2x2(h_conv2)
-
-    h_fpool2 = tf.reshape(h_pool2, [-1, 7*7*32])
-    w_fc1 = self.xavier_init(7*7*32, fch_nodes)
-    b_fc1 = self.biases_init([fch_nodes])
-    h_fc1 = tf.nn.relu(tf.matmul(h_fpool2, w_fc1) + b_fc1)
-    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob=self.drop_prob)
-    return h_fc1_drop

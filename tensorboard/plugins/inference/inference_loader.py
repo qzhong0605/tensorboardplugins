@@ -26,6 +26,12 @@ class Infer:
     result = model.feature(self.data_path,batchsize)
     return result
 
+  def edit(self,datapath,batchsize,edit_log):
+    self.data_path = datapath
+    model = self.classification()
+    result = model.feature_edit(self.data_path,batchsize,edit_log['batch'], edit_log['x'],edit_log['y'],edit_log['c'],edit_log['value'])
+    return result
+
   def config(self,channel,layer_channel):
     model = self.classification()
     result = model.channel(channel,layer_channel)

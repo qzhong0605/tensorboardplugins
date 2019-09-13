@@ -15,6 +15,7 @@ tf_web_library(
     visibility = ["//visibility:public"],
     deps = [
         "//tensorboard/components/tf_imports:polymer",
+        "//tensorboard/components/tf_imports:loaderjs",
         "@org_polymer_iron_ajax",
     ],
 )
@@ -23,6 +24,18 @@ tf_web_library(
     name = "google_chart_demo",
     srcs = [
         "google-chart-demo.html",
+    ],
+    path = "/google-chart",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":google_chart",
+    ],
+)
+
+tf_web_library(
+    name = "google_chart_dist",
+    srcs = [
+        "google-chart-dist.html",
     ],
     path = "/google-chart",
     visibility = ["//visibility:public"],

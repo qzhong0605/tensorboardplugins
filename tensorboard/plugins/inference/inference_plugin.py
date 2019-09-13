@@ -347,11 +347,19 @@ class InferencePlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def _serve_distribution(self, request):
     #os.system("python ~/tensorflow/tensorflow/examples/tutorials/mnist/mnist_with_summaries.py --log_dir /tmp/mnist")
-    print(request.form['modelpath'],request.form['datapath'],request.form['batchsize'])
+    print(request.form['modelpath'], request.form['datapath'],request.form['batchsize'],request.form['modeltype'])
     self.infer = Infer(request.form['modelpath'],request.form['modeltype'])
     result = self.infer.start(request.form['datapath'],request.form['batchsize'])
     print(result)
-    return http_util.Respond(request, result, 'application/json')
+    return http_util.Respond(request, {'accuracy':result.item(),'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'],'model':request.form['modeltype']}, 'application/json')
+
+  @wrappers.Request.application
+  def _serve_distribution_edit(self, request):
+    print(request.form['modelpath'], request.form['datapath'],request.form['batchsize'],request.form['modeltype'],request.form['edit'])
+    self.infer = Infer(request.form['modelpath'],request.form['modeltype'])
+    result = self.infer.edit(request.form['datapath'],request.form['batchsize'],request.form['edit'])
+    print(result)
+    return http_util.Respond(request, {'accuracy':result.item(),'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'],'model':request.form['modeltype']}, 'application/json')
 
   @wrappers.Request.application
   def _serve_split_img(self, request):
