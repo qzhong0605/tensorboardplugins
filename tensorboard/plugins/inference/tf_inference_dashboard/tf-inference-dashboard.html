@@ -115,20 +115,6 @@ TensorFlow run.
         selected-runs="{{_selectedRuns}}"
         style="display: none"
       ></tf-runs-selector>
-      <!-- <form is="iron-form" id="form" method="post">
-        <div class="flex-holder">Data Edit</div>
-        <div class="flex-horizontal">
-          <paper-input label="x" id="" always-float-label></paper-input>
-          <iron-icon icon="icons:remove" class="separator"></iron-icon>
-          <paper-input label="x" id="" always-float-label></paper-input>
-          <iron-icon icon="icons:remove" class="separator"></iron-icon>
-          <paper-input label="x" id="" always-float-label></paper-input>
-          <iron-icon icon="icons:remove" class="separator"></iron-icon>
-          <paper-input label="x" id="" always-float-label></paper-input>
-        </div>
-        <paper-input label="Value" id=""></paper-input>
-        <paper-button raised class="" on-click="" style="width: 100%">EDIT</paper-button>
-      </form> -->
       <div class="allcontrols">
         <div class="flex-horizontal" style="margin-bottom: 10px;">
           <div class="table-title" style="width: 40px">show</div>
@@ -151,8 +137,8 @@ TensorFlow run.
 </div>
       <div class="center" id="center">
         <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
-          <paper-tab>Sessions View</paper-tab>
           <paper-tab>Feature View</paper-tab>
+          <paper-tab>Data Edit</paper-tab>
         </paper-tabs>
         <div id="page0" style="display: none">
           <div class="center-content" id="channelimage">
@@ -265,7 +251,54 @@ TensorFlow run.
         </div>
 <!-- TODO: -->
         <div id="page1">
-
+          <div class="flex-horizontal with-border" style="height: 50%">
+            <div class="data-edit">
+              <form is="iron-form" id="form" method="post">
+                <div class="flex-horizontal">
+                  <paper-input label="Data Point:" id="" always-float-label></paper-input>
+                  <iron-icon icon="icons:remove" class="separator"></iron-icon>
+                  <paper-input label="" id="" always-float-label></paper-input>
+                  <iron-icon icon="icons:remove" class="separator"></iron-icon>
+                  <paper-input label="" id="" always-float-label></paper-input>
+                  <iron-icon icon="icons:remove" class="separator"></iron-icon>
+                  <paper-input label="" id="" always-float-label></paper-input>
+                </div>
+                <paper-input label="Value" id="" always-float-label></paper-input>
+                <paper-button raised class="" on-click="" style="width: 100%;margin-left: 0 !important;margin-top: 20px;">EDIT</paper-button>
+              </form>
+            </div>
+            <div class="sep"></div>
+            <div class="sep" style="margin-left: 5px;"></div>
+            <div class="preview-pic">
+              
+            </div>
+          </div>
+          <div class="edit-log with-border">
+            <div style="margin-left: 10px;margin-top:10px;">
+              <div class="flex-horizontal" style="margin-bottom: 10px;">
+                  <div class="log-title" style="width: 120px">time</div>
+                  <div class="log-title" style="width: 270px">data point</div>
+                  <div class="log-title" style="width: 120px">old value</div>
+                  <div class="log-title" style="border-right: 0px solid;width: 120px">new value</div>
+              </div>
+              <template is="dom-repeat" items="{{log}}">
+                <div class="flex-horizontal" style="margin-bottom: 5px;">
+                  <div class="log-content" style="width: 120px;" id="model">[[item.time]]</div>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.1]]</div>
+                  <iron-icon icon="icons:remove" class="separator2"></iron-icon>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.2]]</div>
+                  <iron-icon icon="icons:remove" class="separator2"></iron-icon>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.3]]</div>
+                  <iron-icon icon="icons:remove" class="separator2"></iron-icon>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.4]]</div>
+                  <div class="log-content" style="width: 120px;" id="session">[[item.old]]</div>
+                  <div class="log-content" style="width: 120px;" id="accuracy">[[item.new]]</div>
+                </div>
+                <hr class="hr2">
+              </template>
+            </div>
+          </div>
+          <paper-button raised class="" on-click="" style="width: 100%;margin-left: 0 !important;margin-top: 10px;">UPDATE</paper-button>
         </div>
       </div>
     </tf-dashboard-layout>
@@ -281,13 +314,31 @@ TensorFlow run.
         font-weight: 500;
         overflow: hidden;
       }
+      .sep{
+        width: 1px;
+        background-color: rgba(0,0,0,0.2);
+      }
+      .data-edit{
+        width: 35%;
+        margin-left: 10px;
+        margin-top: 50px;
+        margin-right: 10px; 
+      }
+      .with-border{
+        border: 1px solid rgba(0,0,0,0.2) ;
+      }
+      .edit-log{
+        height: 30%;
+        margin-top: 5px;
+        overflow-y: auto;
+      }
       #side-top {
         height: 53%;
         overflow:auto;
       }
 
       #side-bottom {
-        height: 38%;
+        height: 40%;
         overflow:auto;
       }
       .hr {
@@ -297,17 +348,26 @@ TensorFlow run.
         height: 1px;
         border: none
       }
+      .hr2 {
+        width: 633px;
+        margin-left: 0px;
+        background-color: #bbbbbb;
+        height: 1px;
+        border: none
+      }
       .separator-hr{
         background-color: #f57c00;
         height: 5px;
         border: none;
-        margin-top: 30px;
         margin-left: -20px;
         margin-right: 0px;
         cursor: row-resize;
       }
       #page1 {
-        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        /* box-shadow: 0 1px 5px rgba(0,0,0,0.2); */
+        /* border: 1px solid rgba(0,0,0,0.2) ; */
+        margin-right: 10px;
+        height: 100%;
       }
       .checkbox {
         margin-top: 0px;
@@ -328,8 +388,28 @@ TensorFlow run.
         border-right: 1px solid #bbbbbb;
         text-align: center;
       }
+      .log-content {
+        font-size: 14px;
+        margin-left: 1px;
+        white-space:nowrap;
+        overflow-x:auto;
+        text-align: center;
+      }
+      .log-title {
+        font-size: 14px;
+        height: 20px;
+        border-bottom: 1px solid #bbbbbb;
+        border-right: 1px solid #bbbbbb;
+        text-align: center;
+      }
+      
       .separator {
         margin-top: 30px;
+      }
+      .separator2 {
+        margin-top: -5px;
+        width: 10px;
+        color: gray;
       }
       .flexchild-vertical {
         @apply --layout-flex;
@@ -406,7 +486,10 @@ TensorFlow run.
         height: 100%;
         display: flex;
         flex-direction: column;
-        overflow: scroll;
+        overflow: hidden;
+      }
+      .center {
+        overflow: hidden;
       }
       .resizer {
         display: none;
@@ -516,9 +599,13 @@ TensorFlow run.
           {id:2,model:'onnx',session:'2',batch_size:'1024',input_size:'1024',accuracy:'0.1'},
           {id:3,model:'onnx',session:'3',batch_size:'1024',input_size:'1024',accuracy:'0.1'}],
         },
+        log:{
+          type: Array,
+          value: [{1:1,2:2,3:3,4:4,old:8,new:10,time:'10s'}]
+        },
         _selectedPage:{
           type: Number,
-          value: 0,
+          value: 1,
           observer: '_changePage'
         },
         _selectedModel: {
@@ -806,12 +893,12 @@ TensorFlow run.
       _changePage: function(){
         if(document.getElementById('page0')){
           if(this._selectedPage == 0){
-            document.getElementById('page0').style.display = 'none'
-            document.getElementById('page1').style.display = ''
-          }
-          if(this._selectedPage == 1){
             document.getElementById('page0').style.display = ''
             document.getElementById('page1').style.display = 'none'
+          }
+          if(this._selectedPage == 1){
+            document.getElementById('page0').style.display = 'none'
+            document.getElementById('page1').style.display = ''
           }
         }
       },
