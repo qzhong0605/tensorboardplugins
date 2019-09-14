@@ -46,85 +46,107 @@ TensorFlow run.
 <tf-dashboard-layout>
 
 <div class="sidebar" id = "side">
-  <div class="sidebar-section">
-    <div class="line-item">
-      <paper-checkbox
-        checked="{{_actualSize}}"
-      >Show actual image size</paper-checkbox>
+  <div id="side-top">
+    <div class="sidebar-section">
+      <div class="line-item">
+        <paper-checkbox
+          checked="{{_actualSize}}"
+        >Show actual image size</paper-checkbox>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <form is="iron-form" id="form" method="post">
+        <div class="flex-holder">
+          <paper-input
+            label="Model Path"
+            id = "modelpath"
+            name = "modelpath"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+          <paper-input
+            label="Data Path"
+            id = "datapath"
+            name = "datapath"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+          <paper-input
+            label="Batch Size"
+            id = "batchsize"
+            name = "batchsize"
+            required type = "number"
+            value = "1024"
+          ></papper-input>
+        </div>
+        <div class="allcontrols">
+          <div class="control-holder">
+            <!-- <div class="title">Model Type</div>
+              <paper-radio-group selected="{{modelType}}">
+                <paper-radio-button name="ckpt" value="ckpt">ckpt</paper-radio-button>
+                <paper-radio-button name="onnx" value="onnx">onnx</paper-radio-button>
+                <paper-radio-button name="pb" value="pb" disabled>pb</paper-radio-button>
+                <paper-radio-button name="h5" value="h5" disabled>h5</paper-radio-button>
+              </paper-radio-group> -->
+            <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
+              <paper-menu class="dropdown-content" selected="{{_selectedModel}}">
+                <template is="dom-repeat" items="{{_modelTypes}}">
+                    <paper-item>[[item]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+        </div>
+        <div class="accept-button-holder">
+          <paper-button raised on-click="submitForm">
+            Accept
+          </paper-button>
+          <paper-button dialog-dismiss class="control-button">Cancel</paper-button>
+        </div>
+      </form>
     </div>
   </div>
-
-  <div class="sidebar-section">
-    <form is="iron-form" id="form" method="post">
-      <div class="flex-holder">
-        <paper-input
-          label="Model Path"
-          id = "modelpath"
-          name = "modelpath"
-        ></papper-input>
-      </div>
-      <div class="flex-holder">
-        <paper-input
-          label="Data Path"
-          id = "datapath"
-          name = "datapath"
-        ></papper-input>
-      </div>
-      <div class="flex-holder">
-        <paper-input
-          label="Batch Size"
-          id = "batchsize"
-          name = "batchsize"
-          required type = "number"
-          value = "1024"
-        ></papper-input>
-      </div>
-      <div class="allcontrols">
-        <div class="control-holder">
-          <!-- <div class="title">Model Type</div>
-            <paper-radio-group selected="{{modelType}}">
-              <paper-radio-button name="ckpt" value="ckpt">ckpt</paper-radio-button>
-              <paper-radio-button name="onnx" value="onnx">onnx</paper-radio-button>
-              <paper-radio-button name="pb" value="pb" disabled>pb</paper-radio-button>
-              <paper-radio-button name="h5" value="h5" disabled>h5</paper-radio-button>
-            </paper-radio-group> -->
-          <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
-            <paper-menu class="dropdown-content" selected="{{_selectedModel}}">
-              <template is="dom-repeat" items="{{_modelTypes}}">
-                  <paper-item>[[item]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
+  <hr class="separator-hr" id="separatorhr">
+  <div id="side-bottom">
+    <div class="sidebar-section" id="resize-border">
+        <tf-runs-selector
+        id="runs-selector"
+        selected-runs="{{_selectedRuns}}"
+        style="display: none"
+      ></tf-runs-selector>
+      <!-- <form is="iron-form" id="form" method="post">
+        <div class="flex-holder">Data Edit</div>
+        <div class="flex-horizontal">
+          <paper-input label="x" id="" always-float-label></paper-input>
+          <iron-icon icon="icons:remove" class="separator"></iron-icon>
+          <paper-input label="x" id="" always-float-label></paper-input>
+          <iron-icon icon="icons:remove" class="separator"></iron-icon>
+          <paper-input label="x" id="" always-float-label></paper-input>
+          <iron-icon icon="icons:remove" class="separator"></iron-icon>
+          <paper-input label="x" id="" always-float-label></paper-input>
         </div>
+        <paper-input label="Value" id=""></paper-input>
+        <paper-button raised class="" on-click="" style="width: 100%">EDIT</paper-button>
+      </form> -->
+      <div class="allcontrols">
+        <div class="flex-horizontal" style="margin-bottom: 10px;">
+          <div class="table-title" style="width: 40px">show</div>
+          <div class="table-title" style="width: 50px">model</div>
+          <div class="table-title" style="width: 60px">session</div>
+          <div class="table-title" style="border-right: 0px solid;width: 70px">accuracy</div>
+        </div>
+        <template is="dom-repeat" items="{{records}}">
+          <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
+            <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
+            <div class="table-content" style="width: 50px;" id="model">[[item.model]]</div>
+            <div class="table-content" style="width: 60px;" id="session">[[item.session]]</div>
+            <div class="table-content" style="width: 70px;" id="accuracy">[[item.accuracy]]</div>
+          </div>
+          <hr class="hr">
+        </template>
       </div>
-      <div class="accept-button-holder">
-        <paper-button raised on-click="submitForm">
-          Accept
-        </paper-button>
-        <paper-button dialog-dismiss class="control-button">Cancel</paper-button>
-      </div>
-    </form>
-  </div>
-	<div class="sidebar-section">
-      <tf-runs-selector
-      id="runs-selector"
-      selected-runs="{{_selectedRuns}}"
-      style="display: none"
-    ></tf-runs-selector>
-    <form is="iron-form" id="form" method="post">
-      <div class="flex-holder">Data Edit</div>
-      <div class="flex-horizontal">
-        <paper-input label="x" id="" always-float-label></paper-input>
-        <iron-icon icon="icons:remove" class="separator"></iron-icon>
-        <paper-input label="x" id="" always-float-label></paper-input>
-        <iron-icon icon="icons:remove" class="separator"></iron-icon>
-        <paper-input label="x" id="" always-float-label></paper-input>
-        <iron-icon icon="icons:remove" class="separator"></iron-icon>
-        <paper-input label="x" id="" always-float-label></paper-input>
-      </div>
-      <paper-input label="Value" id=""></paper-input>
-      <paper-button raised class="" on-click="" style="width: 100%">EDIT</paper-button>
-    </form>
+    </div>
   </div>
 </div>
       <div class="center" id="center">
@@ -243,26 +265,7 @@ TensorFlow run.
         </div>
 <!-- TODO: -->
         <div id="page1">
-          <!-- model, session, show data, batch size, input size, accuracy  -->
-            <div class="flex-horizontal" style="margin-bottom: 10px;">
-              <div class="table-title" style="margin-left: 20px;">show data</div>
-              <div class="table-title">model</div>
-              <div class="table-title">session</div>
-              <div class="table-title">batch size</div>
-              <div class="table-title">input size</div>
-              <div class="table-title" style="border-right: 0px solid;">accuracy</div>
-            </div>
-          <template is="dom-repeat" items="{{records}}">
-            <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
-              <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
-              <div class="table-content" id="model">[[item.model]]</div>
-              <div class="table-content" id="session">[[item.session]]</div>
-              <div class="table-content" id="batchsize">[[item.batch_size]]</div>
-              <div class="table-content" id="inputsize">[[item.input_size]]</div>
-              <div class="table-content" id="accuracy">[[item.accuracy]]</div>
-            </div>
-            <hr class="hr">
-          </template>
+
         </div>
       </div>
     </tf-dashboard-layout>
@@ -278,31 +281,49 @@ TensorFlow run.
         font-weight: 500;
         overflow: hidden;
       }
+      #side-top {
+        height: 53%;
+        overflow:auto;
+      }
+
+      #side-bottom {
+        height: 38%;
+        overflow:auto;
+      }
       .hr {
-        width: 725px;
-        margin-left: 20px;
+        width: 223px;
+        margin-left: 0px;
         background-color: #bbbbbb;
         height: 1px;
         border: none
+      }
+      .separator-hr{
+        background-color: #f57c00;
+        height: 5px;
+        border: none;
+        margin-top: 30px;
+        margin-left: -20px;
+        margin-right: 0px;
+        cursor: row-resize;
       }
       #page1 {
         box-shadow: 0 1px 5px rgba(0,0,0,0.2);
       }
       .checkbox {
         margin-top: 0px;
-        margin-left: 65px;
-        margin-right: 50px;
+        margin-left: 10px;
+        margin-right: 4px;
       }
       .table-content {
-        width: 120px;
+        font-size: 14px;
         margin-left: 1px;
         white-space:nowrap;
         overflow-x:auto;
         text-align: center;
       }
       .table-title {
-        width: 120px;
-        height: 30px;
+        font-size: 14px;
+        height: 20px;
         border-bottom: 1px solid #bbbbbb;
         border-right: 1px solid #bbbbbb;
         text-align: center;
@@ -476,6 +497,9 @@ TensorFlow run.
         --paper-slider-pin-color: var(--tb-orange-strong);
         --paper-slider-pin-start-color: var(--tb-orange-strong);
       }
+      #resize-border {
+        border-top: solid 0px white;
+      }
     </style>
   </template>
   <script>
@@ -607,42 +631,20 @@ TensorFlow run.
           }
         }
         this.set('_isDone',true);
-        // const img = d3.select(this.$.channelimage);
-        // const infoImg = d3.select(this.$.infoImg);
-        // const infoDistribution = d3.select(this.$.infoDistribution);
-        // const info = d3.select(this.$.channelinfo);
-        // const resizer = d3.select(this.$.resizer).classed("dragging", true);
-        // const resizerinfo = d3.select(this.$.resizerinfo);
-        // console.log(resizerinfo);
-        // const self = this;
-        // const dragResize = d3.drag().on('drag', () => {
-        //   // Determine resizer position relative to width of the tool.
-        //   const x = d3.mouse(this.parentNode.parentNode)[0]-270;
-        //   const width = this.parentNode.parentNode.offsetWidth;
-        //   let perc = x / width * 100;
-        //   console.log(perc)
-        //   // Side panel will be a minimum of 40% width.
-        //   perc = Math.max(Math.min(perc,70), 30);
+        const resizer = d3.select(this.$.separatorhr)
+        var starty
+        resizer.call(d3.drag()
+          .on('start',function(){
+            starty = d3.event.y
+          })
+          .on('end',function(){
+            var endy = d3.event.y
+            console.info(starty, endy)
+            document.getElementById('side-top').style.height = document.getElementById('side-top').clientHeight + endy-starty + 'px'
+            document.getElementById('side-bottom').style.height = document.getElementById('side-bottom').clientHeight - endy+starty + 'px'
+          })
 
-        //   img.style('width', (perc) + '%');
-        //   info.style('width', (100-perc) + '%');
-        //   infoImg.style('height', (perc) + '%');
-        // }).on("end", () => {resizer.classed("dragging", false);});
-        // const dragResizeInfo = d3.drag().on('drag', () => {
-        //   console.log("^^^^^^^^^^^^^^^^^")
-        //   // Determine resizer position relative to width of the tool.
-        //   const y = d3.mouse(this.parentNode.parentNode)[1];
-        //   const height = this.parentNode.parentNode.offsetHeight;
-        //   let perc = y / height * 100;
-        //   console.log(perc)
-        //   // Side panel will be a minimum of 40% width.
-        //   perc = Math.max(Math.min(perc,70), 30);
-
-        //   infoImg.style('height', (perc) + '%');
-        //   infoDistribution.style('height', (100-perc) + '%');
-        // }).on("end", () => {resizer.classed("dragging", true);});
-        // resizer.call(dragResize);
-        // resizerinfo.call(dragResizeInfo);
+        )
       },
       reload() {
         this._fetchTags().then(() => {

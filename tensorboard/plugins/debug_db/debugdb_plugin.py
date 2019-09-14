@@ -83,7 +83,7 @@ class DebugDBPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def attach_load(self, request):
     network_identification = request.args.get('network_identification')
-    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'pb')
+    self._tb_graph = onnx_util.OnnxGraph('/Users/emma/git/tensorboardplugins/dataset/model/densenet121.onnx', 'onnx')
     self._tb_graph.ConvertNet()
     graph = self._tb_graph._tb_graph
     return http_util.Respond(request,str(graph) ,'text/x-protobuf')
