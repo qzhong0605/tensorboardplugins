@@ -119,6 +119,10 @@ Polymer({
   is: 'tf-convert-controls',
   properties: {
     // TODO:
+    statistics:{
+      type: Array,
+      value:[],
+    },
     selectedGraph:String,
     graph: Object,
     graphHierarchy: {
@@ -268,6 +272,99 @@ Polymer({
     
     this.selection = data
   },
+
+  streamParse: function(
+    arrayBuffer: ArrayBuffer, callback: (string) => void,
+    chunkSize: number = 1000000, delim: string = '\n'): Promise<boolean> {
+    return new Promise<boolean>(function(resolve, reject) {
+      function readChunk(oldData: string, newData: string, offset: number) {
+        const doneReading = offset >= arrayBuffer.byteLength;
+        const parts = newData.split(delim);
+        parts[0] = oldData + parts[0];
+
+        // The last part may be part of a longer string that got cut off
+        // due to the chunking.
+        const remainder = doneReading ? '' : parts.pop();
+
+        for (let part of parts) {
+          try {
+            callback(part);
+          } catch (e) {
+            reject(e);
+            return;
+          }
+        }
+
+        if (doneReading) {
+          resolve(true);
+          return;
+        }
+
+        const nextChunk = new Blob([arrayBuffer.slice(offset, offset + chunkSize)]);
+        const file = new FileReader();
+        file.onload = function(e: any) {
+          readChunk(remainder, e.target.result, offset + chunkSize);
+        };
+        file.readAsText(nextChunk);
+      }
+
+      readChunk('', '', 0);
+    });
+  },
+
+  parseValue(value: string): string|number|boolean {
+    if (value === 'true') {
+      return true;
+    }
+    if (value === 'false') {
+      return false;
+    }
+    let firstChar = value[0];
+    if (firstChar === '"') {
+      return value.substring(1, value.length - 1);
+    }
+    let num = parseFloat(value);
+    return isNaN(num) ? value : num;
+  },
+
+  getStatistics: function(){
+    var mthis = this
+    var path = tf_backend.getRouter().pluginRoute('convert', '/statistics', );
+    fetch(path).then((res) => {
+      // Fetch does not reject for 400+.
+      if (res.ok) {
+        res.arrayBuffer().then(function(arrayBuffer: ArrayBuffer){
+          if(arrayBuffer!=null){
+            var output = [];
+            var tmp = {};
+            mthis.streamParse(arrayBuffer, function(line: String){
+              if(line){
+                line = line.trim();
+                switch(line[line.length-1]){
+                  case '{':
+                    tmp = {};
+                    break;
+                  case '}':
+                    output.push(tmp);
+                    break;
+                  default:
+                    var index = line.indexOf(':');
+                    var k = line.substring(0, index);
+                    var value = mthis.parseValue(line.substring(index + 2).trim());
+                    tmp[k] = value;
+                    break;
+                }
+              }
+            }).then(function(){
+              mthis.statistics = output
+            })
+          }
+        })
+      }
+    });
+  },
+ 
+  
 
 });
 

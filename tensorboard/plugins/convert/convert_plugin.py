@@ -90,7 +90,8 @@ class ConvertPlugin(base_plugin.TBPlugin):
         '/info': self.info_route,
         '/run_metadata': self.run_metadata_route,
         '/load': self.load_model,
-        '/convert': self.convert_model
+        '/convert': self.convert_model,
+        '/statistics': self.get_statistics,
     }
 
   @wrappers.Request.application
@@ -126,6 +127,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
       pass
     self._src_tb_graph.ConvertNet()
     graph = self._src_tb_graph.GetTBGraph()
+    # logger.warn(str(graph))
     return http_util.Respond(request,str(graph), 'text/x-protobuf')
 
   @wrappers.Request.application
@@ -323,3 +325,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
     else:
       return http_util.Respond(request, '404 Not Found', 'text/plain',
                                code=404)
+  @wrappers.Request.application
+  def get_statistics(self, request):
+    info = 'info {\n  key: "1"\n  value: "1234"\n}\ninfo {\n  key: "2"\n  value: 4321\n}'
+    return http_util.Respond(request, info, 'text/x-protobuf')

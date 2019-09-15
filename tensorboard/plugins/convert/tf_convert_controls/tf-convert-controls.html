@@ -47,6 +47,7 @@ paper-button.full-width-bt{
     background-color: #f57c00 !important;
     font: 900 !important;
     color: white !important;
+    margin-left: 0px;
   }
 
 paper-dropdown-menu {
@@ -68,7 +69,19 @@ paper-dropdown-menu {
 .button-icon-right:hover {
   cursor:col-resize;  
 }
+.flex-horizontal {
+  @apply --layout-horizontal;
+  @apply --layout-justified;
+}
 
+.hr{
+  background-color: rgba(0,0,0,.2);
+  height: 5px;
+  border: none;
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-top: 50px;
+}
 </style>
 <svg width="0" height="0">
   <defs>
@@ -132,7 +145,17 @@ paper-dropdown-menu {
     </div>
 
     <paper-button raised noink class="full-width-bt" on-click="transformModel">CONVERT</paper-button>
+    <hr class="hr">
 
+    <paper-button raised noink class="full-width-bt" on-click="getStatistics" style="margin-top: 5px;margin-bottom: 10px;">STATISTICS</paper-button>
+    <div style="width: 100%">
+      <template is="dom-repeat" items="{{statistics}}">
+          <div class="flex-horizontal">
+            <div class="input">[[item.key]]</div>
+            <div class="input">[[item.value]]</div>
+          </div>
+      </template>
+    </div>
   </div>
 </template>
 
