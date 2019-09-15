@@ -254,7 +254,6 @@ namespace tf.debug.controls {
         })
         .on('end',function(){
           var endy = d3.event.y
-          console.info(starty, endy)
           document.getElementById('side-top').style.height = document.getElementById('side-top').clientHeight + endy-starty + 'px'
           document.getElementById('side-bottom').style.height = document.getElementById('side-bottom').clientHeight - endy+starty + 'px'
         })

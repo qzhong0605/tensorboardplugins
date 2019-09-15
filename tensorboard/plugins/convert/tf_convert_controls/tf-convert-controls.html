@@ -26,9 +26,10 @@ limitations under the License.
 <template>
 <style>
 .allcontrols {
+  height: 100%;
   padding: 0 20px 20px;
   flex-grow: 1;
-  overflow-y: auto;
+  overflow: hidden;
 }
 .allcontrols .control-holder {
   clear: both;
@@ -80,7 +81,18 @@ paper-dropdown-menu {
   border: none;
   margin-left: -20px;
   margin-right: -20px;
-  margin-top: 50px;
+  /* margin-top: 50px; */
+  cursor: row-resize;
+}
+#side-top {
+  /* height: 53%; */
+  overflow:auto;
+}
+
+#side-bottom {
+  height: 50%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 </style>
 <svg width="0" height="0">
@@ -102,62 +114,67 @@ paper-dropdown-menu {
      </g>
   </defs>
 </svg>
-<template is="dom-if" if="{{!selectedNode}}">
+<!-- <template is="dom-if" if="{{!selectedNode}}"> -->
+<div id="isNodeSelected">
   <div class="allcontrols">
-    <div style="margin-bottom: 10px">
-      <iron-icon icon="chevron-left" class="button-icon-left" on-click="dragLeft" id="drag-left"></iron-icon>
+    <div id="side-top">
+      <div style="margin-bottom: 10px">
+        <iron-icon icon="chevron-left" class="button-icon-left" on-click="dragLeft" id="drag-left"></iron-icon>
 
-      <iron-icon icon="chevron-right" class="button-icon-right" on-click="dragRight" id="drag-right"></iron-icon>
+        <iron-icon icon="chevron-right" class="button-icon-right" on-click="dragRight" id="drag-right"></iron-icon>
+      </div>
+
+      <!-- <paper-input class="" label="Source Model Type" value="{{srcType}}"></paper-input>  -->
+      <paper-dropdown-menu label="Source Model Type" no-animations noink horizontal-align="left">
+        <paper-menu class="dropdown-content" selected="{{srcType}}">
+          <template is="dom-repeat" items="{{_modelTypes}}">
+              <paper-item>[[item]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
+      <div id="srcnotc2" style="display: none">
+        <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input>
+      </div>
+      <div id="srcisc2" style="display: none">
+        <paper-input class="" label="Predict Net" id="predict_net"></paper-input>
+        <paper-input class="" label="Init Net" id="init_net"></paper-input>
+      </div>
+
+      <paper-button raised noink class="full-width-bt" on-click="loadModel">LOAD</paper-button>
+
+      <!-- <paper-input class="" label="Destination Model Type" value="{{desType}}"></paper-input>   -->
+      <paper-dropdown-menu label="Destination Model Type" no-animations noink horizontal-align="left">
+        <paper-menu class="dropdown-content" selected="{{desType}}">
+          <template is="dom-repeat" items="{{_modelTypes}}">
+              <paper-item>[[item]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
+      <div id="desnotc2" style="display: none">
+        <paper-input class="" label="Storage Path " value="{{desPath}}"></paper-input>
+      </div>
+      <div id="desisc2" style="display: none">
+        <paper-input class="" label="Predict Net" id="predict_net_des"></paper-input>
+        <paper-input class="" label="Init Net" id="init_net_des"></paper-input>
+      </div>
+
+      <paper-button raised noink class="full-width-bt" on-click="transformModel">CONVERT</paper-button>
     </div>
-
-    <!-- <paper-input class="" label="Source Model Type" value="{{srcType}}"></paper-input>  -->
-    <paper-dropdown-menu label="Source Model Type" no-animations noink horizontal-align="left">
-      <paper-menu class="dropdown-content" selected="{{srcType}}">
-        <template is="dom-repeat" items="{{_modelTypes}}">
-            <paper-item>[[item]]</paper-item>
+    <hr class="hr" id="hr">
+    <div id="side-bottom">
+      <paper-button raised noink class="full-width-bt" on-click="getStatistics" style="margin-top: 5px;margin-bottom: 10px;">STATISTICS</paper-button>
+      <div style="width: 100%;">
+        <template is="dom-repeat" items="{{statistics}}">
+            <div class="flex-horizontal">
+              <div class="input">[[item.key]]</div>
+              <div class="input">[[item.value]]</div>
+            </div>
         </template>
-      </paper-menu>
-    </paper-dropdown-menu>
-    <div id="srcnotc2" style="display: none">
-      <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input>
-    </div>
-    <div id="srcisc2" style="display: none">
-      <paper-input class="" label="Predict Net" id="predict_net"></paper-input>
-      <paper-input class="" label="Init Net" id="init_net"></paper-input>
-    </div>
-
-    <paper-button raised noink class="full-width-bt" on-click="loadModel">LOAD</paper-button>
-
-    <!-- <paper-input class="" label="Destination Model Type" value="{{desType}}"></paper-input>   -->
-    <paper-dropdown-menu label="Destination Model Type" no-animations noink horizontal-align="left">
-      <paper-menu class="dropdown-content" selected="{{desType}}">
-        <template is="dom-repeat" items="{{_modelTypes}}">
-            <paper-item>[[item]]</paper-item>
-        </template>
-      </paper-menu>
-    </paper-dropdown-menu>
-    <div id="desnotc2" style="display: none">
-      <paper-input class="" label="Storage Path " value="{{desPath}}"></paper-input>
-    </div>
-    <div id="desisc2" style="display: none">
-      <paper-input class="" label="Predict Net" id="predict_net_des"></paper-input>
-      <paper-input class="" label="Init Net" id="init_net_des"></paper-input>
-    </div>
-
-    <paper-button raised noink class="full-width-bt" on-click="transformModel">CONVERT</paper-button>
-    <hr class="hr">
-
-    <paper-button raised noink class="full-width-bt" on-click="getStatistics" style="margin-top: 5px;margin-bottom: 10px;">STATISTICS</paper-button>
-    <div style="width: 100%">
-      <template is="dom-repeat" items="{{statistics}}">
-          <div class="flex-horizontal">
-            <div class="input">[[item.key]]</div>
-            <div class="input">[[item.value]]</div>
-          </div>
-      </template>
+      </div>
     </div>
   </div>
-</template>
+</div>
+<!-- </template> -->
 
 <template is="dom-if" if="{{selectedNode}}">
   <div class="nodeInfo">

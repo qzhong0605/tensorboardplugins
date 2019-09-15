@@ -119,6 +119,10 @@ Polymer({
   is: 'tf-convert-controls',
   properties: {
     // TODO:
+    selectedNode: {
+      type: String,
+      observer:'_hasSelectedNode'
+    },
     statistics:{
       type: Array,
       value:[],
@@ -193,7 +197,29 @@ Polymer({
 
   listeners: {},
 
-  ready: function(){},
+  ready: function(){
+    const resizer = d3.select(this.$.hr)
+    var starty
+    resizer.call(d3.drag()
+      .on('start',function(){
+        starty = d3.event.y
+      })
+      .on('end',function(){
+        var endy = d3.event.y
+        document.getElementById('side-top').style.height = document.getElementById('side-top').clientHeight + endy-starty + 'px'
+        document.getElementById('side-bottom').style.height = document.getElementById('side-bottom').clientHeight - endy+starty + 'px'
+      })
+
+    )
+  },
+  _hasSelectedNode: function(){
+    if(document.getElementById('isNodeSelected')==null){return;}
+    if(this.selectedNode == null){
+      document.getElementById('isNodeSelected').style.display = ''
+      return;
+    }
+    document.getElementById('isNodeSelected').style.display = 'none'
+  },
   _srcTypeChanged: function(){
     if(this.srcType == 2){
       document.getElementById('srcnotc2').style.display = 'none'
