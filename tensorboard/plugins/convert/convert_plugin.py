@@ -24,9 +24,9 @@ import os
 import onnx
 import caffe2.python.onnx.frontend as c2_onnx
 from caffe2.python.onnx.backend import Caffe2Backend as c2
-
+from caffe2.proto import caffe2_pb2
 from werkzeug import wrappers
-
+from onnx import ModelProto
 from tensorboard.backend import http_util
 from tensorboard.backend import process_graph
 from tensorboard.backend.event_processing import plugin_event_accumulator as event_accumulator  # pylint: disable=line-too-long
@@ -84,6 +84,16 @@ class ConvertPlugin(base_plugin.TBPlugin):
     self._multiplexer = context.multiplexer
     self._src_tb_graph = None
     self._dst_tb_graph = None
+    # caffe2
+    self.predict_net = None
+    self.init_net = None
+    # other models
+    self.model_file = None
+    # torch
+    self.input_tensor_size = None
+
+    self.s_node_count = None
+    self.d_node_count = None
 
   def get_plugin_apps(self):
     return {
@@ -96,85 +106,109 @@ class ConvertPlugin(base_plugin.TBPlugin):
 
   @wrappers.Request.application
   def load_model(self, request):
-    """ It used to parse model file and convert it to tensorboard IR
-    """
-    model_type = request.args.get("source_type")
-    if model_type == "torch":
-      input_tensor_size = request.args.get("input_tensor_size")
-      model_file = request.args.get('model_file')
-      if not os.path.exists(model_file):
-        # send a response to frontend and report file not existing
-        pass
-      pass
-    elif model_type == "caffe2":
-      predict_net = request.args.get("predict_net")
-      init_net = request.args.get("init_net")
-      if not (os.path.exists(predict_net) and os.path.exists(init_net)):
-        # send a response to frontend and report that model file doesnot exist
-        pass
-      self._src_tb_graph = c2graph_util.C2Graph(predict_net, init_net, "pb")
-    elif model_type == "caffe":
-      model_file = request.args.get('source_path')
-      self._src_tb_graph = caffe_util.CaffeGraph(model_file, "pb")
-    elif model_type == "onnx":
-      model_file = request.args.get('source_path')
-      self._src_tb_graph = onnx_util.OnnxGraph(model_file, "onnx")
-    elif model_type == "tf":
-      model_file = request.args.get('source_path')
-      pass
-    else:
-      # send a response to frontend and report model type error
-      pass
-    self._src_tb_graph.ConvertNet()
-    graph = self._src_tb_graph.GetTBGraph()
-    # logger.warn(str(graph))
-    return http_util.Respond(request,str(graph), 'text/x-protobuf')
+      """ It used to parse model file and convert it to tensorboard IR
+      """
+      model_type = request.args.get("source_type")
+      if model_type == "torch":
+          self.input_tensor_size = request.args.get("input_tensor_size")
+          self.model_file = request.args.get('model_file')
+          if not os.path.exists(self.model_file):
+              # send a response to frontend and report file not existing
+              pass
+          pass
+      elif model_type == "caffe2":
+          self.predict_net = request.args.get("predict_net")
+          self.init_net = request.args.get("init_net")
+          if not (os.path.exists(self.predict_net) and os.path.exists(self.init_net)):
+              # send a response to frontend and report that model file doesnot exist
+              pass
+          self._src_tb_graph = c2graph_util.C2Graph(self.predict_net, self.init_net, "pb")
+      elif model_type == "caffe":
+          self.model_file = request.args.get('source_path')
+          self._src_tb_graph = caffe_util.CaffeGraph(self.model_file, "pb")
+      elif model_type == "onnx":
+          self.model_file = request.args.get('source_path')
+          self._src_tb_graph = onnx_util.OnnxGraph(self.model_file, "onnx")
+      elif model_type == "tf":
+          self.model_file = request.args.get('source_path')
+          pass
+      else:
+          # send a response to frontend and report model type error
+          pass
+      self._src_tb_graph.ConvertNet()
+      graph = self._src_tb_graph.GetTBGraph()
+
+      # count the number of nodes in the input model
+      self.s_node_count = 0
+      for node in graph.node:
+          self.s_node_count += 1
+      logger.warn('The number of nodes:', self.s_node_count)
+
+      return http_util.Respond(request, str(graph), 'text/x-protobuf')
 
   @wrappers.Request.application
   def convert_model(self, request):
-    destination_type = request.args.get('destination_type')
+      destination_type = request.args.get('destination_type')
 
-    if destination_type=='caffe2':
-      predict_net = request.args.get('predict_net')
-      init_net = request.args.get('init_net')
-      logger.warn(init_net)
-      logger.warn(predict_net)
-    else:
-      destination_path = request.args.get('destination_path')
-      logger.warn(destination_path)
+      if destination_type == 'caffe2':
+          dst_predict_net = request.args.get('predict_net')
+          dst_init_net = request.args.get('init_net')
+          logger.warn(dst_init_net)
+          logger.warn(dst_predict_net)
+      else:
+          destination_path = request.args.get('destination_path')
+          logger.warn(destination_path)
 
-    if destination_type == 'onnx':
-      data_type = onnx.TensorProto.FLOAT
-      # data_shape = (1, 3, 299, 299) if model is inceptionv3/4
-      data_shape = (1, 3, 224, 224)
-      value_info = {
-        'data': (data_type, data_shape)
-      }
+      if destination_type == 'onnx':
+          data_type = onnx.TensorProto.FLOAT
+          # data_shape = (1, 3, 299, 299) if model is inceptionv3/4
+          data_shape = (1, 3, 224, 224)
+          value_info = {
+              'data': (data_type, data_shape)
+          }
 
-      if self._src_tb_graph._predict_net.name == '':
-        self._src_tb_graph._predict_net.name = 'modelName'
+          self.predict_net = caffe2_pb2.NetDef()
+          with open('predict_net.pb', 'rb') as f:
+              self.predict_net.ParseFromString(f.read())
 
-      onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph._predict_net,
-                                                    init_net=self._src_tb_graph._init_net,
-                                                    value_info=value_info)
-      with open(destination_path, 'wb') as f:
-        f.write(onnx_model.SerializeToString())
+          self.init_net = caffe2_pb2.NetDef()
+          with open('init_net.pb', 'rb') as f:
+              self.init_net.ParseFromString(f.read())
 
-      self._dst_tb_graph = onnx_util.OnnxGraph(destination_path, "onnx")
+          # if self._src_tb_graph._predict_net.name == '':
+          #     self._src_tb_graph._predict_net.name = 'modelName'
 
-    elif destination_type == 'caffe2':
+          onnx_model = c2_onnx.caffe2_net_to_onnx_model(self.predict_net,
+                                                        self.init_net,
+                                                        value_info)
+          with open(destination_path, 'wb') as f:
+              f.write(onnx_model.SerializeToString())
 
-      init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(self._src_tb_graph._onnx_model)
-      with open(predict_net, 'wb') as f_pre:
-        f_pre.write(predict_net_model.SerializeToString())
-      with open(init_net, 'wb') as f_init:
-        f_init.write(init_net_model.SerializeToString())
-      self._dst_tb_graph = c2graph_util.C2Graph(predict_net, init_net, "pb")
+          self._dst_tb_graph = onnx_util.OnnxGraph(destination_path, "onnx")
 
-    logger.warn('Converting completed.')
-    self._dst_tb_graph.ConvertNet()
-    graph = self._dst_tb_graph.GetTBGraph()
-    return http_util.Respond(request,str(graph) ,'text/x-protobuf')
+      elif destination_type == 'caffe2':
+          onnx_model_proto = ModelProto()
+          with open(self.model_file, "rb") as onnx_model_path:
+              onnx_model_proto.ParseFromString(onnx_model_path.read())
+
+          init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(onnx_model_proto)
+          with open(dst_predict_net, 'wb') as f_pre:
+              f_pre.write(predict_net_model.SerializeToString())
+          with open(dst_init_net, 'wb') as f_init:
+              f_init.write(init_net_model.SerializeToString())
+          self._dst_tb_graph = c2graph_util.C2Graph(dst_predict_net, dst_init_net, "pb")
+
+      logger.warn('Converting completed.')
+      self._dst_tb_graph.ConvertNet()
+      graph = self._dst_tb_graph.GetTBGraph()
+
+      # count the number of nodes in the output model
+      self.d_node_count = 0
+      for node in graph.node:
+          self.d_node_count += 1
+      logger.warn('The number of nodes:', self.d_node_count)
+
+      return http_util.Respond(request, str(graph), 'text/x-protobuf')
 
   def is_active(self):
     """The graphs plugin is active iff any run has a graph."""
@@ -327,5 +361,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
                                code=404)
   @wrappers.Request.application
   def get_statistics(self, request):
-    info = 'info {\n  key: "1"\n  value: "1234"\n}\ninfo {\n  key: "2"\n  value: 4321\n}'
+
+    info = 'info {\n  key: "SOURCE"\n  value: ' + str(self.s_node_count) +\
+           '\n}\ninfo {\n  key: "DESTINATION"\n  value: ' + str(self.d_node_count) + '\n}'
     return http_util.Respond(request, info, 'text/x-protobuf')
