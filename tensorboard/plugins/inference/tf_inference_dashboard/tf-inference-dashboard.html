@@ -44,100 +44,114 @@ TensorFlow run.
 <tf-dashboard-layout>
 
 <div class="sidebar" id = "side">
-  <div class="sidebar-section">
-    <div class="line-item">
-      <paper-checkbox
-        checked="{{_actualSize}}"
-      >Show actual image size</paper-checkbox>
+  <div id="side-top">
+    <div class="sidebar-section">
+      <div class="line-item">
+        <paper-checkbox
+          checked="{{_actualSize}}"
+        >Show actual image size</paper-checkbox>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <form is="iron-form" id="form" method="post">
+        <div class="flex-holder">
+          <paper-input
+            label="Model Path"
+            id = "modelpath"
+            name = "modelpath"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+          <paper-input
+            label="Data Path"
+            id = "datapath"
+            name = "datapath"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+          <paper-input
+            label="Batch Size"
+            id = "batchsize"
+            name = "batchsize"
+            required type = "number"
+            value = "1024"
+          ></papper-input>
+        </div>
+        <div class="allcontrols">
+          <div class="control-holder">
+            <!-- <div class="title">Model Type</div>
+              <paper-radio-group selected="{{modelType}}">
+                <paper-radio-button name="ckpt" value="ckpt">ckpt</paper-radio-button>
+                <paper-radio-button name="onnx" value="onnx">onnx</paper-radio-button>
+                <paper-radio-button name="pb" value="pb" disabled>pb</paper-radio-button>
+                <paper-radio-button name="h5" value="h5" disabled>h5</paper-radio-button>
+              </paper-radio-group> -->
+            <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
+              <paper-menu class="dropdown-content" selected="{{_selectedModel}}">
+                <template is="dom-repeat" items="{{_modelTypes}}">
+                    <paper-item>[[item]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+        </div>
+        <div class="accept-button-holder">
+          <paper-button raised on-click="submitForm">
+            Accept
+          </paper-button>
+          <paper-button dialog-dismiss class="control-button">Cancel</paper-button>
+        </div>
+      </form>
     </div>
   </div>
-
-  <div class="sidebar-section">
-    <form is="iron-form" id="form" method="post">
-      <div class="flex-holder">
-        <paper-input
-          label="Model Path"
-          id = "modelpath"
-          name = "modelpath"
-        ></papper-input>
-      </div>
-      <div class="flex-holder">
-        <paper-input
-          label="Data Path"
-          id = "datapath"
-          name = "datapath"
-        ></papper-input>
-      </div>
-      <div class="flex-holder">
-        <paper-input
-          label="Batch Size"
-          id = "batchsize"
-          name = "batchsize"
-          required type = "number"
-          value = "1024"
-        ></papper-input>
-      </div>
+  <hr class="separator-hr" id="separatorhr">
+  <div id="side-bottom">
+    <div class="sidebar-section" id="resize-border">
+        <tf-runs-selector
+        id="runs-selector"
+        selected-runs="{{_selectedRuns}}"
+        style="display: none"
+      ></tf-runs-selector>
       <div class="allcontrols">
-        <div class="control-holder">
-          <!-- <div class="title">Model Type</div>
-            <paper-radio-group selected="{{modelType}}">
-              <paper-radio-button name="ckpt" value="ckpt">ckpt</paper-radio-button>
-              <paper-radio-button name="onnx" value="onnx">onnx</paper-radio-button>
-              <paper-radio-button name="pb" value="pb" disabled>pb</paper-radio-button>
-              <paper-radio-button name="h5" value="h5" disabled>h5</paper-radio-button>
-            </paper-radio-group> -->
-          <paper-dropdown-menu label="Model Type" no-animations noink horizontal-align="left">
-            <paper-menu class="dropdown-content" selected="{{_selectedModel}}">
-              <template is="dom-repeat" items="{{_modelTypes}}">
-                  <paper-item>[[item]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
+        <div class="flex-horizontal" style="margin-bottom: 10px;">
+          <div class="table-title" style="width: 40px">show</div>
+          <div class="table-title" style="width: 50px">model</div>
+          <div class="table-title" style="width: 60px">session</div>
+          <div class="table-title" style="border-right: 0px solid;width: 70px">accuracy</div>
         </div>
+        <template is="dom-repeat" items="{{records}}">
+          <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
+            <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
+            <div class="table-content" style="width: 50px;" id="model">[[item.model]]</div>
+            <div class="table-content" style="width: 60px;" id="session">[[item.session]]</div>
+            <div class="table-content" style="width: 70px;" id="accuracy">[[item.accuracy]]</div>
+          </div>
+          <hr class="hr">
+        </template>
+          <template is="dom-if" if="[[!_isDone]]">
+            <div id="progress-bar">
+              <div id="progress-msg">Loading New Session</div>
+              <paper-progress value="[[_loadingPerc]]"></paper-progress>
+            </div>
+          </template>
       </div>
-      <div class="accept-button-holder">
-        <paper-button raised on-click="submitForm">
-          Accept
-        </paper-button>
-        <paper-button dialog-dismiss class="control-button">Cancel</paper-button>
-      </div>
-    </form>
-  </div>
-	<div class="sidebar-section">
-      <tf-runs-selector
-      id="runs-selector"
-      selected-runs="{{_selectedRuns}}"
-      style="display: none"
-    ></tf-runs-selector>
-    <form is="iron-form" id="form" method="post">
-      <div class="flex-holder">Data Edit</div>
-      <div class="flex-horizontal">
-        <paper-input label="batch" id="batch" always-float-label></paper-input>
-        <iron-icon icon="icons:remove" class="separator"></iron-icon>
-        <paper-input label="x" id="inputX" always-float-label></paper-input>
-        <iron-icon icon="icons:remove" class="separator"></iron-icon>
-        <paper-input label="y" id="inputY" always-float-label></paper-input>
-        <iron-icon icon="icons:remove" class="separator"></iron-icon>
-        <paper-input label="channel" id="inputC" always-float-label></paper-input>
-      </div>
-      <paper-input label="Value" id=""></paper-input>
-      <paper-button raised class="" on-click="edit" style="width: 100%">EDIT</paper-button>
-    </form>
+    </div>
   </div>
 </div>
       <div class="center" id="center">
         <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
-          <paper-tab>Sessions View</paper-tab>
+          <!--<paper-tab>Sessions View</paper-tab-->
           <paper-tab>Feature View</paper-tab>
           <paper-tab>Data Edit</paper-tab>
         </paper-tabs>
-        <div id="page0" style="display: none">
+        <div id="page0">
           <div class="center-content" id="channelimage">
             <template is="dom-if" if="[[!_isDone]]">
-              <div id="progress-bar" style="display: none">
+              <div id="progress-bar">
                 <div id="progress-msg">Loading Feature Map</div>
-                  <paper-progress value="[[_loadingPerc]]"></paper-progress>
-                </div>
+                <paper-progress value="[[_loadingPerc]]"></paper-progress>
+              </div>
             </template>
             <template is="dom-if" if="[[_isDone]]">
               <template is="dom-if" if="[[_dataNotFound]]">
@@ -240,7 +254,7 @@ TensorFlow run.
           </div>
         </div>
 <!-- TODO: -->
-        <div id="page1">
+        <div id="page2" style="display:none;">
           <!-- model, session, show data, batch size, input size, accuracy  -->
             <div class="flex-horizontal" style="margin-bottom: 10px;">
               <div class="table-title" style="margin-left: 20px;">show data</div>
@@ -265,11 +279,58 @@ TensorFlow run.
               <div id="progress-bar">
                 <div id="progress-msg">Loading New Session</div>
                   <paper-progress value="[[_loadingPerc]]"></paper-progress>
-                </div>
+              </div>
             </template>
         </div>
-        <div id="page2" style="display: none">
-        f
+        <div id="page1" style="display: none">
+          <div class="flex-horizontal with-border" style="height: 50%">
+            <div class="data-edit">
+              <form is="iron-form" id="form" method="post">
+                <div class="flex-horizontal">
+                  <paper-input label="" id="dataBatch" always-float-label></paper-input>
+                  <iron-icon icon="icons:remove" class="separator"></iron-icon>
+                  <paper-input label="" id="dataX" always-float-label></paper-input>
+                  <iron-icon icon="icons:remove" class="separator"></iron-icon>
+                  <paper-input label="" id="dataY" always-float-label></paper-input>
+                  <iron-icon icon="icons:remove" class="separator"></iron-icon>
+                  <paper-input label="" id="dataC" always-float-label></paper-input>
+                </div>
+                <paper-input label="Value" id="editDataValue" always-float-label></paper-input>
+                <paper-button raised class="" on-click="edit" style="width: 100%;margin-left: 0 !important;margin-top: 20px;">EDIT</paper-button>
+              </form>
+            </div>
+            <div class="sep"></div>
+            <div class="sep" style="margin-left: 5px;"></div>
+            <div class="preview-pic">
+              
+            </div>
+          </div>
+          <div class="edit-log with-border">
+            <div style="margin-left: 10px;margin-top:10px;">
+              <div class="flex-horizontal" style="margin-bottom: 10px;">
+                  <div class="log-title" style="width: 200px">time</div>
+                  <div class="log-title" style="width: 270px">data point</div>
+                  <div class="log-title" style="width: 120px">old value</div>
+                  <div class="log-title" style="border-right: 0px solid;width: 120px">new value</div>
+              </div>
+              <template is="dom-repeat" items="{{_log}}">
+                <div class="flex-horizontal" style="margin-bottom: 5px;">
+                  <div class="log-content" style="width: 200px;" id="model">[[item.time]]</div>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.batch]]</div>
+                  <iron-icon icon="icons:remove" class="separator2"></iron-icon>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.x]]</div>
+                  <iron-icon icon="icons:remove" class="separator2"></iron-icon>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.y]]</div>
+                  <iron-icon icon="icons:remove" class="separator2"></iron-icon>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.c]]</div>
+                  <div class="log-content" style="width: 120px;" id="session">[[item.old]]</div>
+                  <div class="log-content" style="width: 120px;" id="accuracy">[[item.new]]</div>
+                </div>
+                <hr class="hr2">
+              </template>
+            </div>
+          </div>
+          <paper-button raised class="" on-click="submitEdit" style="width: 100%;margin-left: 0 !important;margin-top: 10px;">UPDATE</paper-button>
         </div>
       </div>
     </tf-dashboard-layout>
@@ -285,6 +346,33 @@ TensorFlow run.
         font-weight: 500;
         overflow: hidden;
       }
+      .sep{
+        width: 1px;
+        background-color: rgba(0,0,0,0.2);
+      }
+      .data-edit{
+        width: 35%;
+        margin-left: 10px;
+        margin-top: 50px;
+        margin-right: 10px; 
+      }
+      .with-border{
+        border: 1px solid rgba(0,0,0,0.2) ;
+      }
+      .edit-log{
+        height: 30%;
+        margin-top: 5px;
+        overflow-y: auto;
+      }
+      #side-top {
+        height: 53%;
+        overflow:auto;
+      }
+
+      #side-bottom {
+        height: 40%;
+        overflow:auto;
+      }
       .hr {
         width: 725px;
         margin-left: 20px;
@@ -292,33 +380,70 @@ TensorFlow run.
         height: 1px;
         border: none
       }
+      .hr2 {
+        width: 223px;
+        margin-left: 0px;
+        background-color: #bbbbbb;
+        height: 1px;
+        border: none
+      }
+      .separator-hr{
+        background-color: #f57c00;
+        height: 5px;
+        border: none;
+        margin-left: -20px;
+        margin-right: 0px;
+        cursor: row-resize;
+      }
       #page1 {
-        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        /* box-shadow: 0 1px 5px rgba(0,0,0,0.2); */
+        /* border: 1px solid rgba(0,0,0,0.2) ; */
+        margin-right: 10px;
+        height: 100%;
       }
       #page0 {
         height:100%;
       }
       .checkbox {
         margin-top: 0px;
-        margin-left: 65px;
-        margin-right: 50px;
+        margin-left: 10px;
+        margin-right: 4px;
       }
       .table-content {
-        width: 120px;
+        width: 14px;
         margin-left: 1px;
         white-space:nowrap;
         overflow-x:auto;
         text-align: center;
       }
       .table-title {
-        width: 120px;
-        height: 30px;
+        width: 14px;
+        height: 20px;
+        border-bottom: 1px solid #bbbbbb;
+        border-right: 1px solid #bbbbbb;
+        text-align: center;
+      }
+      .log-content {
+        font-size: 14px;
+        margin-left: 1px;
+        white-space:nowrap;
+        overflow-x:auto;
+        text-align: center;
+      }
+      .log-title {
+        font-size: 14px;
+        height: 20px;
         border-bottom: 1px solid #bbbbbb;
         border-right: 1px solid #bbbbbb;
         text-align: center;
       }
       .separator {
         margin-top: 30px;
+      }
+      .separator2 {
+        margin-top: -5px;
+        width: 10px;
+        color: gray;
       }
       .flexchild-vertical {
         @apply --layout-flex;
@@ -486,6 +611,9 @@ TensorFlow run.
         --paper-slider-pin-color: var(--tb-orange-strong);
         --paper-slider-pin-start-color: var(--tb-orange-strong);
       }
+      #resize-border {
+        border-top: solid 0px white;
+      }
     </style>
   </template>
   <script>
@@ -497,6 +625,9 @@ TensorFlow run.
           type: String
         },
         records:{
+          type: Array,
+        },
+        _log:{
           type: Array,
         },
         _selectedPage:{
@@ -659,7 +790,8 @@ TensorFlow run.
         this._fetchTags().then(() => {
           this._reloadImages();
         });
-          console.log(this.records);
+        console.log(this.records);
+        console.log(this._log);
       },
       _loadingProcess(){
         if(false){
@@ -811,13 +943,27 @@ TensorFlow run.
       modelTypeChanged_: tf_storage.getStringObserver(
         'modelType', {defaultValue: 'onnx'}),
       edit:function(){
-        
+        var list = this._log;
+        var tmp = new Array();
+        console.log(list);
+        if(list==null){
+          list = [{batch: parseInt(this.$.dataBatch.value), x: parseInt(this.$.dataX.value), y: parseInt(this.$.dataY.value), c: parseInt(this.$.dataC.value), old: 0, new: this.$.editDataValue.value,time: '2019-09-14 16:57:58.445542'}];
+          tmp = [].concat(list);
+        }
+        else{
+          list.push({batch: parseInt(this.$.dataBatch.value), x: parseInt(this.$.dataX.value), y: parseInt(this.$.dataY.value), c: parseInt(this.$.dataC.value), old: 0, new: this.$.editDataValue.value,time: '2019-09-14 16:57:58.445542'});
+          //console.log(list);
+          tmp = [].concat(list);
+        }
+        //console.log(tmp);
+        this.set('_log',tmp);
       },
       submitForm: function() {
         var modelpath = this.$.modelpath.value;
         var data = this.$.datapath.value;
         var batch = this.$.batchsize.value;
         var modeltype = this.modelType;
+        var tmp = new Array();
         if(this.records==null){
           var list = new Array();
         }
@@ -831,14 +977,16 @@ TensorFlow run.
           const that = this;
           a.then(function(result) {
             console.log(result['accuracy']);
-list.push({id:list.length+1,model:result['model'],session:"feature",batch_size:result['batch_size'],input_size:result['input_size'],accuracy:result['accuracy']});
-          that.set('records',list);
+            list.push({id:list.length+1,model:result['model'], session:"feature", batch_size:result['batch_size'], input_size:result['input_size'],accuracy:result['accuracy']});
+          tmp = [].concat(list); 
+          that.set('records',tmp);
           that.set('_isDone',true);
           });//then
           console.log(list,this.records);
           this.set('_dataNotFound',false);
           this.set('_isDone',false);
           this._loadingProcess();
+          console.log(this._isDone);
           alert("start!")
         }
       },
@@ -847,40 +995,44 @@ list.push({id:list.length+1,model:result['model'],session:"feature",batch_size:r
         var data = this.$.datapath.value;
         var batch = this.$.batchsize.value;
         var modeltype = this.modelType;
+        var editlog = JSON.stringify(this._log);
+        console.log(typeof editlog);
+        var tmp = new Array();
         if(this.records==null){
           var list = new Array();
         }
         else{
           var list = this.records;
         }
-        console.log(this._modelTypes[this._selectedModel]);
+        //console.log(this._modelTypes[this._selectedModel]);
         if(modelpath != "" && data != ""){ // whatever input check                   
-          const url = tf_backend.getRouter().pluginRoute('inference', '/distribution');
-          const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'batchsize':batch,'modeltype':modeltype}));
+          const url = tf_backend.getRouter().pluginRoute('inference', '/distributionEdit');
+          const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'batchsize':batch,'modeltype':modeltype,'edit':editlog}));
           const that = this;
           a.then(function(result) {
             console.log(result['accuracy']);
-list.push({id:list.length+1,model:result['model'],session:"feature",batch_size:result['batch_size'],input_size:result['input_size'],accuracy:result['accuracy']});
-          that.set('records',list);
+          list.push({id:list.length+1, model:result['model'],session:"feature", batch_size:result['batch_size'], input_size:result['input_size'], accuracy:result['accuracy']});
+          tmp = [].concat(list); 
+          that.set('records',tmp);
           that.set('_isDone',true);
           });//then
-          console.log(list,this.records);
+          //console.log(list,this.records);
           this.set('_dataNotFound',false);
           this.set('_isDone',false);
           this._loadingProcess();
-          alert("start!")
+          //alert("start!")
         }
       },
       _changePage: function(){
         if(document.getElementById('page0')){
           if(this._selectedPage == 0){
-            document.getElementById('page0').style.display = 'none'
-            document.getElementById('page1').style.display = ''
+            document.getElementById('page1').style.display = 'none'
+            document.getElementById('page0').style.display = ''
             document.getElementById('page2').style.display = 'none'
           }
           if(this._selectedPage == 1){
-            document.getElementById('page0').style.display = ''
-            document.getElementById('page1').style.display = 'none'
+            document.getElementById('page1').style.display = ''
+            document.getElementById('page0').style.display = 'none'
             document.getElementById('page2').style.display = 'none'
           }
           if(this._selectedPage == 2){

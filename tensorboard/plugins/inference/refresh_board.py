@@ -71,11 +71,11 @@ def pred_refresh(log_dir):
     pred_writer(log_dir)
     print("done!")
 
-def fea_refresh(log_dir,image1,image2,image3,image4):
+def fea_refresh(log_dir,tensor,name):
   if tf.gfile.Exists(log_dir):
     tf.gfile.DeleteRecursively(log_dir)
   tf.gfile.MakeDirs(log_dir)
-  fea_writer(log_dir,image1,image2,image3,image4)
+  fea_writer(log_dir,tensor,name)
   print("done!")
 
 '''

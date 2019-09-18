@@ -9,6 +9,7 @@ data_path = '/root/Desktop/data/mnist/mnist.tfrecords'
 import tensorflow as tf
 import requests
 import shutil
+import json
 from tensorboard.plugins.inference.model_prediction import Inference
 
 class Infer:
@@ -18,18 +19,38 @@ class Infer:
       model_type = None):
     self.model_path = model_path
     self.model_type = model_type
+    self.tensor_name = None
+    self.tensor_channel_num = None
     self.data_path = None
+    self.input_cache=None
+    self.label_cache=None
 
   def start(self,datapath,batchsize):
     self.data_path = datapath
     model = self.classification()
-    result = model.feature(self.data_path,batchsize)
-    return result
+    result,self.input_cache,self.label_cache = model.feature(self.data_path,batchsize)
+    self.tensor_name = model.tensor_name
+    self.tensor_channel_num = model.tensor_channel_num
+    print("**********************")
+    print(self.tensor_name,self.tensor_channel_num)
+    return result,self.tensor_name,self.tensor_channel_num
 
   def edit(self,datapath,batchsize,edit_log):
+    print(type(edit_log))
+    edit_log = json.loads(edit_log)
+    print(type(edit_log))
+    trans_log = edit_log[0].copy()
+    for item in trans_log:
+      trans_log[item] = []
+    for i in range(0,len(edit_log)):
+      for item in trans_log:
+        trans_log[item].append(edit_log[i][item])
+    print(trans_log)
     self.data_path = datapath
     model = self.classification()
-    result = model.feature_edit(self.data_path,batchsize,edit_log['batch'], edit_log['x'],edit_log['y'],edit_log['c'],edit_log['value'])
+    result = model.feature_edit(self.input_cache, self.label_cache, batchsize,trans_log['batch'], trans_log['x'], trans_log['y'],trans_log['c'],trans_log['new'])
+    self.tensor_name = model.tensor_name
+    self.tensor_channel_num = model.tensor_channel_num
     return result
 
   def config(self,channel,layer_channel):
