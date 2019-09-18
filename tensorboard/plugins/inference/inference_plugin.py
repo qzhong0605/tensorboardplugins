@@ -354,17 +354,13 @@ class InferencePlugin(base_plugin.TBPlugin):
     print(request.form['modelpath'], request.form['datapath'],request.form['batchsize'],request.form['modeltype'])
     self.infer = Infer(request.form['modelpath'],request.form['modeltype'])
     result,self.tensor_name,self.tensor_channel_num = self.infer.start(request.form['datapath'], request.form['batchsize'])
-    print("&&&&&&&&&&&")
-    print(result,self.tensor_name,self.tensor_channel_num)
-    return http_util.Respond(request, {'accuracy':result.item(),'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'],'model':request.form['modeltype']}, 'application/json')
+    return http_util.Respond(request, {'accuracy':result,'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'],'model':request.form['modeltype']}, 'application/json')
 
   @wrappers.Request.application
   def _serve_distribution_edit(self, request):
-    print("%%%%%%%%%%%%%$$$$$$$$$$$$$$$$")
-    print(request.form['edit'])
     result = self.infer.edit(request.form['datapath'],request.form['batchsize'],request.form['edit'])
     print(result)
-    return http_util.Respond(request, {'accuracy':result.item(),'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'], 'model':request.form['modeltype']}, 'application/json')
+    return http_util.Respond(request, {'accuracy':result,'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'], 'model':request.form['modeltype']}, 'application/json')
 
   @wrappers.Request.application
   def _serve_split_img(self, request):

@@ -31,21 +31,16 @@ class Infer:
     result,self.input_cache,self.label_cache = model.feature(self.data_path,batchsize)
     self.tensor_name = model.tensor_name
     self.tensor_channel_num = model.tensor_channel_num
-    print("**********************")
-    print(self.tensor_name,self.tensor_channel_num)
     return result,self.tensor_name,self.tensor_channel_num
 
   def edit(self,datapath,batchsize,edit_log):
-    print(type(edit_log))
     edit_log = json.loads(edit_log)
-    print(type(edit_log))
     trans_log = edit_log[0].copy()
     for item in trans_log:
       trans_log[item] = []
     for i in range(0,len(edit_log)):
       for item in trans_log:
         trans_log[item].append(edit_log[i][item])
-    print(trans_log)
     self.data_path = datapath
     model = self.classification()
     result = model.feature_edit(self.input_cache, self.label_cache, batchsize,trans_log['batch'], trans_log['x'], trans_log['y'],trans_log['c'],trans_log['new'])

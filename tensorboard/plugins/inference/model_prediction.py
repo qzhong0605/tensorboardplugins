@@ -139,7 +139,8 @@ class Inference(object):
   def feature(self,file_path,batchsize_s):
     init_x = self.loaded_graph.get_tensor_by_name("input/Placeholder:0")
     label_y = self.loaded_graph.get_tensor_by_name("label/Placeholder:0")
-    accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
+    predict = self.loaded_graph.get_tensor_by_name("predict/Equal:0")
+    #accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
     batchsize = int(batchsize_s)
     filename_queue = tf.train.string_input_producer([file_path],num_epochs=None)
     img,label = read_and_decode(filename_queue,True,batchsize)
@@ -148,7 +149,13 @@ class Inference(object):
     with sv.managed_session() as sess:
       self.test_x, self.test_label=sess.run([img,label])
     self.get_all_tensor()
-    acc, = self.sess.run(accuracy,feed_dict = {init_x:self.test_x,label_y:self.test_label})
+    predict_list = self.sess.run(predict, feed_dict={init_x:self.test_x,label_y:self.test_label})
+    acc = 0
+    for result in predict_list:
+      if result:
+        acc+=1
+    acc = round(float(acc/len(predict_list)),5)
+    #acc, = self.sess.run(accuracy,feed_dict = {init_x:self.test_x,label_y:self.test_label})
     tf.reset_default_graph()
     g = tf.Graph()
     with g.as_default():
@@ -161,21 +168,24 @@ class Inference(object):
     return acc,self.test_x,self.test_label
 
   def feature_edit(self,input_cache,label_cache,batchsize_s,batch,x,y,c,value):
-    print("%%%%%%%%%%%%%%%%%%%")
-    print(input_cache.shape)
     init_x = self.loaded_graph.get_tensor_by_name("input/Placeholder:0")
     label_y = self.loaded_graph.get_tensor_by_name("label/Placeholder:0")
-    accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
+    #accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
+    predict = self.loaded_graph.get_tensor_by_name("predict/Equal:0")
     input_reshape = self.loaded_graph.get_tensor_by_name("input_reshape/Reshape:0")
     batchsize = int(batchsize_s)
     img_reshape = np.reshape(input_cache,(-1, input_reshape.shape[1], input_reshape.shape[2], input_reshape.shape[3]))
-    print(batch[0],x[0],y[0],c[0],value[0])
     img_edit = self.edit(img_reshape,batch,x,y,c,value)#edit
-    print(img_edit[batch[0],x[0],y[0],c[0]])
     img_reshape = np.reshape(img_edit,(-1,init_x.shape[1]))
     #threads stop problem
     self.get_all_tensor()
-    acc = self.sess.run(accuracy,feed_dict = {input_reshape:img_edit, label_y:label_cache})
+    predict_list = self.sess.run(predict, feed_dict={input_reshape:img_edit, label_y:label_cache})
+    acc = 0
+    for result in predict_list:
+      if result:
+        acc+=1
+    acc = round(float(acc/len(predict_list)),5)
+    #acc = self.sess.run(accuracy,feed_dict = {input_reshape:img_edit, label_y:label_cache})
     tf.reset_default_graph()
     g = tf.Graph()
     with g.as_default():
@@ -187,17 +197,19 @@ class Inference(object):
     return acc
 
   def edit(self,img,batch,x,y,c,value):
-    new_img = img
+    new_img = img.copy()
     for i in range(len(batch)):
       new_img[batch[i],x[i],y[i],c[i]] = value[i]
+      #pass
     return new_img
 
   def get_all_tensor(self):
-    print("############################################")
     v1 = self.sess.graph.get_operations()
     for i in range(len(v1)):
       if v1[i].name.startswith('layer'):
-        print(v1[i].name)
+        #print(v1[i].name)
+        pass
+    self.tensor_name.append("input_reshape/Reshape:0")
     self.tensor_name.append("layer1/Conv2D:0")
     self.tensor_name.append("layer1/MaxPool:0")
     self.tensor_name.append("layer2/Conv2D:0")
