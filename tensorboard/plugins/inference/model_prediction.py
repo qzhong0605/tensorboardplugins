@@ -46,10 +46,19 @@ class Inference(object):
     return acc.tolist()
 
   def concact_features(self, conv_output):
-    num_or_size_splits = int(math.sqrt(conv_output.shape[0]))
+    num_or_size_splits = int(math.sqrt(conv_output.shape[0])) #side
+    margin = int(conv_output.shape[1]/7)
+    index = np.unravel_index(np.argmax(conv_output),conv_output.shape)
+    blank_value = conv_output[index[0],index[1],index[2],index[3]]#white
     img_out_list = []
+    if num_or_size_splits!=1:
+      conv_tmp=[]
+      for i in range(conv_output.shape[0]):
+        conv_tmp.append(np.pad(conv_output[i], ((margin, margin), (margin, margin),(0,0)), 'constant', constant_values=(blank_value, blank_value)))#margin
+      conv_output = np.array(conv_tmp)
     for j in range(num_or_size_splits):
       img_temp = conv_output[j*4]
+      #img_temp = np.pad(conv_output[j*4], ((4, 4), (4, 4),(0,0)), 'constant', constant_values=(0, 0))
       for i in range(num_or_size_splits-1):
         img_temp = np.concatenate((img_temp,conv_output[i+1+4*j]),axis=1)
       img_out_list.append(img_temp)
