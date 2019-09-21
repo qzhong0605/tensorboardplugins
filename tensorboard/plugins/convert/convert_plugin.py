@@ -85,6 +85,10 @@ class ConvertPlugin(base_plugin.TBPlugin):
     self._src_tb_graph = None
     self._dst_tb_graph = None
 
+    # src type and dst type are used to record the input model type
+    self._src_type = None
+    self._dst_type = None
+
   def get_plugin_apps(self):
     return {
         '/info': self.info_route,
@@ -97,28 +101,28 @@ class ConvertPlugin(base_plugin.TBPlugin):
   def load_model(self, request):
     """ It used to parse model file and convert it to tensorboard IR
     """
-    model_type = request.args.get("source_type")
-    if model_type == "torch":
+    self._src_type = request.args.get("source_type")
+    if self._src_type == "torch":
       input_tensor_size = request.args.get("input_tensor_size")
       model_file = request.args.get('model_file')
       if not os.path.exists(model_file):
         # send a response to frontend and report file not existing
         pass
       pass
-    elif model_type == "caffe2":
+    elif self._src_type == "caffe2":
       predict_net = request.args.get("predict_net")
       init_net = request.args.get("init_net")
       if not (os.path.exists(predict_net) and os.path.exists(init_net)):
         # send a response to frontend and report that model file doesnot exist
         pass
-        self._src_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
-    elif model_type == "caffe":
+      self._src_tb_graph = c2graph_util.C2Graph(predict_net, init_net, "pb")
+    elif self._src_type == "caffe":
       model_file = request.args.get('source_path')
       self._src_tb_graph = caffe_util.CaffeGraph(model_file, "pb")
-    elif model_type == "onnx":
+    elif self._src_type == "onnx":
       model_file = request.args.get('source_path')
       self._src_tb_graph = onnx_util.OnnxGraph(model_file, "pb")
-    elif model_type == "tf":
+    elif self._src_type == "tf":
       model_file = request.args.get('source_path')
       pass
     else:
@@ -130,8 +134,8 @@ class ConvertPlugin(base_plugin.TBPlugin):
 
   @wrappers.Request.application
   def convert_model(self, request):
-    destination_type = request.args.get('destination_type')
-    if destination_type=='caffe2':
+    self._dst_type = request.args.get('destination_type')
+    if self._dst_type =='caffe2':
       predict_net = request.args.get('predict_net')
       init_net = request.args.get('init_net')
       logger.warn(init_net)
@@ -140,7 +144,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
       destination_path = request.args.get('destination_path')
       logger.warn(destination_path)
 
-    if destination_type == 'onnx':
+    if self._dst_type == 'onnx':
       data_type = onnx.TensorProto.FLOAT
       # data_shape = (1, 3, 299, 299) if model is inceptionv3/4
       data_shape = (1, 3, 224, 224)
@@ -148,25 +152,36 @@ class ConvertPlugin(base_plugin.TBPlugin):
         'data': (data_type, data_shape)
       }
 
-      if self._src_tb_graph.predict_net.name == '':
-        self._src_tb_graph.predict_net.name = 'modelName'
+      if self._src_type == "caffe2":
+        if self._src_tb_graph._predict_net.name == '':
+          self._src_tb_graph._predict_net.name = 'modelName'
 
-      onnx_model = c2_onnx.caffe2_net_to_onnx_model(predict_net=self._src_tb_graph.predict_net,
-                                                    init_net=self._src_tb_graph.init_net,
-                                                    value_info=value_info)
-      with open(destination_path, 'wb') as f:
-        f.write(onnx_model.SerializeToString())
+        onnx_model = c2_onnx.caffe2_net_to_onnx_model(
+            predict_net=self._src_tb_graph._predict_net,
+            init_net=self._src_tb_graph._init_net,
+            value_info=value_info
+        )
+        with open(destination_path, 'wb') as f:
+          f.write(onnx_model.SerializeToString())
+        self._des_tb_graph = onnx_util.OnnxGraph(destination_path, "pb")
 
-      self._des_tb_graph = onnx_util.OnnxGraph(destination_path, "pb")
+      elif self._src_type == "torch":
+        pass
 
-    elif destination_type == 'caffe2':
+    elif self._dst_type == 'caffe2':
+      if self._src_type == "onnx":
+        init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(self._src_tb_graph._onnx_model)
+        with open(predict_net, 'wb') as f_pre:
+          f_pre.write(predict_net_model.SerializeToString())
+        with open(init_net, 'wb') as f_init:
+          f_init.write(init_net_model.SerializeToString())
+        self._des_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+      else:
+        raise NotImplementedError("It can't support model conversion from {} to {}".format(
+                                 self._src_type, self._dst_type))
 
-      init_net_model, predict_net_model = c2.onnx_graph_to_caffe2_net(self._src_tb_graph._onnx_model)
-      with open(predict_net, 'wb') as f_pre:
-        f_pre.write(predict_net_model.SerializeToString())
-      with open(init_net, 'wb') as f_init:
-        f_init.write(init_net_model.SerializeToString())
-      self._des_tb_graph = c2graph_util.C2Graph(predict_net, "pb", init_net)
+    elif self._dst_type == "tf":
+        raise NotImplementedError("model type {} doesn't supported yet".format(destination_type))
 
     self._des_tb_graph.ConvertNet()
     graph = self._des_tb_graph.GetTBGraph()
