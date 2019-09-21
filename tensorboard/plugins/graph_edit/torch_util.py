@@ -1232,12 +1232,12 @@ def _make_input_data_node(input_tensor, shape_size):
     return data_node
 
 
-def freeze_graph(nn_module, input_tensor):
+def freeze_graph(nn_module, input):
     """ Freeze the module architecture for the pytorch module
 
     Args:
         nn_module: pytorch module
-        input_tensor: a pytorch Tensor
+        input: a pytorch Tensor
 
     Return:
         a node-based tb graph def
@@ -1284,31 +1284,31 @@ def freeze_graph(nn_module, input_tensor):
         __seq__ = 0
         __tb_graph__ = TorchTBGraph.torch_tb_graph
 
-    class TorchConcat(object):
-        def __init__(self, torch_cat):
-            self._torch_cat = torch_cat
+    # class TorchConcat(object):
+    #     def __init__(self, torch_cat):
+    #         self._torch_cat = torch_cat
 
-        def __call__(self, tensors, dim=0, out=None):
-            """ The tensors are a list of TensorHook """
-            tensors = [_tensor._torch_tensor for _tensor in tensors]
-            concat_node = node_def_pb2.NodeDef()
-            concat_node.input.extend([TensorToName.get_tensor_name(_tensor) for _tensor in tensors])
-            concat_node.op = "Concat"
+    #     def __call__(self, tensors, dim=0, out=None):
+    #         """ The tensors are a list of TensorHook """
+    #         tensors = [_tensor._torch_tensor for _tensor in tensors]
+    #         concat_node = node_def_pb2.NodeDef()
+    #         concat_node.input.extend([TensorToName.get_tensor_name(_tensor) for _tensor in tensors])
+    #         concat_node.op = "Concat"
 
-            if out is not None:
-                raise NotImplementedError("You can't provide out parameter to hold result")
-            else:
-                result_tensor = self._torch_cat(tensors, dim=dim)
-                concat_node.name = "{}#{}".format(
-                    "numpy", NumpyWrap.__seq__
-                )
-                TensorToName.add_tensor_name(result_tensor, concat_node.name)
-                __name_to_version__["numpy"] = NumpyWrap.__seq__
-                NumpyWrap.__tb_graph__.node.extend([concat_node])
-                NumpyWrap.__seq__ += 1
-                return TensorHook(result_tensor)
+    #         if out is not None:
+    #             raise NotImplementedError("You can't provide out parameter to hold result")
+    #         else:
+    #             result_tensor = self._torch_cat(tensors, dim=dim)
+    #             concat_node.name = "{}#{}".format(
+    #                 "numpy", NumpyWrap.__seq__
+    #             )
+    #             TensorToName.add_tensor_name(result_tensor, concat_node.name)
+    #             __name_to_version__["numpy"] = NumpyWrap.__seq__
+    #             NumpyWrap.__tb_graph__.node.extend([concat_node])
+    #             NumpyWrap.__seq__ += 1
+    #             return TensorHook(result_tensor)
 
-    torch.cat = TorchConcat(torch.cat)
+    # torch.cat = TorchConcat(torch.cat)
 
     class TorchAbs(object):
         def __init__(self, torch_abs):
@@ -1333,6 +1333,32 @@ def freeze_graph(nn_module, input_tensor):
                 return TensorHook(result_tensor)
 
     torch.abs = TorchAbs(torch.abs)
+
+    class TorchFlatten(object):
+        def __init__(self, torch_flatten):
+            self._torch_flatten = torch_flatten
+
+        def __call__(self, input, start_dim=0, end_dim=-1):
+            if isinstance(input, torch.Tensor):
+                # it has been handled by upper module
+                return self._torch_flatten(input)
+
+            input = input._torch_tensor
+            flatten_node = node_def_pb2.NodeDef()
+            flatten_node.input.extend([TensorToName.get_tensor_name(input)])
+            flatten_node.op = "flatten"
+
+            result_tensor = self._torch_flatten(input, start_dim, end_dim)
+            flatten_node.name = "{}#{}".format(
+                "numpy", NumpyWrap.__seq__
+            )
+            TensorToName.add_tensor_name(result_tensor, flatten_node.name)
+            __name_to_version__["numpy"] = NumpyWrap.__seq__
+            NumpyWrap.__tb_graph__.node.extend([flatten_node])
+            NumpyWrap.__seq__ += 1
+            return TensorHook(result_tensor)
+
+    torch.flatten = TorchFlatten(torch.flatten)
 
     class TorchRelu(object):
         def __init__(self, torch_relu):
@@ -1364,6 +1390,10 @@ def freeze_graph(nn_module, input_tensor):
             self._torch_relu_ = torch_relu_
 
         def __call__(self, input):
+            if isinstance(input, torch.Tensor):
+                # it has been handled by upper module
+                return self._torch_relu_(input)
+
             input = input._torch_tensor
 
             relu_node = node_def_pb2.NodeDef()
@@ -1535,7 +1565,7 @@ def freeze_graph(nn_module, input_tensor):
     F.dropout = TorchDropout(F.dropout)
 
     # add an input data tensor
-    input_tensor = TensorHook(input_tensor)
+    input_tensor = TensorHook(input)
     TensorToName.add_tensor_name(input_tensor._torch_tensor, "data")
     data_node = _make_input_data_node(input_tensor, input_tensor._torch_tensor.size())
     TorchTBGraph.torch_tb_graph.node.extend([data_node])
