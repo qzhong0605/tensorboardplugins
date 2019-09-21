@@ -190,7 +190,7 @@ def tensorboard_js_workspace():
           "https://github.com/KaTex/KaTex/archive/v0.11.0.tar.gz"
       ],
       strip_prefix = "KaTeX-0.11.0",
-      path = "/katex",
+      path = "/katex-js",
       srcs = ["katex.js"],
       extra_build_file_content = "exports_files([\"LICENSE\"])",
   )
