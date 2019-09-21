@@ -127,6 +127,7 @@ tf_web_library(
     ],
     path = "/tf-imports",
     visibility = ["//visibility:public"],
+    deps = ["@com_katex"],
 )
 
 tf_web_library(
