@@ -278,7 +278,7 @@ Polymer({
       }
     }else{
       data = {
-        'destination_path': this.desType,
+        'destination_path': this.desPath,
         'destination_type': destination_type,
       }
     }
