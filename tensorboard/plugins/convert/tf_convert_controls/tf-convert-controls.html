@@ -132,12 +132,15 @@ paper-dropdown-menu {
           </template>
         </paper-menu>
       </paper-dropdown-menu>
-      <div id="srcnotc2" style="display: none">
+      <div id="srcnotc2"  style="display: none">
         <paper-input class="" label="Origin Path" value="{{srcPath}}"></paper-input>
       </div>
       <div id="srcisc2" style="display: none">
         <paper-input class="" label="Predict Net" id="predict_net"></paper-input>
         <paper-input class="" label="Init Net" id="init_net"></paper-input>
+      </div>
+      <div id="srcisonnxortorch"  style="display: none">
+        <paper-input class="" label="Input Size" value="{{inputSize}}"></paper-input>
       </div>
 
       <paper-button raised noink class="full-width-bt" on-click="loadModel">LOAD</paper-button>

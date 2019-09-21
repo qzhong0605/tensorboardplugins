@@ -137,6 +137,7 @@ Polymer({
       type: Object,
     },
     srcPath: String,
+    inputSize: String,
     desPath: String,
     srcType: {
       type: Number,
@@ -228,6 +229,12 @@ Polymer({
       document.getElementById('srcnotc2').style.display = ''
       document.getElementById('srcisc2').style.display = 'none'
     }
+    if(this.srcType == 0 || this.srcType == 3){
+      document.getElementById('srcisonnxortorch').style.display = ''
+    }
+    else{
+      document.getElementById('srcisonnxortorch').style.display = 'none'     
+    }
   },
   _desTypeChanged: function(){
     if(this.desType == 2){
@@ -294,6 +301,10 @@ Polymer({
         'source_path': this.srcPath,
         'source_type': source_type,
       }
+    }
+
+    if(source_type == 'onnx' || source_type == 'torch'){
+      data['input_tensor_size'] = this.inputSize
     }
     
     this.selection = data

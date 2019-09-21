@@ -138,6 +138,7 @@ class ConvertPlugin(base_plugin.TBPlugin):
       self._src_tb_graph = caffe_util.CaffeGraph(self.model_file, "pb")
     elif self._src_type == "onnx":
       self.model_file = request.args.get('source_path')
+      self.input_tensor_size = request.args.get("input_tensor_size")
       self._src_tb_graph = onnx_util.OnnxGraph(self.model_file, "onnx")
     elif self._src_type == "tf":
       self.model_file = request.args.get('source_path')
