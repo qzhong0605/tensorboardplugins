@@ -182,6 +182,18 @@ def tensorboard_js_workspace():
 
   ##############################################################################
   # TensorBoard JavaScript Production Dependencies
+  web_library_external(
+      name = "com_katex",
+      licenses = ["notice"],  # MIT
+      sha256 = "51daf7e93d2503b34c7d71228874233cede82d50cc89a8d72927c9302cdf88eb",
+      urls = [
+          "https://github.com/KaTex/KaTex/archive/v0.11.0.tar.gz"
+      ],
+      strip_prefix = "KaTeX-0.11.0",
+      path = "/katex",
+      srcs = ["katex.js"],
+      extra_build_file_content = "exports_files([\"LICENSE\"])",
+  )
 
   web_library_external(
       name = "com_lodash",
