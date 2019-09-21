@@ -206,6 +206,8 @@ future for loading older images.
         /** @type {{description: string, displayName: string}} */
         tagMetadata: Object,
         imgsrc: String,
+        nameList:Object,
+        channelList:Object,
         channel: {
          type: Number,
         },
@@ -300,9 +302,17 @@ future for loading older images.
         "reload(run, tag)",
         "_updateImageUrl(_currentStep, brightnessAdjustment, contrastPercentage)",
       ],
-      _computeChannel(categoryname){
-        if(categoryname == "conv1_16"){
-          return 16
+      _computeChannel(tensor_name){
+        console.log("*****")
+        console.log(this.nameList,tensor_name);
+        for(var i=0;i<this.nameList.length;i++){
+          var namelist_ = this.nameList[i].split(":")[0];
+          console.log(namelist_);
+          if(tensor_name.search(namelist_)!=-1){
+            console.log("$$$$$$$$$$$$$$$$");
+            console.log(this.channelList[i]);
+            return this.channelList[i]
+          }
         }
       },
       _computeRunColor(run) {
@@ -374,6 +384,18 @@ future for loading older images.
           this.set("_stepIndex", steps.length - 1);
         });
         this.requestManager.request(url).then(updateSteps);
+        const listinfo = Promise.resolve(this.requestManager.request(tf_backend.getRouter().pluginRoute('inference', '/getChannelNum')));
+        const that = this;
+        listinfo.then(function(result) {
+          var tensor_name = result['tensorName'];
+          var channel_num = result['channelNum'];
+          that.set('nameList',tensor_name);
+          that.set('channelList',channel_num);
+          console.log("###########");
+          console.log(that.nameList);
+          console.log(that.tagMetadata.displayName);
+          that.set('channel',that._computeChannel(that.tagMetadata.displayName));
+        });
       },
       _createStepDatum(imageMetadata) {
         let url = tf_backend.getRouter().pluginRoute('images', '/individualImage');
@@ -416,6 +438,7 @@ future for loading older images.
         this.set("_isImageLoading", true);
         img.src = currentStep.url;
         this.set('imgsrc',img.src);
+        //console.log(this.imgsrc);
       },
       _updateImageBoarder(Bottom,Left,Lenth){
         const imgboarder=document.createElement("div");
@@ -429,7 +452,7 @@ future for loading older images.
       },
       _handleTap(e) {
         this.set('isActive',false);
-        this.set('channel',this._computeChannel(this.categoryname));
+        //this.set('channel',this._computeChannel(this.tagMetadata.displayName));
         //this.set('actualSize', !this.actualSize);
         var div = this.$$("#main-image-container");
         var reactObj = div.getBoundingClientRect();

@@ -31,10 +31,8 @@ limitations under the License.
 <link rel="import" href="../tf-runs-selector/tf-runs-selector.html">
 <link rel="import" href="../tf-tensorboard/registry.html">
 <link rel="import" href="../google-chart/google-chart-dist.html">
-<link rel="import" href="../google-chart/google-chart.html">
 <link rel="import" href="tf-inference-loader.html">
 <link rel="import" href="tf-inference-info.html">
-<link rel="import" href="animation.html">
 <link rel="import" href="../paper-tabs/paper-tabs.html">
 
 <!--
@@ -131,22 +129,29 @@ TensorFlow run.
           </div>
           <hr class="hr">
         </template>
+          <template is="dom-if" if="[[!_isDone]]">
+            <div id="progress-bar">
+              <div id="progress-msg">Loading New Session</div>
+              <paper-progress value="[[_loadingPerc]]"></paper-progress>
+            </div>
+          </template>
       </div>
     </div>
   </div>
 </div>
       <div class="center" id="center">
         <paper-tabs id="page-tab-bar" selected="{{_selectedPage}}" no-bar noink scrollable>
+          <!--<paper-tab>Sessions View</paper-tab-->
           <paper-tab>Feature View</paper-tab>
           <paper-tab>Data Edit</paper-tab>
         </paper-tabs>
-        <div id="page0" style="display: none">
+        <div id="page0">
           <div class="center-content" id="channelimage">
             <template is="dom-if" if="[[!_isDone]]">
               <div id="progress-bar">
-                <div id="progress-msg">demo</div>
-                  <paper-progress value="40"></paper-progress>
-                </div>
+                <div id="progress-msg">Loading Feature Map</div>
+                <paper-progress value="[[_loadingPerc]]"></paper-progress>
+              </div>
             </template>
             <template is="dom-if" if="[[_isDone]]">
               <template is="dom-if" if="[[_dataNotFound]]">
@@ -205,10 +210,9 @@ TensorFlow run.
               </template>
             </template>
           </div>
-          
-          <!-- <div class="resizer" id="resizer">
+          <div class="resizer" id="resizer">
             <iron-icon icon="av:pause" class="resize-icon"></iron-icon>
-          </div> -->
+          </div> 
           <div class="center-content" id = "channelinfo">
             <template is="dom-if" if="[[_dataNotFound]]">
               <div class="no-data-warning">
@@ -250,21 +254,49 @@ TensorFlow run.
           </div>
         </div>
 <!-- TODO: -->
-        <div id="page1">
+        <div id="page2" style="display:none;">
+          <!-- model, session, show data, batch size, input size, accuracy  -->
+            <div class="flex-horizontal" style="margin-bottom: 10px;">
+              <div class="table-title" style="margin-left: 20px;">show data</div>
+              <div class="table-title">model</div>
+              <div class="table-title">session</div>
+              <div class="table-title">batch size</div>
+              <div class="table-title">input size</div>
+              <div class="table-title" style="border-right: 0px solid;">accuracy</div>
+            </div>
+          <template is="dom-repeat" items="{{records}}">
+            <div class="flex-horizontal" style="margin-bottom: 5px;" id="[[item.id]]">
+              <paper-checkbox class="checkbox" on-click="selectRecord"></paper-checkbox>
+              <div class="table-content" id="model">[[item.model]]</div>
+              <div class="table-content" id="session">[[item.session]]</div>
+              <div class="table-content" id="batchsize">[[item.batch_size]]</div>
+              <div class="table-content" id="inputsize">[[item.input_size]]</div>
+              <div class="table-content" id="accuracy">[[item.accuracy]]</div>
+            </div>
+            <hr class="hr">
+          </template>
+            <template is="dom-if" if="[[!_isDone]]">
+              <div id="progress-bar">
+                <div id="progress-msg">Loading New Session</div>
+                  <paper-progress value="[[_loadingPerc]]"></paper-progress>
+              </div>
+            </template>
+        </div>
+        <div id="page1" style="display: none">
           <div class="flex-horizontal with-border" style="height: 50%">
             <div class="data-edit">
               <form is="iron-form" id="form" method="post">
                 <div class="flex-horizontal">
-                  <paper-input label="Data Point:" id="" always-float-label></paper-input>
+                  <paper-input label="" id="dataBatch" always-float-label></paper-input>
                   <iron-icon icon="icons:remove" class="separator"></iron-icon>
-                  <paper-input label="" id="" always-float-label></paper-input>
+                  <paper-input label="" id="dataX" always-float-label></paper-input>
                   <iron-icon icon="icons:remove" class="separator"></iron-icon>
-                  <paper-input label="" id="" always-float-label></paper-input>
+                  <paper-input label="" id="dataY" always-float-label></paper-input>
                   <iron-icon icon="icons:remove" class="separator"></iron-icon>
-                  <paper-input label="" id="" always-float-label></paper-input>
+                  <paper-input label="" id="dataC" always-float-label></paper-input>
                 </div>
-                <paper-input label="Value" id="" always-float-label></paper-input>
-                <paper-button raised class="" on-click="" style="width: 100%;margin-left: 0 !important;margin-top: 20px;">EDIT</paper-button>
+                <paper-input label="Value" id="editDataValue" always-float-label></paper-input>
+                <paper-button raised class="" on-click="edit" style="width: 100%;margin-left: 0 !important;margin-top: 20px;">EDIT</paper-button>
               </form>
             </div>
             <div class="sep"></div>
@@ -281,16 +313,16 @@ TensorFlow run.
                   <div class="log-title" style="width: 120px">old value</div>
                   <div class="log-title" style="border-right: 0px solid;width: 120px">new value</div>
               </div>
-              <template is="dom-repeat" items="{{log}}">
+              <template is="dom-repeat" items="{{_log}}">
                 <div class="flex-horizontal" style="margin-bottom: 5px;">
                   <div class="log-content" style="width: 200px;" id="model">[[item.time]]</div>
-                  <div class="log-content" style="width: 60px;" id="model">[[item.1]]</div>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.batch]]</div>
                   <iron-icon icon="icons:remove" class="separator2"></iron-icon>
-                  <div class="log-content" style="width: 60px;" id="model">[[item.2]]</div>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.x]]</div>
                   <iron-icon icon="icons:remove" class="separator2"></iron-icon>
-                  <div class="log-content" style="width: 60px;" id="model">[[item.3]]</div>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.y]]</div>
                   <iron-icon icon="icons:remove" class="separator2"></iron-icon>
-                  <div class="log-content" style="width: 60px;" id="model">[[item.4]]</div>
+                  <div class="log-content" style="width: 60px;" id="model">[[item.c]]</div>
                   <div class="log-content" style="width: 120px;" id="session">[[item.old]]</div>
                   <div class="log-content" style="width: 120px;" id="accuracy">[[item.new]]</div>
                 </div>
@@ -298,7 +330,7 @@ TensorFlow run.
               </template>
             </div>
           </div>
-          <paper-button raised class="" on-click="" style="width: 100%;margin-left: 0 !important;margin-top: 10px;">UPDATE</paper-button>
+          <paper-button raised class="" on-click="submitEdit" style="width: 100%;margin-left: 0 !important;margin-top: 10px;">UPDATE</paper-button>
         </div>
       </div>
     </tf-dashboard-layout>
@@ -342,14 +374,14 @@ TensorFlow run.
         overflow:auto;
       }
       .hr {
-        width: 223px;
-        margin-left: 0px;
+        width: 725px;
+        margin-left: 20px;
         background-color: #bbbbbb;
         height: 1px;
         border: none
       }
       .hr2 {
-        width: 713px;
+        width: 223px;
         margin-left: 0px;
         background-color: #bbbbbb;
         height: 1px;
@@ -369,20 +401,23 @@ TensorFlow run.
         margin-right: 10px;
         height: 100%;
       }
+      #page0 {
+        height:100%;
+      }
       .checkbox {
         margin-top: 0px;
         margin-left: 10px;
         margin-right: 4px;
       }
       .table-content {
-        font-size: 14px;
+        width: 14px;
         margin-left: 1px;
         white-space:nowrap;
         overflow-x:auto;
         text-align: center;
       }
       .table-title {
-        font-size: 14px;
+        width: 14px;
         height: 20px;
         border-bottom: 1px solid #bbbbbb;
         border-right: 1px solid #bbbbbb;
@@ -402,7 +437,6 @@ TensorFlow run.
         border-right: 1px solid #bbbbbb;
         text-align: center;
       }
-      
       .separator {
         margin-top: 30px;
       }
@@ -419,7 +453,7 @@ TensorFlow run.
       }
       .resize-icon {
         display: table-cell;
-        vertical-align: middle;
+        justify-content: center;
         color: grey;
         width: 10px;
         height: 10px;
@@ -428,7 +462,7 @@ TensorFlow run.
       }
       .resizeinfo-icon {
         display: table-cell;
-        justify-content: center;
+        vertical-align: middle;
         color: grey;
         width: 10px;
         height: 10px;
@@ -451,14 +485,14 @@ TensorFlow run.
         display: flex;
         float:center;
         height: 100%;
-        flex-direction:column;
+        flex-direction:row;
       }
       #channelinfo{
         display:none;
         margin-left: 3px;
       }
       #infoImg{
-        height: 40%;
+        height: 100%;
         display: block;
         margin-bottom: 3px;
         border:1px solid #999;
@@ -486,24 +520,21 @@ TensorFlow run.
         height: 100%;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
-      }
-      .center {
-        overflow: hidden;
+        overflow: scroll;
       }
       .resizer {
-        display: none;
+        display: table;
+        width: 100%;
+        height: 8px;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        cursor: pointer;
+      }
+      .resizerinfo {
         height: 100%;
         width: 8px;
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
-        cursor: pointer;
-      }
-      .resizerinfo {
-        height: 8px;
-        width: 100%;
-        border-top: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
         cursor: pointer;
       }
       .allcontrols {
@@ -595,17 +626,13 @@ TensorFlow run.
         },
         records:{
           type: Array,
-          value: [{id:1,model:'onnx',session:'1',batch_size:'1024',input_size:'1024',accuracy:'0.1'},
-          {id:2,model:'onnx',session:'2',batch_size:'1024',input_size:'1024',accuracy:'0.1'},
-          {id:3,model:'onnx',session:'3',batch_size:'1024',input_size:'1024',accuracy:'0.1'}],
         },
-        log:{
+        _log:{
           type: Array,
-          value: [{1:1,2:2,3:3,4:4,old:8,new:10,time:'2019-09-14 16:57:58.445542'}]
         },
         _selectedPage:{
           type: Number,
-          value: 1,
+          value: 0,
           observer: '_changePage'
         },
         _selectedModel: {
@@ -656,6 +683,9 @@ TensorFlow run.
           type: Number,
           value: 100,
         },
+        _loadingPerc:{
+          type: Number,
+        },
         _tagFilter: String,
         _brightnessIsDefault: {
           type: Boolean,
@@ -690,7 +720,7 @@ TensorFlow run.
         modelType: {
           type: String,
           value: tf_storage.getStringInitializer(
-            'modelType', {defaultValue: 'ckpt'}),
+            'modelType', {defaultValue: 'onnx'}),
           observer: 'modelTypeChanged_',
           notify: true,
         },
@@ -709,36 +739,77 @@ TensorFlow run.
         this.reload();
       },*/
       ready: function() {
+        this.set('_selectedRuns',[])
         this.reload();
         if(this._dataNotFound){
           this.set('_isDone',false);
-          this._clearTags();
+          //this._clearTags();
           if(this._isDone){
             //this.$.form.submit();
           }
         }
         this.set('_isDone',true);
-        const resizer = d3.select(this.$.separatorhr)
-        var starty
-        resizer.call(d3.drag()
-          .on('start',function(){
-            starty = d3.event.y
-          })
-          .on('end',function(){
-            var endy = d3.event.y
-            console.info(starty, endy)
-            document.getElementById('side-top').style.height = document.getElementById('side-top').clientHeight + endy-starty + 'px'
-            document.getElementById('side-bottom').style.height = document.getElementById('side-bottom').clientHeight - endy+starty + 'px'
-          })
+         const img = d3.select(this.$.channelimage);
+         const infoImg = d3.select(this.$.infoImg);
+         const infoDistribution = d3.select(this.$.infoDistribution);
+         const info = d3.select(this.$.channelinfo);
+         const resizer = d3.select(this.$.resizer).classed("dragging", true);
+         //  const resizerinfo = d3.select(this.$.resizerinfo);
+         //  console.log(resizerinfo);
+         const self = this;
+         const dragResize = d3.drag().on('drag', () => {
+           // Determine resizer position relative to width of the tool.
+           const x = d3.mouse(this.parentNode.parentNode)[1];
+           const width = this.parentNode.parentNode.offsetWidth;
+           let perc = x / width * 100;
+           console.log(perc)
+           // Side panel will be a minimum of 40% width.
+           perc = Math.max(Math.min(perc,70), 30);
 
-        )
+           img.style('height', (perc) + '%');
+           info.style('height', (100-perc) + '%');
+           infoImg.style('height', (perc) + '%');
+         }).on("end", () => {resizer.classed("dragging", false);});
+        // const dragResizeInfo = d3.drag().on('drag', () => {
+        //   console.log("^^^^^^^^^^^^^^^^^")
+        //   // Determine resizer position relative to width of the tool.
+        //   const y = d3.mouse(this.parentNode.parentNode)[1];
+        //   const height = this.parentNode.parentNode.offsetHeight;
+        //   let perc = y / height * 100;
+        //   console.log(perc)
+        //   // Side panel will be a minimum of 40% width.
+        //   perc = Math.max(Math.min(perc,70), 30);
+
+        //   infoImg.style('height', (perc) + '%');
+        //   infoDistribution.style('height', (100-perc) + '%');
+        // }).on("end", () => {resizer.classed("dragging", true);});
+         resizer.call(dragResize);
+        //   resizerinfo.call(dragResizeInfo);
       },
       reload() {
         this._fetchTags().then(() => {
           this._reloadImages();
         });
+        console.log(this.records);
+        console.log(this._log);
       },
-
+      _loadingProcess(){
+        if(false){
+          this.set('_loadingPerc',0)
+        }
+        else{
+          const that = this;
+          var perc = 0;
+          var process = setInterval(function(){
+            perc=perc+1;
+            that.set('_loadingPerc',perc+'%');
+            if(perc==150){
+              clearInterval(process);
+              that.set('_loadingPerc',0);
+            }
+          },100);
+        }
+      },
       _revealInfo(e){
         const img = d3.select(this.$.channelimage);
         const info = d3.select(this.$.channelinfo);
@@ -750,11 +821,11 @@ TensorFlow run.
         if(!this._isRevealed){
           this._isRevealed = true;
           img.style('width', 100 + '%');
-          img.style('height', 50 + '%');
+          img.style('height', 60 + '%');
           info.style('width', 100 + '%');
-          info.style('height', 50 + '%');
-          infoImg.style('height', 30 + '%');
-          infoDistribution.style('height', 70 + '%');
+          info.style('height', 40 + '%');
+          //infoImg.style('height', 30 + '%');
+          //infoDistribution.style('height', 70 + '%');
           info.style('display', "block");
           resizer.style('display',"table");
           resizerinfo.style('display',"table");
@@ -770,6 +841,7 @@ TensorFlow run.
         
         this.reload();
         console.log(this._isRevealed);
+        console.log(that.records);
       },
       _hideInfo(e){
         const img = d3.select(this.$.channelimage);
@@ -779,7 +851,7 @@ TensorFlow run.
         const loader = this.$.channelloader
         if(this._isRevealed){
           this._isRevealed = false;
-          img.style('width', 100 + '%');
+          img.style('height', 100 + '%');
           info.style('display', "none");
           resizer.style('display',"none");
           resizerinfo.style('display',"none");
@@ -869,48 +941,129 @@ TensorFlow run.
         return runToTagInfo[run][tag];
       },
       modelTypeChanged_: tf_storage.getStringObserver(
-        'modelType', {defaultValue: 'ckpt'}),
-
+        'modelType', {defaultValue: 'onnx'}),
+      edit:function(){
+        var list = this._log;
+        var tmp = new Array();
+        console.log(list);
+        if(list==null){
+          list = [{batch: parseInt(this.$.dataBatch.value), x: parseInt(this.$.dataX.value), y: parseInt(this.$.dataY.value), c: parseInt(this.$.dataC.value), old: 0, new: this.$.editDataValue.value,time: '2019-09-14 16:57:58.445542'}];
+          tmp = [].concat(list);
+        }
+        else{
+          list.push({batch: parseInt(this.$.dataBatch.value), x: parseInt(this.$.dataX.value), y: parseInt(this.$.dataY.value), c: parseInt(this.$.dataC.value), old: 0, new: this.$.editDataValue.value,time: '2019-09-14 16:57:58.445542'});
+          //console.log(list);
+          tmp = [].concat(list);
+        }
+        //console.log(tmp);
+        this.set('_log',tmp);
+      },
       submitForm: function() {
         var modelpath = this.$.modelpath.value;
         var data = this.$.datapath.value;
         var batch = this.$.batchsize.value;
         var modeltype = this.modelType;
+        var tmp = new Array();
+        if(this.records==null){
+          var list = new Array();
+        }
+        else{
+          var list = this.records;
+        }
         console.log(this._modelTypes[this._selectedModel]);
         if(modelpath != "" && data != ""){ // whatever input check                   
           const url = tf_backend.getRouter().pluginRoute('inference', '/distribution');
           const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'batchsize':batch,'modeltype':modeltype}));
           const that = this;
           a.then(function(result) {
-            var i = result['ifDone'];
-            console.log(that._isDone);
-          });
-          this.set('_dataNotFound',true);
+            console.log(result['accuracy']);
+            list.push({id:list.length+1,model:result['model'], session:"feature", batch_size:result['batch_size'], input_size:result['input_size'],accuracy:result['accuracy']});
+          tmp = [].concat(list); 
+          that.set('records',tmp);
+          that.set('_isDone',true);
+          });//then
+          console.log(list,this.records);
+          this.set('_dataNotFound',false);
           this.set('_isDone',false);
+          this._loadingProcess();
+          console.log(this._isDone);
           alert("start!")
+        }
+      },
+      submitEdit: function() {
+        var modelpath = this.$.modelpath.value;
+        var data = this.$.datapath.value;
+        var batch = this.$.batchsize.value;
+        var modeltype = this.modelType;
+        var editlog = JSON.stringify(this._log);
+        console.log(typeof editlog);
+        var tmp = new Array();
+        if(this.records==null){
+          var list = new Array();
+        }
+        else{
+          var list = this.records;
+        }
+        //console.log(this._modelTypes[this._selectedModel]);
+        if(modelpath != "" && data != ""){ // whatever input check                   
+          const url = tf_backend.getRouter().pluginRoute('inference', '/distributionEdit');
+          const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'batchsize':batch,'modeltype':modeltype,'edit':editlog}));
+          const that = this;
+          a.then(function(result) {
+            console.log(result['accuracy']);
+          list.push({id:list.length+1, model:result['model'],session:"feature", batch_size:result['batch_size'], input_size:result['input_size'], accuracy:result['accuracy']});
+          tmp = [].concat(list); 
+          that.set('records',tmp);
+          that.set('_isDone',true);
+          });//then
+          //console.log(list,this.records);
+          this.set('_dataNotFound',false);
+          this.set('_isDone',false);
+          this._loadingProcess();
+          //alert("start!")
         }
       },
       _changePage: function(){
         if(document.getElementById('page0')){
           if(this._selectedPage == 0){
-            document.getElementById('page0').style.display = ''
             document.getElementById('page1').style.display = 'none'
+            document.getElementById('page0').style.display = ''
+            document.getElementById('page2').style.display = 'none'
           }
           if(this._selectedPage == 1){
-            document.getElementById('page0').style.display = 'none'
             document.getElementById('page1').style.display = ''
+            document.getElementById('page0').style.display = 'none'
+            document.getElementById('page2').style.display = 'none'
+          }
+          if(this._selectedPage == 2){
+            document.getElementById('page0').style.display = 'none'
+            document.getElementById('page1').style.display = 'none'
+            document.getElementById('page2').style.display = ''
           }
         }
       },
       selectRecord: function(e){
         var divelement = e.path[2]
-        if(this.postDivElement!=undefined){
+        if(this.postDivElement!=undefined){//select others
           if(this.postDivElement != divelement.id){
-            document.getElementById(this.postDivElement).getElementsByClassName('checkbox')[0].checked = false
+document.getElementById(this.postDivElement).getElementsByClassName('checkbox')[0].checked = false;
+            this.postDivElement = divelement.id
+          }
+          else{//cancel
+            this.set('postDivElement',null);
           }
         }
-
-        this.postDivElement = divelement.id
+        else{//select
+          this.postDivElement = divelement.id;
+        }
+        if(this.postDivElement!=null){
+          this.set('_selectedRuns',this.records[this.postDivElement-1]['session'])
+        }
+        else{
+          this.set('_selectedRuns',[]);
+          this._hideInfo(e);
+        }
+        console.log(this._selectedRuns)
       }
 });
 </script>
