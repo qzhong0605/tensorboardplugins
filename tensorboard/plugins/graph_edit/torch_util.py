@@ -472,6 +472,9 @@ class AvgPool2dCustom(modules.AvgPool2d):
         """ Input is a tensor input
         """
         result_tensor = super(AvgPool2dCustom, self).forward(input._torch_tensor)
+        # result_tensor = F.avg_pool2d(input, self.kernel_size, self.stride,
+        #     self.padding, self.ceil_mode, self.count_include_pad, self.divisor_override
+        # )
 
         node_name = _update_name_version(self)
         avgpool2d_node = _make_avgpoolnd_node(
@@ -1347,6 +1350,8 @@ def freeze_graph(nn_module, input):
             flatten_node = node_def_pb2.NodeDef()
             flatten_node.input.extend([TensorToName.get_tensor_name(input)])
             flatten_node.op = "flatten"
+            _make_int_attr_value(flatten_node, "start_dim", start_dim)
+            _make_int_attr_value(flatten_node, "end_dim", end_dim)
 
             result_tensor = self._torch_flatten(input, start_dim, end_dim)
             flatten_node.name = "{}#{}".format(
@@ -1359,6 +1364,31 @@ def freeze_graph(nn_module, input):
             return TensorHook(result_tensor)
 
     torch.flatten = TorchFlatten(torch.flatten)
+
+    class TorchCat(object):
+        def __init__(self, torch_cat):
+            self._torch_cat = torch_cat
+
+        def __call__(self, tensors, dim=0):
+            input_tensors = [_tensor._torch_tensor for _tensor in tensors]
+
+            cat_node = node_def_pb2.NodeDef()
+            cat_node.input.extend([TensorToName.get_tensor_name(input) for input in input_tensors])
+            cat_node.op = "Concat"
+            _make_int_attr_value(cat_node, "dim", dim)
+
+            result_tensor = self._torch_cat(input_tensors, dim)
+            cat_node.name = "{}#{}".format(
+                "numpy", NumpyWrap.__seq__
+            )
+
+            TensorToName.add_tensor_name(result_tensor, cat_node.name)
+            __name_to_version__["numpy"] = NumpyWrap.__seq__
+            NumpyWrap.__tb_graph__.node.extend([cat_node])
+            NumpyWrap.__seq__ += 1
+            return TensorHook(result_tensor)
+
+    torch.cat = TorchCat(torch.cat)
 
     class TorchRelu(object):
         def __init__(self, torch_relu):
@@ -1501,18 +1531,21 @@ def freeze_graph(nn_module, input):
             self.torch_avgpool2d = torch_avgpool2d
 
         def __call__(self, input, kernel_size, stride=None,
-                     padding=0, ceil_mode=False, count_include_pad=True):
+                     padding=0, ceil_mode=False, count_include_pad=True,
+                     divisor_override=None):
             if type(input) == torch.Tensor:
                 # it has been handled by upper module-based wrapper
                 return self.torch_avgpool2d(
-                    input, kernel_size, stride, padding, ceil_mode, count_include_pad
+                    input, kernel_size, stride, padding, ceil_mode,
+                    count_include_pad, divisor_override
                 )
             else:
                 # it's called from the functional first
                 input = input._torch_tensor
 
                 result_tensor = self.torch_avgpool2d(
-                    input, kernel_size, stride, padding, ceil_mode, count_include_pad
+                    input, kernel_size, stride, padding, ceil_mode,
+                    count_include_pad, divisor_override
                 )
                 node_name = "{}#{}".format("numpy", NumpyWrap.__seq__)
                 avgpool2d_node = _make_avgpoolnd_node(
