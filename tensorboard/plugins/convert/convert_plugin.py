@@ -46,6 +46,7 @@ from tensorboard.plugins.graph_edit import onnx_write_util
 from torchvision.models.densenet import densenet121, densenet169, densenet201, densenet161
 from torchvision.models.vgg import vgg16, vgg19
 from torchvision.models.resnet import resnet101, resnet152, resnet18, resnet34, resnet50
+from torchvision.models.googlenet import googlenet
 logger = tb_logging.get_logger()
 
 _PLUGIN_PREFIX_ROUTE = 'convert'
@@ -123,7 +124,8 @@ class ConvertPlugin(base_plugin.TBPlugin):
       if not os.path.exists(self.model_file):
         # send a response to frontend and report file not existing
         pass
-      self._src_tb_graph = torch_util.freeze_graph(resnet18(pretrained=True), torch.randn(1, 3, 224, 224))
+      self._src_tb_graph = torch_util.freeze_graph(googlenet(pretrained=True, transform_input=False),
+                                                   torch.randn(1, 3, 224, 224))
     elif self._src_type == "caffe2":
       self.predict_net = request.args.get("predict_net")
       self.init_net = request.args.get("init_net")

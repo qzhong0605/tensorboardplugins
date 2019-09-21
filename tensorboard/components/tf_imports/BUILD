@@ -127,6 +127,15 @@ tf_web_library(
     ],
     path = "/tf-imports",
     visibility = ["//visibility:public"],
+)
+
+tf_web_library(
+    name = "katex-js",
+    srcs = [
+        "katex-js.html",
+    ],
+    path = "/tf-imports",
+    visibility = ["//visibility:public"],
     deps = ["@com_katex"],
 )
 
