@@ -212,6 +212,9 @@ class ConvertPlugin(base_plugin.TBPlugin):
         # TODO: choose input_net
         tensor_size_list = self.input_tensor_size.split(',')
         logger.warn(destination_path)
+        import ipdb; ipdb.set_trace()
+        # resolve all overloaded symbols
+        torch_util.leave_symbol_ctx()
         x = torch.randn(tuple(map(int, tensor_size_list)))
         if self.model_file in ['inception_v3', 'googlenet']:
           model = globals().get(self.model_file)(pretrained=True, aux_logits=False ,transform_input=False)
