@@ -1674,6 +1674,8 @@ def enter_symbol_ctx():
 
             dropout_node = node_def_pb2.NodeDef()
             dropout_node.input.extend([TensorToName.get_tensor_name(input)])
+            _make_float_attr_value(dropout_node, "p", p)
+            _make_bool_attr_value(dropout_node, "inplace", inplace)
             result_tensor = self.torch_dropout(input, p=p, training=training, inplace=inplace)
 
             dropout_node.op = "Dropout"
