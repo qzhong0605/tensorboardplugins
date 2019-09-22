@@ -319,12 +319,15 @@ namespace tf.debug.controls {
         var file_type = (<HTMLInputElement>document.getElementById('fileType')).value;
         var predict_net = (<HTMLInputElement>document.getElementById('predictNet')).value;
         var init_net = (<HTMLInputElement>document.getElementById('initNet')).value;
+        var inputTensorSize = (<HTMLInputElement>document.getElementById('inputTensorSize')).value;
         params.set('predict_net', predict_net);
         params.set('init_net', init_net);
         params.set('file_type', file_type);
+        params.set('input_tensor_size', inputTensorSize);
         loadparams['predict_net'] = predict_net
         loadparams['init_net'] = init_net
         loadparams['file_type'] = file_type
+        loadparams['input_tensor_size'] = inputTensorSize
       }
       else{
         if(this._srcMode == 3){

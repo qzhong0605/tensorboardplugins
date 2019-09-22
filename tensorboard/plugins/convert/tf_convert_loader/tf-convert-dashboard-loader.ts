@@ -88,12 +88,13 @@ Polymer({
       params.set('source_type', this.selection.source_type);
       params.set('predict_net', this.selection.predict_net);
       params.set('init_net', this.selection.init_net);
+      params.set('input_tensor_size', this.selection.input_tensor_size)
     }
     else{
       params.set('source_path', this.selection.source_path);
       params.set('source_type', this.selection.source_type);
     }
-    if(this.selection.source_type == 'onnx' || this.selection.source_type == 'torch'){
+    if(this.selection.source_type == 'torch'){
       params.set('input_tensor_size', this.selection.input_tensor_size)
     }
     const graphPath =

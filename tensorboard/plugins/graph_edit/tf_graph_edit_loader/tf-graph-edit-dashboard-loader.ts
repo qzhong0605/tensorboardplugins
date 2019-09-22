@@ -125,6 +125,7 @@ Polymer({
       params.set('file_type', loadparams.fileType);
       params.set('predict_net',loadparams.predictNet)
       params.set('init_net',loadparams.initNet)
+      params.set('input_tensor_size', loadparams.inputTensorSize);
     }
     else{
       if(loadparams.modelType == 'torch'){

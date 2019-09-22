@@ -229,11 +229,11 @@ Polymer({
       document.getElementById('srcnotc2').style.display = ''
       document.getElementById('srcisc2').style.display = 'none'
     }
-    if(this.srcType == 0 || this.srcType == 3){
-      document.getElementById('srcisonnxortorch').style.display = ''
+    if(this.srcType == 2 || this.srcType == 3){
+      document.getElementById('srcisc2ortorch').style.display = ''
     }
     else{
-      document.getElementById('srcisonnxortorch').style.display = 'none'     
+      document.getElementById('srcisc2ortorch').style.display = 'none'     
     }
   },
   _desTypeChanged: function(){
@@ -294,6 +294,7 @@ Polymer({
         'predict_net': (<HTMLInputElement>document.getElementById('predict_net')).value,
         'init_net': (<HTMLInputElement>document.getElementById('init_net')).value,
         'source_type': source_type,
+        'input_tensor_size': this.inputSize
       }
     }
     else{
@@ -303,7 +304,7 @@ Polymer({
       }
     }
 
-    if(source_type == 'onnx' || source_type == 'torch'){
+    if(source_type == 'torch'){
       data['input_tensor_size'] = this.inputSize
     }
     
