@@ -1265,6 +1265,7 @@ class TensorSymbol(object):
     def resolveAll(cls):
         for _symbol in cls.__symbol_list__:
             _symbol.resolveSymbol()
+        cls.__symbol_list__.clear()
 
 ###############################################################################
 #
@@ -1350,51 +1351,11 @@ class TorchDropoutSymbol(SymbolResolve):
     def resolveSymbol(self):
         F.dropout = self.torch_func
 
+def leave_symbol_ctx():
+    """ restore all the origial torch tensor symbol """
+    TensorSymbol.resolveAll()
 
-def freeze_graph(nn_module, input):
-    """ Freeze the module architecture for the pytorch module
-
-    Args:
-        nn_module: pytorch module
-        input: a pytorch Tensor
-
-    Return:
-        a node-based tb graph def
-    """
-
-    def __build_modules_internal(module, tb_graph, prefix):
-        for name, _module in module.named_children():
-            if _module.__class__.__name__ in __class_modules__:
-                custom_class = __module_class__[_module.__class__.__name__]
-                new_custom_module = custom_class(_module, tb_graph)
-                ModuleToName.add_module_name(new_custom_module, "{}/{}".format(prefix, name))
-                setattr(module, name, new_custom_module)
-            else:
-                __build_modules_internal(_module, tb_graph,
-                                         "{}/{}".format(prefix, name))
-
-    def _build_modules(module, tb_graph):
-        for name, _module in module.named_children():
-            if _module.__class__.__name__ in __class_modules__:
-                custom_class = __module_class__[_module.__class__.__name__]
-                new_custom_module = custom_class(_module, tb_graph)
-                ModuleToName.add_module_name(new_custom_module, name)
-                setattr(module, name, new_custom_module)
-            else:
-                __build_modules_internal(_module, tb_graph, name)
-
-    class TBModule(object):
-        def __init__(self, nn_module, tb_graph):
-            self.nn_module = nn_module
-            self.tb_graph = tb_graph
-
-        def build_custom_module(self):
-            _build_modules(self.nn_module, self.tb_graph)
-
-        def __call__(self, input_tensor):
-            self.nn_module(input_tensor)
-
-
+def enter_symbol_ctx():
     # In order to build tensorboard graph with all python, we need to handle
     # the numpy interfaces for torch. We replace all the torch numpy symbol
     # with the wrap function
@@ -1605,8 +1566,10 @@ def freeze_graph(nn_module, input):
             TensorSymbol.appendSymbol(TorchAdaptiveAvgPool2dSymbol(torch_adaptive_avg_pool2d))
 
         def __call__(self, input, output_size):
-            input = input._torch_tensor
+            if isinstance(input, torch.Tensor):
+                return F.adaptive_avg_pool2d(input, output_size)
 
+            input = input._torch_tensor
             adap_avgpool2d_node = node_def_pb2.NodeDef()
             adap_avgpool2d_node.input.extend([TensorToName.get_tensor_name(input)])
             adap_avgpool2d_node.op = "AdaptiveAvgPool2d"
@@ -1734,6 +1697,53 @@ def freeze_graph(nn_module, input):
 
     F.dropout = TorchDropout(F.dropout)
 
+
+def freeze_graph(nn_module, input):
+    """ Freeze the module architecture for the pytorch module
+
+    Args:
+        nn_module: pytorch module
+        input: a pytorch Tensor
+
+    Return:
+        a node-based tb graph def
+    """
+
+    def __build_modules_internal(module, tb_graph, prefix):
+        for name, _module in module.named_children():
+            if _module.__class__.__name__ in __class_modules__:
+                custom_class = __module_class__[_module.__class__.__name__]
+                new_custom_module = custom_class(_module, tb_graph)
+                ModuleToName.add_module_name(new_custom_module, "{}/{}".format(prefix, name))
+                setattr(module, name, new_custom_module)
+            else:
+                __build_modules_internal(_module, tb_graph,
+                                         "{}/{}".format(prefix, name))
+
+    def _build_modules(module, tb_graph):
+        for name, _module in module.named_children():
+            if _module.__class__.__name__ in __class_modules__:
+                custom_class = __module_class__[_module.__class__.__name__]
+                new_custom_module = custom_class(_module, tb_graph)
+                ModuleToName.add_module_name(new_custom_module, name)
+                setattr(module, name, new_custom_module)
+            else:
+                __build_modules_internal(_module, tb_graph, name)
+
+    class TBModule(object):
+        def __init__(self, nn_module, tb_graph):
+            self.nn_module = nn_module
+            self.tb_graph = tb_graph
+
+        def build_custom_module(self):
+            _build_modules(self.nn_module, self.tb_graph)
+
+        def __call__(self, input_tensor):
+            self.nn_module(input_tensor)
+
+    # overload the tensor symbols
+    enter_symbol_ctx()
+
     # add an input data tensor
     input_tensor = TensorHook(input)
     TensorToName.add_tensor_name(input_tensor._torch_tensor, "data")
@@ -1744,8 +1754,7 @@ def freeze_graph(nn_module, input):
     tb_module.build_custom_module()
     tb_module(input_tensor)
 
-    return TorchTBGraph.torch_tb_graph
+    # leave the context containing overloaded tensor symbols
+    leave_symbol_ctx()
 
-def leave_symbol_ctx():
-    """ restore all the origial torch tensor symbol """
-    TensorSymbol.resolveAll()
+    return TorchTBGraph.torch_tb_graph
