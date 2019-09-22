@@ -1741,6 +1741,9 @@ def freeze_graph(nn_module, input):
         def __call__(self, input_tensor):
             self.nn_module(input_tensor)
 
+    # cleanup the tb graph in case of last loaded tb graph
+    TorchTBGraph.torch_tb_graph.Clear()
+
     # overload the tensor symbols
     enter_symbol_ctx()
 
