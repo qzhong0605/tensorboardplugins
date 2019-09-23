@@ -78,8 +78,8 @@ by default. The user can select a different run from a dropdown menu.
   <div class="sidebar">
     <tf-convert-controls
           id="controls"
-          graph-hierarchy="{{_graphHierarchy}}"
-          graph="{{_graph}}"
+          graph-hierarchy="{{_selectedGraphHierarchy}}"
+          graph="{{_graphStruct}}"
           color-by-params="[[_colorByParams]]"
           stats="[[_stats]]"
           color-by="{{_colorBy}}"
@@ -152,6 +152,12 @@ paper-dialog {
 Polymer({
   is: 'tf-convert-dashboard',
   properties: {
+    _graphStruct: {
+      type: Object,
+    },
+    _selectedGraphHierarchy:{
+      type: Object,
+    },
     /**
      * @type {!Array<!RunItem>}
      */
@@ -164,8 +170,8 @@ Polymer({
       observer: '_selectedNodeTarChanged'
     },
     _selectedNode: {
-    type: String,
-    value:'',
+      type: String,
+      value:'',
     },
     _selectedGraph: String,
     _renderHierarchy: {type: Object, observer: '_renderHierarchyChanged'},
@@ -267,11 +273,15 @@ Polymer({
   _selectedNodeSrcChanged: function(){
     this._selectedNode = this._selectedNodeSrc
     this._selectedGraph = 'SOURCE'
+    this._selectedGraphHierarchy = this._graphHierarchy
+    this._graphStruct = this._graph
   },
 
   _selectedNodeTarChanged: function(){
     this._selectedNode = this._selectedNodeTar
     this._selectedGraph = 'DESTINATION'
+    this._selectedGraphHierarchy = this._graphHierarchyTar
+    this._graphStruct = this._graphTar
     console.info(this._selectedNode)
   },
 });
