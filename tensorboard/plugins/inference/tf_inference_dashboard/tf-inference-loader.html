@@ -50,21 +50,22 @@ future for loading older images.
       </template>
       <template is="dom-if" if="[[_hasAtLeastOneStep]]">
         <div class="heading-row">
-          <div class="heading-label">
-            [[_sliderName]] <span style="font-weight: bold">[[_toLocaleString(_stepValue)]]</span>
-          </div>
-          <div class="heading-label heading-right datetime">
+          <!-- <div class="heading-label">
+            [[_sliderName]] 
+            <span style="font-weight: bold">[[_toLocaleString(_stepValue)]]</span>
+          </div> -->
+          <!-- <div class="heading-label heading-right datetime">
             <template is="dom-if" if="[[_currentWallTime]]">
               [[_currentWallTime]]
             </template>
-          </div>
+          </div> -->
           <div class="label right">
             <paper-spinner-lite active hidden$=[[!_isImageLoading]]>
             </paper-spinner-lite>
           </div>
         </div>
       </template>
-      <template is="dom-if" if="[[_hasMultipleSteps]]">
+      <!-- <template is="dom-if" if="[[_hasMultipleSteps]]">
         <div>
           <paper-slider
             id="steps"
@@ -76,7 +77,17 @@ future for loading older images.
             value="{{_stepIndex}}"
           ></paper-slider>
         </div>
-      </template>
+      </template> -->
+      <div id="slidercontainer">
+        <paper-slider
+          id='[[tagMetadata.displayName]]'
+          max="[[batchSize]]"
+          snaps
+          value="0"
+          editable
+          on-change='sliderChange'
+        ></paper-slider>
+      </div>
     </tf-card-heading>
 
     <!-- Semantically a button but <img> inside a <button> disallows user to do
@@ -139,9 +150,9 @@ future for loading older images.
         --paper-spinner-color: var(--tb-orange-strong);
       }
 
-      #steps {
+      /* #steps {
         height: 15px;
-        margin: 0 0 0 -15px;
+        margin: 0 0 0 -15px; */
         /*
          * 31 comes from adding a padding of 15px from both sides of the
          * paper-slider, subtracting 1px so that the slider width aligns
@@ -149,7 +160,7 @@ future for loading older images.
          * adding 2px to account for a border of 1px on both sides of
          * the image. 30 - 1 + 2.
          */
-        width: calc(100% + 31px);
+        /* width: calc(100% + 31px);
         --paper-slider-active-color: var(--tb-orange-strong);
         --paper-slider-knob-color: var(--tb-orange-strong);
         --paper-slider-knob-start-border-color: var(--tb-orange-strong);
@@ -157,7 +168,7 @@ future for loading older images.
         --paper-slider-markers-color: var(--tb-orange-strong);
         --paper-slider-pin-color: var(--tb-orange-strong);
         --paper-slider-pin-start-color: var(--tb-orange-strong);
-      }
+      } */
 
       #main-image-container {
         max-height: 1024px;
@@ -188,6 +199,26 @@ future for loading older images.
       paper-icon-button[selected] {
         background: var(--tb-ui-light-accent);
       }
+
+      /* .slider-input.paper-slider {
+          width: 80px;
+          overflow: hidden;
+      } */
+      
+      paper-slider {
+        width: 100%;
+        --paper-slider-active-color: var(--tb-orange-strong);
+        --paper-slider-knob-color: var(--tb-orange-strong);
+        --paper-slider-knob-start-border-color: var(--tb-orange-strong);
+        --paper-slider-knob-start-color: var(--tb-orange-strong);
+        --paper-slider-markers-color: var(--tb-orange-strong);
+        --paper-slider-pin-color: var(--tb-orange-strong);
+        --paper-slider-pin-start-color: var(--tb-orange-strong);
+        --paper-slider-container:{
+          margin-left: -10px;
+          width: 80%;
+        }
+      }
     </style>
   </template>
   <script>
@@ -196,6 +227,7 @@ future for loading older images.
     Polymer({
       is: "tf-inference-loader",
       properties: {
+        batchSize: Number,
         isActive: Boolean,
         run: String,
         tag: String,
@@ -303,8 +335,8 @@ future for loading older images.
         "_updateImageUrl(_currentStep, brightnessAdjustment, contrastPercentage)",
       ],
       _computeChannel(tensor_name){
-        console.log("*****")
-        console.log(this.nameList,tensor_name);
+        // console.log("*****")
+        // console.log(this.nameList,tensor_name);
         for(var i=0;i<this.nameList.length;i++){
           var namelist_ = this.nameList[i].split(":")[0];
           console.log(namelist_);
@@ -391,8 +423,8 @@ future for loading older images.
           var channel_num = result['channelNum'];
           that.set('nameList',tensor_name);
           that.set('channelList',channel_num);
-          console.log("###########");
-          console.log(that.nameList);
+          // console.log("###########");
+          // console.log(that.nameList);
           console.log(that.tagMetadata.displayName);
           that.set('channel',that._computeChannel(that.tagMetadata.displayName));
         });
@@ -499,6 +531,14 @@ future for loading older images.
         // Shows commas (or locale-appropriate punctuation) for large numbers.
         return number.toLocaleString();
       },
+      sliderChange(e){
+        var slider = e.path[0]
+        var value = slider.value
+        var title = slider.id
+        console.info(title)
+        console.info(value)
+        
+      }
     });
   </script>
 </dom-module>
