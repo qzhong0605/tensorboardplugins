@@ -147,7 +147,7 @@ class OnnxGraph(tbgraph_base.TBGraph):
         """ onnx_type is the file type for onnx model, currently including pb """
         super(OnnxGraph,self).__init__()
         self._onnx_model = onnx_pb2.ModelProto()
-        if onnx_type == "onnx":
+        if onnx_type == "pb":
             with open(onnx_model, "rb") as onnx_stream:
                 self._onnx_model.ParseFromString(onnx_stream.read())
         else:

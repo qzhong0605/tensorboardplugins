@@ -38,8 +38,34 @@ from tensorboard.plugins.graph_edit import c2graph_util
 from tensorboard.plugins.graph_edit import caffe_util
 from tensorboard.plugins.graph_edit import onnx_util
 from tensorboard.plugins.graph_edit import onnx_write_util
+from tensorboard.plugins.graph_edit import torch_util
 
 from tensorboard.util import tb_logging
+
+import torch
+
+from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from torchvision.models.densenet import densenet121, densenet161, densenet169, densenet201
+from torchvision.models.inception import inception_v3
+from torchvision.models.googlenet import googlenet
+from torchvision.models.mobilenet import mobilenet_v2
+
+__module_dict__ = {
+  "resnet18" : resnet18,
+  "resnet34" : resnet34,
+  "resnet50" : resnet50,
+  "resnet101" : resnet101,
+  "resnet152" : resnet152,
+
+  "densenet121" : densenet121,
+  "densenet161" : densenet161,
+  "densenet169" : densenet169,
+  "densenet201" : densenet201,
+
+  "googlenet" : googlenet,
+  "inception_v3" : inception_v3,
+  "mobilenet_v2" : mobilenet_v2,
+}
 
 logger = tb_logging.get_logger()
 # logger.setLevel(tb_logging.logging.INFO)
@@ -93,47 +119,56 @@ class GraphEditPlugin(base_plugin.TBPlugin):
 
   @wrappers.Request.application
   def parse_from_model(self, request):
-      """ It used to parse model file and convert it to tensorboard IR
-      """
-      model_type = request.args.get("model_type")
-      if model_type == "torch":
-          input_tensor_size = request.args.get("input_tensor_size")
-          print("input_tensor_size: ".format(input_tensor_size))
-          # for torch, the model file is a python script. The format for
-          # pytorch script is a module, which contains a forward method
-          model_file = request.args.get('model_file')
-          if not os.path.exists(model_file):
-            # send a response to frontend and report file not existing
-            pass
-          pass
-      elif model_type == "caffe2":
-          predict_net = request.args.get("predict_net")
-          init_net = request.args.get("init_net")
-          file_type = request.args.get("file_type")
-          if not (os.path.exists(predict_net) and os.path.exists(init_net)):
-              # send a response to frontend and report that model file doesnot exist
-              pass
-          self._tb_graph = c2graph_util.C2Graph(predict_net, init_net, file_type)
-      elif model_type == "caffe":
-          file_type = request.args.get("file_type")
-          model_file = request.args.get('model_file')
-          self._tb_graph = caffe_util.CaffeGraph(model_file, file_type)
-      elif model_type == "onnx":
-          file_type = request.args.get("file_type")
-          model_file = request.args.get('model_file')
-          self._tb_graph = onnx_util.OnnxGraph(model_file, file_type)
-      elif model_type == "tf":
-          file_type = request.args.get("file_type")
-          model_file = request.args.get('model_file')
-          pass
+    """ It used to parse model file and convert it to tensorboard IR
+    """
+    model_type = request.args.get("model_type")
+    if model_type == "torch":
+      input_tensor_size = request.args.get("input_tensor_size")
+      tensor_size_list = input_tensor_size.split(',')
+      # for torch, the model file is a python script. The format for
+      # pytorch script is a module, which contains a forward method
+      model_file = request.args.get('model_file')
+      if not os.path.exists(model_file):
+        # send a response to frontend and report file not existing
+        pass
+      if model_file in ['inception_v3', 'googlenet']:
+        self._tb_graph = torch_util.freeze_graph(
+            globals().get(model_file)(pretrained=True, aux_logits=False ,transform_input=False),
+            torch.randn(tuple(map(int, tensor_size_list))))
       else:
-          # send a response to frontend and report model type error
+        self._tb_graph = torch_util.freeze_graph(globals().get(model_file)(pretrained=True),
+                                                 torch.randn(tuple(map(int, tensor_size_list))))
+    elif model_type == "caffe2":
+      predict_net = request.args.get("predict_net")
+      init_net = request.args.get("init_net")
+      file_type = request.args.get("file_type")
+      if not (os.path.exists(predict_net) and os.path.exists(init_net)):
+          # send a response to frontend and report that model file doesnot exist
           pass
+      self._tb_graph = c2graph_util.C2Graph(predict_net, init_net, file_type)
+    elif model_type == "caffe":
+      file_type = request.args.get("file_type")
+      model_file = request.args.get('model_file')
+      self._tb_graph = caffe_util.CaffeGraph(model_file, file_type)
+    elif model_type == "onnx":
+      file_type = request.args.get("file_type")
+      model_file = request.args.get('model_file')
+      self._tb_graph = onnx_util.OnnxGraph(model_file, file_type)
+    elif model_type == "tf":
+      file_type = request.args.get("file_type")
+      model_file = request.args.get('model_file')
+      pass
+    else:
+      # send a response to frontend and report model type error
+      pass
 
+    if model_type != "torch":
       self._tb_graph.ConvertNet()
       graph = self._tb_graph._tb_graph
-      self.graph = graph
-      return http_util.Respond(request,str(graph) ,'text/x-protobuf')
+    else:
+      graph = self._tb_graph
+    self.graph = graph
+    return http_util.Respond(request,str(graph) ,'text/x-protobuf')
 
   @wrappers.Request.application
   def init_graph(self, request):
