@@ -71,7 +71,7 @@ by default. The user can select a different run from a dropdown menu.
         all-steps-mode-enabled="{{allStepsModeEnabled}}"
         specific-health-pill-step="{{specificHealthPillStep}}"
         health-pill-step-index="[[_healthPillStepIndex]]"
-        render-hierarchy="{{_renderHierarchy}}"
+        render-hierarchy="{{_renderHierarchySrc}}"
         stats="[[_stats]]"
     ></tf-convert-board>
   </div>
@@ -108,7 +108,7 @@ by default. The user can select a different run from a dropdown menu.
         all-steps-mode-enabled="{{allStepsModeEnabled}}"
         specific-health-pill-step="{{specificHealthPillStep}}"
         health-pill-step-index="[[_healthPillStepIndex]]"
-        render-hierarchy="{{_renderHierarchy}}"
+        render-hierarchy="{{_renderHierarchyTar}}"
         stats="[[_stats]]"
     ></tf-convert-board>
   </div>
@@ -275,6 +275,7 @@ Polymer({
     this._selectedGraph = 'SOURCE'
     this._selectedGraphHierarchy = this._graphHierarchy
     this._graphStruct = this._graph
+    this._renderHierarchy = this._renderHierarchySrc
   },
 
   _selectedNodeTarChanged: function(){
@@ -282,6 +283,7 @@ Polymer({
     this._selectedGraph = 'DESTINATION'
     this._selectedGraphHierarchy = this._graphHierarchyTar
     this._graphStruct = this._graphTar
+    this._renderHierarchy = this._renderHierarchyTar
     console.info(this._selectedNode)
   },
 });
