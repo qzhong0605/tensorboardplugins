@@ -271,19 +271,19 @@ Polymer({
   },
 
   _selectedNodeSrcChanged: function(){
-    this._selectedNode = this._selectedNodeSrc
     this._selectedGraph = 'SOURCE'
     this._selectedGraphHierarchy = this._graphHierarchy
     this._graphStruct = this._graph
     this._renderHierarchy = this._renderHierarchySrc
+    this._selectedNode = this._selectedNodeSrc
   },
 
   _selectedNodeTarChanged: function(){
-    this._selectedNode = this._selectedNodeTar
     this._selectedGraph = 'DESTINATION'
     this._selectedGraphHierarchy = this._graphHierarchyTar
     this._graphStruct = this._graphTar
     this._renderHierarchy = this._renderHierarchyTar
+    this._selectedNode = this._selectedNodeTar
     console.info(this._selectedNode)
   },
 });
