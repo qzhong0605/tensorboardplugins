@@ -28,8 +28,6 @@ def pred_writer(log_dir):
   sess.close()
 
 def fea_writer(log_dir,tensor,name):
-  init_x = tf.placeholder(tf.float32,[None,28,28,1])
-  x = tf.reshape(init_x, [-1, 784])
   sess = tf.Session()
   writer = tf.summary.FileWriter(log_dir)
   for i in range(len(tensor)):

@@ -78,6 +78,20 @@ TensorFlow run.
         </div>
         <div class="flex-holder">
           <paper-input
+            label="Input Shape"
+            id = "inputshape"
+            name = "inputshape"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+          <paper-input
+            label="Output Shape"
+            id = "outputshape"
+            name = "outputshape"
+          ></papper-input>
+        </div>
+        <div class="flex-holder">
+          <paper-input
             label="Batch Size"
             id = "batchsize"
             name = "batchsize"
@@ -372,12 +386,12 @@ TensorFlow run.
         overflow-y: auto;
       }
       #side-top {
-        height: 53%;
+        height: 67%;
         overflow:auto;
       }
 
       #side-bottom {
-        height: 40%;
+        height: 33%;
         overflow:auto;
       }
       .hr {
@@ -975,6 +989,8 @@ TensorFlow run.
         var data = this.$.datapath.value;
         var tensorpath = this.$.tensorpath.value;
         var batch = this.$.batchsize.value;
+        var i_shape = this.$.inputshape.value;
+        var o_shape = this.$.outputshape.value;
         this._batchsize = batch
         var modeltype = this.modelType;
         var tmp = new Array();
@@ -987,7 +1003,15 @@ TensorFlow run.
         console.log(this._modelTypes[this._selectedModel]);
         if(modelpath != "" && data != ""){ // whatever input check                   
           const url = tf_backend.getRouter().pluginRoute('inference', '/distribution');
-          const a = Promise.resolve(this._requestManager.request(url,{'modelpath':modelpath,'datapath':data,'tensorpath':tensorpath,'batchsize':batch,'modeltype':modeltype}));
+          const a = Promise.resolve(
+                        this._requestManager.request(url,
+                            {'modelpath':modelpath, 
+                             'datapath':data,
+                             'batchsize':batch,
+                             'modeltype':modeltype,
+                             'tensorpath':tensorpath,
+                             'inputshape':i_shape,
+                             'outputshape':o_shape}));
           const that = this;
           a.then(function(result) {
             console.log(result['accuracy']);

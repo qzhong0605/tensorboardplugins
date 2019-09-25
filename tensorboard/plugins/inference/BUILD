@@ -52,15 +52,6 @@ py_library(
 )
 
 py_library(
-    name = "model",
-    srcs = ["model.py"],
-    srcs_version = "PY2AND3",
-    visibility = [
-        "//visibility:public",
-    ],
-)
-
-py_library(
     name = "model_prediction",
     srcs = ["model_prediction.py"],
     srcs_version = "PY2AND3",
@@ -68,7 +59,6 @@ py_library(
         "//visibility:public",
     ],
     deps = [
-        "//tensorboard/plugins/inference:model",
         "//tensorboard/plugins/inference:ReadTFRecord",
         "//tensorboard/plugins/inference:refresh_board",
     ],

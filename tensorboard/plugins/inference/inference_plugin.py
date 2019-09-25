@@ -351,30 +351,65 @@ class InferencePlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def _serve_distribution(self, request):
     #os.system("python ~/tensorflow/tensorflow/examples/tutorials/mnist/mnist_with_summaries.py --log_dir /tmp/mnist")
-    print(request.form['modelpath'], request.form['datapath'],request.form['batchsize'],request.form['modeltype'])
-    self.infer = Infer(request.form['modelpath'],request.form['modeltype'])
-    result,self.tensor_name,self.tensor_channel_num = self.infer.start(request.form['datapath'], request.form['batchsize'])
-    return http_util.Respond(request, {'accuracy':result,'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'],'model':request.form['modeltype']}, 'application/json')
+    #print(request.form['modelpath'], request.form['datapath'],request.form['batchsize'],request.form['modeltype'])
+    self.infer = Infer(
+                     request.form['modelpath'],
+                     request.form['modeltype'])
+    result, self.tensor_name, self.tensor_channel_num = self.infer.start(
+                                                            request.form['datapath'], 
+                                                            request.form['batchsize'],
+                                                            request.form['inputshape'], 
+                                                            request.form['outputshape'])
+    return http_util.Respond(request, {
+           'accuracy':result, 
+           'batch_size':request.form['batchsize'],
+           'input_size':request.form['batchsize'], 
+           'model':request.form['modeltype']
+        }, 
+        'application/json')
 
   @wrappers.Request.application
   def _serve_distribution_edit(self, request):
-    result = self.infer.edit(request.form['datapath'],request.form['batchsize'],request.form['edit'])
+    result = self.infer.edit(
+        request.form['datapath'],
+        request.form['batchsize'],
+        request.form['edit'])
     print(result)
-    return http_util.Respond(request, {'accuracy':result,'batch_size':request.form['batchsize'],'input_size':request.form['batchsize'], 'model':request.form['modeltype']}, 'application/json')
+    return http_util.Respond(request, {
+          'accuracy':result,
+          'batch_size':request.form['batchsize'],
+          'input_size':request.form['batchsize'], 
+          'model':request.form['modeltype']
+        }, 
+        'application/json')
 
   @wrappers.Request.application
   def _serve_split_img(self, request):
     global channel_num,selectImg,imgsrc
     if(len(request.form)==0):
-      return http_util.Respond(request, {'selectImg': self.selectImg,'channel': self.channel_num, 'imgsrc': self.imgsrc}, 'application/json')
+      return http_util.Respond(request, {
+            'selectImg': self.selectImg,
+            'channel': self.channel_num, 
+            'imgsrc': self.imgsrc
+          }, 
+          'application/json')
     self.channel_num = request.form['channel']
     self.selectImg = request.form['selectImg']
     self.imgsrc = request.form['imgsrc']
-    return http_util.Respond(request, {'selectImg': self.selectImg,'channel': self.channel_num, 'imgsrc': self.imgsrc}, 'application/json')
+    return http_util.Respond(request, {
+          'selectImg': self.selectImg,
+          'channel': self.channel_num, 
+          'imgsrc': self.imgsrc
+        }, 
+       'application/json')
 
   @wrappers.Request.application
   def _serve_get_channel_num(self,request):
-    return http_util.Respond(request, {'tensorName':self.tensor_name,'channelNum': self.tensor_channel_num}, 'application/json')
+    return http_util.Respond(request, {
+          'tensorName':self.tensor_name,
+          'channelNum': self.tensor_channel_num
+        }, 
+        'application/json')
 
   @wrappers.Request.application
   def _serve_tags(self, request):

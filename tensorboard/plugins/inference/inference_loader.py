@@ -25,10 +25,16 @@ class Infer:
     self.input_cache=None
     self.label_cache=None
 
-  def start(self,datapath,batchsize):
+  def start(
+          self,
+          datapath,
+          batchsize,
+          inputshape,
+          outputshape):
     self.data_path = datapath
     model = self.classification()
-    result,self.input_cache,self.label_cache = model.feature(self.data_path,batchsize)
+    result, self.input_cache, self.label_cache = model.feature(
+                                                     self.data_path, batchsize, inputshape, outputshape)
     self.tensor_name = model.tensor_name
     self.tensor_channel_num = model.tensor_channel_num
     return result,self.tensor_name,self.tensor_channel_num
@@ -43,7 +49,14 @@ class Infer:
         trans_log[item].append(edit_log[i][item])
     self.data_path = datapath
     model = self.classification()
-    result = model.feature_edit(self.input_cache, self.label_cache, batchsize,trans_log['batch'], trans_log['x'], trans_log['y'],trans_log['c'],trans_log['new'])
+    result = model.feature_edit(
+        self.input_cache, 
+        self.label_cache, 
+        batchsize,trans_log['batch'], 
+        trans_log['x'], 
+        trans_log['y'], 
+        trans_log['c'],
+        trans_log['new'])
     self.tensor_name = model.tensor_name
     self.tensor_channel_num = model.tensor_channel_num
     return result

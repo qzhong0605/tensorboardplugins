@@ -1,4 +1,3 @@
-#from tensorboard.plugins.inference.model import Network
 from tensorboard.plugins.inference.ReadTFRecord import read_and_decode
 from tensorboard.plugins.inference.refresh_board import pred_refresh, fea_refresh
 import matplotlib.pyplot as plt
@@ -19,7 +18,6 @@ class Inference(object):
     self.tensor_name = []
     self.tensor_in_graph = []
     self.tensor_channel_num=[]
-    #self.net = Network()
     self.sess = tf.Session()
     self.sess.run(tf.global_variables_initializer())
     self.coord = tf.train.Coordinator()
@@ -54,7 +52,10 @@ class Inference(object):
     if num_or_size_splits!=1:
       conv_tmp=[]
       for i in range(conv_output.shape[0]):
-        conv_tmp.append(np.pad(conv_output[i], ((margin, margin), (margin, margin),(0,0)), 'constant', constant_values=(blank_value, blank_value)))#margin
+        conv_tmp.append(np.pad(
+            conv_output[i], 
+            ((margin, margin), (margin, margin),(0,0)), 
+            'constant', constant_values=(blank_value, blank_value)))#margin
       conv_output = np.array(conv_tmp)
     for j in range(num_or_size_splits):
       img_temp = conv_output[j*4]
@@ -88,10 +89,14 @@ class Inference(object):
     print(tensor_conv.shape)
     return tensor_conv
 
-  def predict(self,file_path,batchsize_s):
+  def predict(self,
+              file_path,
+              batchsize_s,
+              inputshape,
+              outputshape):
     batchsize = int(batchsize_s)
     filename_queue = tf.train.string_input_producer([file_path],num_epochs=None)
-    img,label = read_and_decode(filename_queue,True,batchsize)
+    img,label = read_and_decode(filename_queue,True,batchsize,inputshape,outputshape)
     #threads stop problem
     sv = tf.train.Supervisor()
     with sv.managed_session() as sess:
@@ -148,7 +153,12 @@ class Inference(object):
       data.append([weights[i].tolist(),h_conv1_dist[channel][i].tolist()])
     return {'data':data}
 
-  def feature(self,file_path,batchsize_s):
+  def feature(
+          self,
+          file_path,
+          batchsize_s,
+          inputshape,
+          outputshape):
     init_x = self.loaded_graph.get_tensor_by_name("input/Placeholder:0")
     label_y = self.loaded_graph.get_tensor_by_name("label/Placeholder:0")
     predict = self.loaded_graph.get_tensor_by_name("predict/Equal:0")
@@ -157,14 +167,21 @@ class Inference(object):
     #accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
     batchsize = int(batchsize_s)
     filename_queue = tf.train.string_input_producer([file_path],num_epochs=None)
-    img,label = read_and_decode(filename_queue,True,batchsize)
+    img,label = read_and_decode(
+                    filename_queue,
+                    True,
+                    batchsize,
+                    inputshape,
+                    outputshape)
     #threads stop problem
     sv = tf.train.Supervisor()
     with sv.managed_session() as sess:
       self.test_x, self.test_label=sess.run([img,label])
     self.get_all_tensor()
-    predict_list = self.sess.run(predict, feed_dict={init_x:self.test_x,label_y:self.test_label})
-    output,grads_val = self.sess.run([output_y,grads], feed_dict = {init_x:self.test_x, label_y:self.test_label})
+    predict_list = self.sess.run(predict, 
+                       feed_dict={init_x:self.test_x, label_y:self.test_label})
+    output,grads_val = self.sess.run([output_y,grads], 
+                           feed_dict = {init_x:self.test_x, label_y:self.test_label})
     acc = 0
     for result in predict_list:
       if result:
@@ -176,24 +193,33 @@ class Inference(object):
     #grads_npary = np.array(grads_list)
     #print(grads_npary.shape)
     #grads_npary = np.transpose(grads_npary, (1,2,0,3))
-    print("%%%%%%%%%%%%%%%%")
+    #print("%%%%%%%%%%%%%%%%")
     #print(grads_npary.shape)
     #acc, = self.sess.run(accuracy,feed_dict = {init_x:self.test_x,label_y:self.test_label})
     tf.reset_default_graph()
     g = tf.Graph()
     with g.as_default():
-      feature_list = self.sess.run(self.tensor_in_graph, feed_dict={init_x:self.test_x})#list
+      feature_list = self.sess.run(self.tensor_in_graph, 
+                         feed_dict={init_x:self.test_x})#list
     feature_tensor = []
     for i in range(len(self.tensor_in_graph)):
       feature_tensor.append(self.generate_tensor(feature_list[i]))
-      print(np.array(feature_list[i]).shape)
-    print(self.tensor_channel_num)
+      #print(np.array(feature_list[i]).shape)
+    #print(self.tensor_channel_num)
     #feature_tensor.append(self.generate_tensor(grads_npary))
     #self.tensor_name.append("grads")
     fea_refresh("/tmp/mnist/feature", feature_tensor, self.tensor_name)
     return acc,self.test_x,self.test_label
 
-  def feature_edit(self,input_cache,label_cache,batchsize_s,batch,x,y,c,value):
+  def feature_edit(self,
+          input_cache,
+          label_cache,
+          batchsize_s,
+          batch,
+          x,
+          y,
+          c,
+          value):
     init_x = self.loaded_graph.get_tensor_by_name("input/Placeholder:0")
     label_y = self.loaded_graph.get_tensor_by_name("label/Placeholder:0")
     #accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
@@ -202,13 +228,19 @@ class Inference(object):
     output_y = self.loaded_graph.get_tensor_by_name("layer1/Relu:0")
     grads = self.loaded_graph.get_tensor_by_name("grads/div:0")
     batchsize = int(batchsize_s)
-    img_reshape = np.reshape(input_cache,(-1, input_reshape.shape[1], input_reshape.shape[2], input_reshape.shape[3]))
+    img_reshape = np.reshape(input_cache,
+                      (-1, 
+                       input_reshape.shape[1], 
+                       input_reshape.shape[2], 
+                       input_reshape.shape[3]))
     img_edit = self.edit(img_reshape,batch,x,y,c,value)#edit
     img_reshape = np.reshape(img_edit,(-1,init_x.shape[1]))
     #threads stop problem
     self.get_all_tensor()
-    predict_list = self.sess.run(predict, feed_dict={input_reshape:img_edit, label_y:label_cache})
-    output,grads_val = self.sess.run([output_y,grads], feed_dict = {init_x:self.test_x, label_y:self.test_label})
+    predict_list = self.sess.run(predict, 
+                       feed_dict={input_reshape:img_edit, label_y:label_cache})
+    output,grads_val = self.sess.run([output_y,grads], 
+                           feed_dict = {init_x:self.test_x, label_y:self.test_label})
     acc = 0
     for result in predict_list:
       if result:
@@ -218,7 +250,8 @@ class Inference(object):
     tf.reset_default_graph()
     g = tf.Graph()
     with g.as_default():
-      feature_list = self.sess.run(self.tensor_in_graph, feed_dict={input_reshape:img_edit})
+      feature_list = self.sess.run(self.tensor_in_graph, 
+                         feed_dict={input_reshape:img_edit})
     feature_tensor = []
     for i in range(len(self.tensor_in_graph)):
       feature_tensor.append(self.generate_tensor(feature_list[i]))
