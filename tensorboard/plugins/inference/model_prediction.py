@@ -85,8 +85,6 @@ class Inference(object):
     with tf.Session(graph=g) as sess:
       conv_concact = sess.run(tf.transpose(self.concact_features(conv_transpose), [2, 1, 0]))
     tensor_conv = tf.convert_to_tensor(conv_concact)[:, :, :, np.newaxis]
-    print("@#$%^&*&^%$#$%^&*")
-    print(tensor_conv.shape)
     return tensor_conv
 
   def predict(self,

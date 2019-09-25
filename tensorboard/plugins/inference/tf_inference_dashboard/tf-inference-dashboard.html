@@ -209,6 +209,7 @@ TensorFlow run.
                               <tf-inference-loader
                                 id="channelloader"
                                 isActive="[[_isRevealed]]"
+                                run="[[item.run]]"
                                 tag="[[item.tag]]"
                                 sample="[[item.sample]]"
                                 categoryname="[[category.name]]"
@@ -219,6 +220,7 @@ TensorFlow run.
                                 brightness-adjustment="[[_brightnessAdjustment]]"
                                 contrast-percentage="[[_contrastPercentage]]"
                                 batch-size = "[[_batchsize]]"
+                                on-tap="_revealInfo"
                               ></tf-inference-loader>
                             </template>
                           </div>
@@ -832,41 +834,41 @@ TensorFlow run.
               clearInterval(process);
               that.set('_loadingPerc',0);
             }
-          },100);
+          },this.$.batchsize.value);
         }
       },
       _revealInfo(){
-        // const img = d3.select(this.$.channelimage);
-        // const info = d3.select(this.$.channelinfo);
-        // const infoImg = d3.select(this.$.infoImg);
-        // const infoDistribution = d3.select(this.$.infoDistribution);
-        // const resizer = d3.select(this.$.resizer);
-        // const resizerinfo = d3.select(this.$.resizerinfo);
-        // const loader = this.$.channelloader
-        // if(!this._isRevealed){
-        //   this._isRevealed = true;
-        //   img.style('width', 100 + '%');
-        //   img.style('height', 60 + '%');
-        //   info.style('width', 100 + '%');
-        //   info.style('height', 40 + '%');
-        //   //infoImg.style('height', 30 + '%');
-        //   //infoDistribution.style('height', 70 + '%');
-        //   info.style('display', "block");
-        //   resizer.style('display',"table");
-        //   resizerinfo.style('display',"table");
-        // }
-        // const url = tf_backend.getRouter().pluginRoute('inference', '/channelinfo');
-        // const datainfo = Promise.resolve(this._requestManager.request(url));
-        // const that = this;
-        // datainfo.then(function(result) {
-        //   var data = result['data'];
-        //   that.set('_data',data);
-        //   console.log(that._data);
-        // });
+         const img = d3.select(this.$.channelimage);
+         const info = d3.select(this.$.channelinfo);
+         const infoImg = d3.select(this.$.infoImg);
+         const infoDistribution = d3.select(this.$.infoDistribution);
+         const resizer = d3.select(this.$.resizer);
+         const resizerinfo = d3.select(this.$.resizerinfo);
+         const loader = this.$.channelloader
+         if(!this._isRevealed){
+           this._isRevealed = true;
+           img.style('width', 100 + '%');
+           img.style('height', 60 + '%');
+           info.style('width', 100 + '%');
+           info.style('height', 40 + '%');
+           //infoImg.style('height', 30 + '%');
+           //infoDistribution.style('height', 70 + '%');
+           info.style('display', "block");
+           resizer.style('display',"table");
+           resizerinfo.style('display',"table");
+         }
+         const url = tf_backend.getRouter().pluginRoute('inference', '/channelinfo');
+         const datainfo = Promise.resolve(this._requestManager.request(url));
+         const that = this;
+         datainfo.then(function(result) {
+           var data = result['data'];
+           that.set('_data',data);
+           console.log(that._data);
+         });
         
-        // this.reload();
-        // console.log(this._isRevealed);
-        // console.log(that.records);
+         this.reload();
+         console.log(this._isRevealed);
+         console.log(that.records);
       },
       _hideInfo(e){
         const img = d3.select(this.$.channelimage);
@@ -959,8 +961,7 @@ TensorFlow run.
             name: category.name,
           }));
         this.set('_categoryname',withSamples[1]['name']);
-        // console.log(this._categoryname,withSamples[1]['name']);
-        console.info(withSamples)
+        console.log(this._categoryname,withSamples[1]['name']);
         return withSamples;
       },
       _tagMetadata(runToTagInfo, run, tag) {
