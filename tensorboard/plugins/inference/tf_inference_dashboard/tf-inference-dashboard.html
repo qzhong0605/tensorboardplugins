@@ -209,7 +209,6 @@ TensorFlow run.
                               <tf-inference-loader
                                 id="channelloader"
                                 isActive="[[_isRevealed]]"
-                                run="[[item.run]]"
                                 tag="[[item.tag]]"
                                 sample="[[item.sample]]"
                                 categoryname="[[category.name]]"
@@ -960,7 +959,8 @@ TensorFlow run.
             name: category.name,
           }));
         this.set('_categoryname',withSamples[1]['name']);
-        console.log(this._categoryname,withSamples[1]['name']);
+        // console.log(this._categoryname,withSamples[1]['name']);
+        console.info(withSamples)
         return withSamples;
       },
       _tagMetadata(runToTagInfo, run, tag) {

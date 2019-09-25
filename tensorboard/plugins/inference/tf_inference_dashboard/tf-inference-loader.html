@@ -36,59 +36,26 @@ future for loading older images.
 -->
 <dom-module id="tf-inference-loader">
   <template>
-    <tf-card-heading
-      isActive="[[isActive]]"
-      tag="[[tag]]"
-      run="[[run]]"
-      categoryname="[[categoryname]]"
-      display-name="[[tagMetadata.displayName]]"
-      description="[[tagMetadata.description]]"
-      color="[[_runColor]]"
-    >
-      <template is="dom-if" if="[[_hasMultipleSamples]]">
-        <div>sample: [[_sampleText]] of [[ofSamples]]</div>
-      </template>
-      <template is="dom-if" if="[[_hasAtLeastOneStep]]">
-        <div class="heading-row">
-          <!-- <div class="heading-label">
-            [[_sliderName]] 
-            <span style="font-weight: bold">[[_toLocaleString(_stepValue)]]</span>
-          </div> -->
-          <!-- <div class="heading-label heading-right datetime">
-            <template is="dom-if" if="[[_currentWallTime]]">
-              [[_currentWallTime]]
-            </template>
-          </div> -->
-          <div class="label right">
-            <paper-spinner-lite active hidden$=[[!_isImageLoading]]>
-            </paper-spinner-lite>
+    <figcaption class="content">
+      <div class="heading-row">
+        <template is="dom-if" if="[[tagMetadata.displayName]]">
+          <div itemprop="name" class="heading-label name">
+            [[tagMetadata.displayName]]
           </div>
-        </div>
-      </template>
-      <!-- <template is="dom-if" if="[[_hasMultipleSteps]]">
-        <div>
-          <paper-slider
-            id="steps"
-            immediate-value="{{_stepIndex}}"
-            max="[[_maxStepIndex]]"
-            max-markers="[[_maxStepIndex]]"
-            snaps
-            step="1"
-            value="{{_stepIndex}}"
-          ></paper-slider>
-        </div>
-      </template> -->
-      <div id="slidercontainer">
-        <paper-slider
-          id='[[tagMetadata.displayName]]'
-          max="[[batchSize]]"
-          snaps
-          value="0"
-          editable
-          on-change='sliderChange'
-        ></paper-slider>
+        </template>
       </div>
-    </tf-card-heading>
+      <slot></slot>
+    </figcaption>
+    <div id="slidercontainer">
+      <paper-slider
+        id='[[tagMetadata.displayName]]'
+        max="[[batchSize]]"
+        value="0"
+        editable
+        dir="rtl"
+        on-change='sliderChange'
+      ></paper-slider>
+    </div>
 
     <!-- Semantically a button but <img> inside a <button> disallows user to do
     an interesting operation like "Copy Image" in non-Chromium browsers. -->
@@ -229,7 +196,10 @@ future for loading older images.
       properties: {
         batchSize: Number,
         isActive: Boolean,
-        run: String,
+        run: {
+          type: String,
+          value: 'train',
+        },
         tag: String,
         sample: Number,
         ofSamples: Number,
