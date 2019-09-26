@@ -132,23 +132,30 @@ class Inference(object):
     acc = self.sess.run(self.net.accuracy,feed_dict = {self.net.init_x:test_x,self.net.label:test_label})
     return acc
 
-  def channel(self,channel,layer_channel):
-    layer = 0
-    channel = int(channel)
-    layer_channel = int(layer_channel)
-    if(layer_channel==16):
-      layer = 2
-    #values = self.sess.run(self.net.variable_names)
-    values = self.loaded_graph.get_tensor_by_name("layer1/Variable/Adam:0")
-    #print((np.array(values)).shape,(np.array(values[0])).shape,(np.array(values[1])).shape,(np.array(values[2])).shape,(np.array(values[3])).shape,(np.array(values[4])).shape,(np.array(values[5])).shape,(np.array(values[6])).shape,(np.array(values[7])).shape)
-    h_conv1_dist = self.sess.run(values)
-    h_conv1_dist = np.transpose(h_conv1_dist, (2,3,0,1))
-    h_conv1_dist = np.reshape(h_conv1_dist, (-1,25))
-    weights = np.arange(len(h_conv1_dist[0]))
+  def channel(self,layer_index_s,channel_s,input_cache,label_cache):
+    #values = self.loaded_graph.get_tensor_by_name("layer1/Variable/Adam:0")
+    #h_conv1_dist = self.sess.run(values)
+    channel = int(channel_s)
+    layer_index = int(layer_index_s)
+    self.get_all_tensor()
+    values = self.tensor_in_graph[layer_index]
+    init_x = self.loaded_graph.get_tensor_by_name("input/Placeholder:0")
+    label_y = self.loaded_graph.get_tensor_by_name("label/Placeholder:0")
+    h_conv1_dist = self.sess.run(values,feed_dict = {init_x:input_cache, label_y:label_cache})
+    print(h_conv1_dist.shape)
+    h_conv1_dist = np.transpose(h_conv1_dist, (0,3,1,2))
+    print(h_conv1_dist.shape)
+    h_conv1_dist = np.reshape(h_conv1_dist,
+                       (h_conv1_dist.shape[0], 
+                        h_conv1_dist.shape[1], 
+                        h_conv1_dist.shape[2]*h_conv1_dist.shape[3]))
+    print(h_conv1_dist.shape)
+    weights = np.arange(len(h_conv1_dist[0][0]))
     data = []
     data.append(['weights','figure'])
     for i in range(len(weights)):
-      data.append([weights[i].tolist(),h_conv1_dist[channel][i].tolist()])
+      print(weights[i],h_conv1_dist[0][channel][i])
+      data.append([weights[i].tolist(),h_conv1_dist[0][channel][i].tolist()])#sample batch 0
     return {'data':data}
 
   def feature(
@@ -160,8 +167,8 @@ class Inference(object):
     init_x = self.loaded_graph.get_tensor_by_name("input/Placeholder:0")
     label_y = self.loaded_graph.get_tensor_by_name("label/Placeholder:0")
     predict = self.loaded_graph.get_tensor_by_name("predict/Equal:0")
-    output_y = self.loaded_graph.get_tensor_by_name("layer1/Relu:0")
-    grads = self.loaded_graph.get_tensor_by_name("grads/div:0")
+    #output_y = self.loaded_graph.get_tensor_by_name("layer1/Relu:0")
+    #grads = self.loaded_graph.get_tensor_by_name("grads/div:0")
     #accuracy = self.loaded_graph.get_tensor_by_name("accuracy/Const:0")
     batchsize = int(batchsize_s)
     filename_queue = tf.train.string_input_producer([file_path],num_epochs=None)
@@ -178,8 +185,8 @@ class Inference(object):
     self.get_all_tensor()
     predict_list = self.sess.run(predict, 
                        feed_dict={init_x:self.test_x, label_y:self.test_label})
-    output,grads_val = self.sess.run([output_y,grads], 
-                           feed_dict = {init_x:self.test_x, label_y:self.test_label})
+    #output,grads_val = self.sess.run([output_y,grads], 
+    #                       feed_dict = {init_x:self.test_x, label_y:self.test_label})
     acc = 0
     for result in predict_list:
       if result:
@@ -237,8 +244,7 @@ class Inference(object):
     self.get_all_tensor()
     predict_list = self.sess.run(predict, 
                        feed_dict={input_reshape:img_edit, label_y:label_cache})
-    output,grads_val = self.sess.run([output_y,grads], 
-                           feed_dict = {init_x:self.test_x, label_y:self.test_label})
+    #output,grads_val = self.sess.run([output_y,grads], feed_dict = {init_x:self.test_x, label_y:self.test_label})
     acc = 0
     for result in predict_list:
       if result:

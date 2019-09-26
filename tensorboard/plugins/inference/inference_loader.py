@@ -61,9 +61,9 @@ class Infer:
     self.tensor_channel_num = model.tensor_channel_num
     return result
 
-  def config(self,channel,layer_channel):
+  def config(self,channel,layer_index):
     model = self.classification()
-    result = model.channel(channel,layer_channel)
+    result = model.channel(layer_index,channel,self.input_cache,self.label_cache)
     return result
 
   def classification(self):

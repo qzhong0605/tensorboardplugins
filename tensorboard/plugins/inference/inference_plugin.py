@@ -71,6 +71,7 @@ class InferencePlugin(base_plugin.TBPlugin):
     self.infer=None
     self.channel_num=0
     self.selectImg=0
+    self.layer_index=None
     self.imgsrc=""
     self.tensor_name=[]
     self.tensor_channel_num=[]
@@ -344,7 +345,7 @@ class InferencePlugin(base_plugin.TBPlugin):
   def _serve_channel_info(self,request):
     selected_channel = self.selectImg
     layer_channel = self.channel_num
-    data = self.infer.config(selected_channel,layer_channel)
+    data = self.infer.config(selected_channel,self.layer_index)
     print(data)
     return http_util.Respond(request, data, 'application/json')
 
@@ -389,16 +390,20 @@ class InferencePlugin(base_plugin.TBPlugin):
     if(len(request.form)==0):
       return http_util.Respond(request, {
             'selectImg': self.selectImg,
-            'channel': self.channel_num, 
+            'channel': self.channel_num,
+            'layer_index' : self.layer_index, 
             'imgsrc': self.imgsrc
           }, 
           'application/json')
     self.channel_num = request.form['channel']
+    self.layer_index = request.form['layer_index']
     self.selectImg = request.form['selectImg']
+    print(self.layer_index)
     self.imgsrc = request.form['imgsrc']
     return http_util.Respond(request, {
           'selectImg': self.selectImg,
           'channel': self.channel_num, 
+          'layer_index' : self.layer_index, 
           'imgsrc': self.imgsrc
         }, 
        'application/json')
@@ -406,8 +411,8 @@ class InferencePlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def _serve_get_channel_num(self,request):
     return http_util.Respond(request, {
-          'tensorName':self.tensor_name,
-          'channelNum': self.tensor_channel_num
+          'tensorName':self.tensor_name,        #list
+          'channelNum': self.tensor_channel_num #list 
         }, 
         'application/json')
 

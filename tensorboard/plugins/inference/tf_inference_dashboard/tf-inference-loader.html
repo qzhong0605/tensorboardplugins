@@ -208,6 +208,7 @@ future for loading older images.
         /** @type {{description: string, displayName: string}} */
         tagMetadata: Object,
         imgsrc: String,
+        layer_index: Number,
         nameList:Object,
         channelList:Object,
         channel: {
@@ -309,10 +310,11 @@ future for loading older images.
         // console.log(this.nameList,tensor_name);
         for(var i=0;i<this.nameList.length;i++){
           var namelist_ = this.nameList[i].split(":")[0];
-          console.log(namelist_);
+          //console.log(namelist_);
           if(tensor_name.search(namelist_)!=-1){
-            console.log("$$$$$$$$$$$$$$$$");
-            console.log(this.channelList[i]);
+            //console.log("$$$$$$$$$$$$$$$$");
+            this.set('layer_index',i);
+            //console.log(this.channelList[i],this.layer_index);
             return this.channelList[i]
           }
         }
@@ -386,7 +388,8 @@ future for loading older images.
           this.set("_stepIndex", steps.length - 1);
         });
         this.requestManager.request(url).then(updateSteps);
-        const listinfo = Promise.resolve(this.requestManager.request(tf_backend.getRouter().pluginRoute('inference', '/getChannelNum')));
+        const listinfo = Promise.resolve(this.requestManager.request(
+                             tf_backend.getRouter().pluginRoute('inference', '/getChannelNum')));
         const that = this;
         listinfo.then(function(result) {
           var tensor_name = result['tensorName'];
@@ -459,11 +462,12 @@ future for loading older images.
         var div = this.$$("#main-image-container");
         var reactObj = div.getBoundingClientRect();
         var mp = this._mousePosition;
-        var block_num = Math.sqrt(this.channel);
+        var block_num = parseInt(Math.sqrt(this.channel));
         var block_l = (reactObj.bottom - reactObj.top)/block_num
         //console.log(reactObj.top);
         //console.log(this.channel);
         for(var i=0;i<block_num;i++){
+          console.log(block_num);
           for(var j=0;j<block_num;j++){
             if(mp['y']>reactObj.top+i*block_l && mp['y']<reactObj.bottom-(block_num-i-1)*block_l && mp['x']>reactObj.left+j*block_l && mp['x']<reactObj.right-(block_num-j-1)*block_l){
               this.set("selectImg",4*i+j)
@@ -471,7 +475,11 @@ future for loading older images.
               var Bottom = (block_num-i-1)*block_l;
               var Left = j*block_l;
               const url = tf_backend.getRouter().pluginRoute('inference', '/splitimg');
-              var channel = this.requestManager.request(url,{selectImg: this.selectImg, channel: this.channel, imgsrc: this.imgsrc});
+              var channel = this.requestManager.request(url,
+                                {selectImg: this.selectImg, 
+                                 channel: this.channel, 
+                                 layer_index: this.layer_index,  
+                                 imgsrc: this.imgsrc});
               if(this.isActive==false){
                 //this._updateImageBoarder(Bottom,Left,block_l);
               }

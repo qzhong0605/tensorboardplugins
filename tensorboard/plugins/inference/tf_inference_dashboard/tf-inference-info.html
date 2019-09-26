@@ -152,16 +152,17 @@ future for loading older images.
         }).bind(this);
         // Load the new image.
         this.set("_isImageLoading", true);
-        img.style.width = 400+'%';
-        img.style.height = 400+'%';
-        var block_num = Math.sqrt(this.channel);
+        var block_num = parseInt(Math.sqrt(this.channel));
+        img.style.width = block_num*100+'%';
+        img.style.height = block_num*100+'%';
+        console.log(block_num);
         var block_len = 200;
         var selected = parseInt(this.selectImg)+1;
 console.log(block_num,selected);
         var col = Math.ceil(selected/block_num);
         var row = selected%block_num;
         if(row==0){
-          row=4;
+          row=block_num;
         }
         img.style.marginTop = -(col-1)*block_len+"px";
         img.style.marginLeft = -(row-1)*block_len+"px";
