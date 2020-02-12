@@ -1,0 +1,197 @@
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<!-- <link rel="import" href="../tf-imports/CodeMirror.html"> -->
+
+<dom-module id="tf-graph-edit-jupyter">
+<template>
+<style>
+  /* paper-input {
+    --paper-input-container-focus-color: #f57c00;
+  }
+
+  paper-dropdown-menu.op-type {
+    width: 100%;
+    --paper-input-container-focus-color: gray;
+    --paper-input-container-input: {
+      font-size: large !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  paper-input.op-type {
+    width: 200px;
+    --paper-input-container-input: {
+      font-size: large !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  paper-input.node-name {
+    width: 200px;
+    --paper-input-container-input: {
+      font-size: large !important;
+    }
+  }
+  .sub-list-group {
+    font-size: 12pt;
+    padding-bottom: 8px;
+    width: 100%;
+  }
+
+  .sub-list {
+    max-height: 300px;
+    overflow-y: scroll;
+  }
+
+  paper-button.full-width-bt{
+    width: 100%;
+    background-color: #f57c00 !important;
+    font: 900 !important;
+    color: white !important;
+  }
+
+  .intro {
+    margin-top: 10px;
+    font-size: 15px;
+  } */
+  .add-icon {
+    color: black;
+  }
+  .delete-icon {
+    color: black;
+  }
+  .runall-icon {
+    color: black;
+  }
+  .runcell-icon {
+    color: black;
+  }
+  .stop-icon {
+    color: rgba(210,0,0);
+  }
+  .refresh-icon {
+    color: green;
+  }
+  .hr1 {
+    background-color: #f57c00;
+    height: 2px;
+    border: none;
+    margin-top: 0px;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: 10px;
+  }
+  .flexchild-vertical {
+    @apply --layout-flex;
+  }
+  .flex-horizontal {
+    @apply --layout-horizontal;
+  }
+  .with-border{
+    border: 1px solid rgba(0,0,0,0.2) ;
+  }
+  
+  .cell {
+    border: 1px solid white;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-left: 5px solid white;
+  }
+
+  .edit{
+    border: 1px solid green;
+    border-left: 5px solid green;
+  }
+
+  .selected{
+    border: 1px solid #f57c00;
+    border-left: 5px solid #f57c00;
+  }
+
+  .op-time-label{
+    color: #555555;
+    width: 50px;
+    text-align: right;
+    letter-spacing: 3px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .code-section {
+    margin-left: 10px;
+    /* background-color: #eeeeee; */
+    margin-top: 10px;
+    margin-bottom: 10px;
+    /* border: 1px solid rgba(0,0,0,0.2); */
+  }
+  .CodeMirror {
+    height: auto;
+    background-color: #eeeeee;
+    border: 0.5px solid #cfcfcf;
+  }
+</style>
+
+
+<div>
+  <iron-icon icon="add" class="add-icon"></iron-icon>
+  <iron-icon icon="delete" class="delete-icon"></iron-icon>
+  <iron-icon icon="av:fast-forward" class="runall-icon"></iron-icon>
+  <iron-icon icon="av:skip-next" class="runcell-icon"></iron-icon>
+  <iron-icon icon="av:stop" class="stop-icon"></iron-icon>
+  <iron-icon icon="icons:refresh" class="refresh-icon"></iron-icon>
+</div>
+<hr class="hr1">
+<div>
+  <div class="flex-horizontal cell selected">
+    <div class="op-time-label">[1]</div>
+    <div class="code-section">
+      <textarea id="code-python" name="code">
+        def foo():
+        do_some_stuff()
+        here
+        return None
+        </textarea>
+    </div>
+  </div>
+</div>
+</template>
+</dom-module>
+<script>
+  
+</script>
+<script>
+(function(){
+
+Polymer({
+  is: 'tf-graph-edit-jupyter',
+  properties: {
+    
+  },
+  ready: function() {
+    // var te_python = document.getElementById("code-python");
+    // window.editor_python = CodeMirror.fromTextArea(te_python, {
+    //     mode: "python",
+    //     lineNumbers: false,
+    //     smartIndent: true,
+    //     tabSize:2,
+    //     lineWrapping:true,
+    //     // extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
+    //     gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    //     matchBrackets: true,
+    //     autoCloseBrackets: true
+    //   });
+
+  },
+  
+});
+})();
+</script>
+

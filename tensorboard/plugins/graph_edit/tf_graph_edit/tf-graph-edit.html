@@ -22,6 +22,7 @@ limitations under the License.
 <link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../tf-graph-edit-common/tf-graph-edit-common.html">
+<link rel="import" href="../tf-graph-edit-jupyter/tf-graph-edit-jupyter.html">
 <link rel="import" href="tf-graph-edit-scene.html">
 
 <dom-module id="tf-graph-edit">
@@ -49,6 +50,17 @@ h2 {
   text-align: center;
 }
 
+.hr{
+  background-color: #f57c00;
+  height: 5px;
+  border: none;
+  margin-top: 30px;
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-bottom: 0px;
+  cursor: row-resize;
+}
+
 paper-button {
   text-transform: none;
 }
@@ -70,6 +82,8 @@ paper-button {
           health-pill-step-index="{{healthPillStepIndex}}"
           handle-edge-selected="[[handleEdgeSelected]]"
     ></tf-graph-edit-scene>
+    <hr class="hr" id="hr">
+    <tf-graph-edit-jupyter style="background-color: #fff;"></tf-graph-edit-jupyter>
   </div>
 </div>
 </template>

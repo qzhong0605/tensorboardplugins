@@ -244,6 +244,15 @@ tf_web_library(
     path = "/tf-imports",
 )
 
+tf_web_library(
+    name = "CodeMirror",
+    srcs = [
+        "CodeMirror.html",
+    ],
+    path = "/tf-imports",
+#    visibility = ["//visibility:public"],
+)
+
 # Generate single TypeScript typings file for d3.js with no ES6 imports.
 #
 # The DefinitelyTyped definition of d3 v4 was written under the assumption that

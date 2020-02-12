@@ -16,6 +16,7 @@ tf_web_library(
     deps = [
         "//tensorboard/components/tf_dashboard_common",
         "//tensorboard/plugins/graph_edit/tf_graph_edit_common",
+        "//tensorboard/plugins/graph_edit/tf_graph_edit_jupyter",
         "//tensorboard/components/tf_imports:polymer",
         "@org_polymer_iron_flex_layout",
         "@org_polymer_iron_icons",
@@ -36,6 +37,7 @@ tensorboard_webcomponent_library(
     deps = [
         "//tensorboard/components/tf_dashboard_common:legacy",
         "//tensorboard/plugins/graph_edit/tf_graph_edit_common:legacy",
+        "//tensorboard/plugins/graph_edit/tf_graph_edit_jupyter:legacy",
         "//third_party/javascript/polymer/v1/iron-flex-layout:lib",
         "//third_party/javascript/polymer/v1/iron-icons:lib",
         "//third_party/javascript/polymer/v1/paper-button:lib",
