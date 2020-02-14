@@ -61,24 +61,36 @@
     margin-top: 10px;
     font-size: 15px;
   } */
-  .add-icon {
-    color: black;
+
+  .back-icon{
+    margin-left: 5px;
+    margin-right: 15px;
   }
+
+  /* .add-icon {
+    color: black;
+  } */
   .delete-icon {
-    color: black;
+    /* color: black; */
+    margin-right: 15px;
   }
-  .runall-icon {
+  /* .runall-icon {
     color: black;
   }
   .runcell-icon {
     color: black;
-  }
+  } */
   .stop-icon {
-    color: rgba(210,0,0);
+    /* color: rgba(210,0,0); */
   }
   .refresh-icon {
-    color: green;
+    /* color: green; */
   }
+  .op-icon {
+    color:  #555555;
+    cursor: pointer;
+  }
+
   .hr1 {
     background-color: #f57c00;
     height: 2px;
@@ -106,16 +118,6 @@
     border-left: 5px solid white;
   }
 
-  .edit{
-    border: 1px solid green;
-    border-left: 5px solid green;
-  }
-
-  .selected{
-    border: 1px solid #f57c00;
-    border-left: 5px solid #f57c00;
-  }
-
   .op-time-label{
     color: #555555;
     width: 50px;
@@ -123,6 +125,7 @@
     letter-spacing: 3px;
     margin-top: 10px;
     margin-bottom: 10px;
+    font-size: 10px;
   }
 
   .code-section {
@@ -132,35 +135,47 @@
     margin-bottom: 10px;
     /* border: 1px solid rgba(0,0,0,0.2); */
   }
+ 
+  .info-section {
+    font-size: 12px;
+  }
+
+  .cell-section {
+    max-height: 140px;
+    overflow-y: scroll;
+  } 
+
   .CodeMirror {
     height: auto;
     background-color: #eeeeee;
     border: 0.5px solid #cfcfcf;
   }
+
 </style>
 
 
 <div>
-  <iron-icon icon="add" class="add-icon"></iron-icon>
-  <iron-icon icon="delete" class="delete-icon"></iron-icon>
-  <iron-icon icon="av:fast-forward" class="runall-icon"></iron-icon>
-  <iron-icon icon="av:skip-next" class="runcell-icon"></iron-icon>
-  <iron-icon icon="av:stop" class="stop-icon"></iron-icon>
-  <iron-icon icon="icons:refresh" class="refresh-icon"></iron-icon>
+  <iron-icon icon="arrow-back" class="back-icon op-icon" on-click="backToLoadePage"></iron-icon>
+  <iron-icon icon="add" class="add-icon op-icon" on-click="addCell"></iron-icon>
+  <iron-icon icon="delete" class="delete-icon op-icon" on-click="delCell"></iron-icon>
+  <iron-icon icon="av:fast-forward" class="runall-icon op-icon"></iron-icon>
+  <iron-icon icon="av:skip-next" class="runcell-icon op-icon"></iron-icon>
+  <iron-icon icon="av:stop" class="stop-icon op-icon"></iron-icon>
+  <iron-icon icon="icons:refresh" class="refresh-icon op-icon"></iron-icon>
 </div>
 <hr class="hr1">
-<div>
-  <div class="flex-horizontal cell selected">
-    <div class="op-time-label">[1]</div>
-    <div class="code-section">
-      <textarea id="code-python" name="code">
-        def foo():
-        do_some_stuff()
-        here
-        return None
-        </textarea>
+<div class="cell-section">
+  <template is="dom-repeat" items="{{cells}}">
+    <div class="flex-horizontal cell" on-click="selectCell" id="[[item.id]]">
+      <div class="op-time-label">[[[item.execution_count]]]</div>
+      <div class="code-section">
+        <textarea id="code-python" name="code">
+          [[item.id]]
+          </textarea>
+          <div class="info-section">[[item.outputs]]</div>
+      </div>
     </div>
-  </div>
+  </template>
 </div>
 </template>
 </dom-module>
@@ -173,9 +188,32 @@
 Polymer({
   is: 'tf-graph-edit-jupyter',
   properties: {
-    
+    globalcellid: Number,
+    fileloaded:{
+      type: Boolean,
+      notify: true,
+    },
+    cells: {
+      type: Array,
+      // value: [
+      //   {
+      //   "cell_type": "code",
+      //   "execution_count": '*',
+      //   "metadata": {},
+      //   "outputs": [],
+      //   "source": []
+      //   }
+      // ],
+    },
+    notebook: {
+      type: Object,
+      observer:'initNotebook'
+    },
+    selectedcelldiv:{
+      type: Object,
+    },
   },
-  ready: function() {
+  ready: function () {
     // var te_python = document.getElementById("code-python");
     // window.editor_python = CodeMirror.fromTextArea(te_python, {
     //     mode: "python",
@@ -188,9 +226,121 @@ Polymer({
     //     matchBrackets: true,
     //     autoCloseBrackets: true
     //   });
-
+    
   },
+  // parse notebook json
+  initNotebook: function() {
+    var c = []
+    if(this.notebook!=undefined){
+      this.notebook.cells.forEach((cell,index) => {
+        var t = {}
+        t["id"] = index
+        if(cell["execution_count"]==null){
+          t["execution_count"] = '*'
+        }else{
+          t["execution_count"] = cell["execution_count"]
+        }
+        var s = ""
+        cell["source"].forEach(sentence => {
+          s += sentence
+        })
+        t["source"] = s
+        t["outputs"] = ""
+        c.push(t)
+      })
+      this.cells = c
+      this.globalcellid = this.cells.length
+    }
+  },
+  backToLoadePage: function () {
+    this.fileloaded = false
+  },
+  // updateNotebook: function(){
+  //   if(this.notebook!=undefined){
+  //     this.notebook["cells"] = this.cells 
+  //   }
+  // }
+  selectCell: function (e) {
+    var divelement = e.path[0]
+    // console.info(typeof(e.path[0]))
+    if(e.path[0].className[0] == 's'){
+      if(this.selectedcelldiv!=undefined){
+        this.selectedcelldiv.style['border'] = '1px solid white';
+        this.selectedcelldiv.style['border-left'] = '5px solid white';
+      }
+      e.path[2].style['border'] = '1px solid #f57c00';
+      e.path[2].style['border-left'] = '5px solid #f57c00';
+      this.selectedcelldiv = e.path[2]
+    }
+    if(e.path[0].className[0] == 'o'){
+      if(this.selectedcelldiv!=undefined){
+        this.selectedcelldiv.style['border'] = '1px solid white';
+        this.selectedcelldiv.style['border-left'] = '5px solid white';
+      }
+      e.path[1].style['border'] = '1px solid #f57c00';
+      e.path[1].style['border-left'] = '5px solid #f57c00';
+      this.selectedcelldiv = e.path[1]
+    }
+    if(e.path[0].className[0] == 'f'){
+      if(this.selectedcelldiv!=undefined){
+        this.selectedcelldiv.style['border'] = '1px solid white';
+        this.selectedcelldiv.style['border-left'] = '5px solid white';
+      }
+      e.path[0].style['border'] = '1px solid #f57c00';
+      e.path[0].style['border-left'] = '5px solid #f57c00';
+      this.selectedcelldiv = e.path[0]
+    }
+  },
+  addCell: function () {
+    var n = []
+    if(this.selectedcelldiv!=undefined) {
+      var delid = this.selectedcelldiv.getAttribute('id')
+      this.cells.forEach(cell => {
+        if(cell.id != delid){
+          n.push(cell)
+        }
+        else{
+          n.push(cell)
+          n.push({
+            "id": this.globalcellid,
+            "execution_count": '*',
+            "outputs": [],
+            "source": [],
+            })
+        }
+      })
+    }else{
+      this.cells.forEach(cell => {
+        n.push(cell)
+      })
+      n.push({
+            "id": this.globalcellid,
+            "execution_count": '*',
+            "outputs": [],
+            "source": [],
+            })
+    }
+    this.globalcellid += 1
+    this.cells = n
+    console.info(this.cells)
+  },
+  delCell: function(){
+    if(this.selectedcelldiv!=undefined) {
+      var delid = this.selectedcelldiv.getAttribute('id')
+      var n = []
+      this.cells.forEach(cell => {
+        if(cell.id != delid){
+          n.push(cell)
+        }
+      })
+      this.selectedcelldiv.style['border'] = '1px solid white';
+      this.selectedcelldiv.style['border-left'] = '5px solid white';
+      this.selectedcelldiv = undefined
+      this.cells = n
   
+    }
+  },
+
 });
 })();
 </script>
